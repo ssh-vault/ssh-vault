@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 )
 
 // Parser interface
@@ -21,6 +22,7 @@ type Parse struct {
 // Parse parse the command line flags
 func (p *Parse) Parse(fs *flag.FlagSet) (*Flags, error) {
 	fs.BoolVar(&p.Flags.Version, "v", false, "Print version")
+	fs.StringVar(&p.Flags.Create, "c", "", "create vault")
 
 	err := fs.Parse(os.Args[1:])
 	if err != nil {
@@ -35,6 +37,22 @@ func (p *Parse) Usage(fs *flag.FlagSet) func() {
 		fs.VisitAll(func(f *flag.Flag) {
 			flags = append(flags, f.Name)
 		})
+		sort.Strings(flags)
+		for _, v := range flags {
+			f := fs.Lookup(v)
+			s := fmt.Sprintf("  -%s", f.Name)
+			name, usage := flag.UnquoteUsage(f)
+			if len(name) > 0 {
+				s += " " + name
+			}
+			if len(s) <= 4 {
+				s += "\t"
+			} else {
+				s += "\n    \t"
+			}
+			s += usage
+			fmt.Fprintf(os.Stderr, "%s\n", s)
+		}
 	}
 }
 
