@@ -13,6 +13,7 @@ type cache struct {
 	dir string
 }
 
+// Cache creates ~/.ssh-vault
 func Cache() *cache {
 	usr, _ := user.Current()
 	sv := filepath.Join(usr.HomeDir, ".ssh-vault", "keys")
@@ -22,29 +23,20 @@ func Cache() *cache {
 	return &cache{sv}
 }
 
+// Get return ssh-key
 func (c *cache) Get(u string) (string, error) {
-	uKey := fmt.Sprintf("%s/%s.key", c.dir, u)
-	if c.isFile(uKey) {
-		// read from file and return
-	}
-	key, err := GetKey(u)
+	keyPath := fmt.Sprintf("%s/%s.key", c.dir, u)
+	key, err := ioutil.ReadFile(keyPath)
 	if err != nil {
-		return "", err
+		key, err := GetKey(u)
+		if err != nil {
+			return "", err
+		}
+		err = ioutil.WriteFile(keyPath, []byte(key), 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		return key, nil
 	}
-	err = ioutil.WriteFile(uKey, []byte(key), 0644)
-	if err != nil {
-		log.Println(err)
-	}
-	return key, nil
-}
-
-func (c *cache) isFile(path string) bool {
-	f, err := os.Stat(path)
-	if err != nil {
-		return false
-	}
-	if m := f.Mode(); !m.IsDir() && m.IsRegular() && m&400 != 0 {
-		return true
-	}
-	return false
+	return string(key), err
 }

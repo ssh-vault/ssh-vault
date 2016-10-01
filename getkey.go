@@ -10,6 +10,7 @@ import (
 
 const GITHUB = "https://github.com"
 
+// GetKey fetches ssh-key from url
 func GetKey(u string) (string, error) {
 	client := &http.Client{}
 	// create a new request
