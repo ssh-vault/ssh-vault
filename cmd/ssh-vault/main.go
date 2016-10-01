@@ -12,6 +12,11 @@ import (
 
 var version string
 
+func exit1(err error) {
+	fmt.Println(err)
+	os.Exit(1)
+}
+
 func main() {
 	var (
 		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key`")
@@ -40,8 +45,7 @@ func main() {
 	}
 
 	if flag.NArg() < 1 {
-		fmt.Printf("Missing option, use (\"%s -h\") for help.\n", os.Args[0])
-		os.Exit(1)
+		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	exit := true
@@ -52,13 +56,11 @@ func main() {
 		}
 	}
 	if exit {
-		fmt.Printf("Invalid option, use (\"%s -h\") for help.\n", os.Args[0])
-		os.Exit(1)
+		exit1(fmt.Errorf("Invalid option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	if flag.NArg() < 2 {
-		fmt.Printf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0])
-		os.Exit(1)
+		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	usr, _ := user.Current()
@@ -66,5 +68,13 @@ func main() {
 		*k = filepath.Join(usr.HomeDir, (*k)[2:])
 	}
 
-	sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
+	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
+	if err != nil {
+		exit1(err)
+	}
+
+	// ssh-keygen -f id_rsa.pub -e -m PKCS8
+	if err := vault.PKCS8(); err != nil {
+		exit1(err)
+	}
 }

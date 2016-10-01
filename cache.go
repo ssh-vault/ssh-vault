@@ -25,18 +25,28 @@ func Cache() *cache {
 
 // Get return ssh-key
 func (c *cache) Get(u string) (string, error) {
-	keyPath := fmt.Sprintf("%s/%s.key", c.dir, u)
-	key, err := ioutil.ReadFile(keyPath)
-	if err != nil {
+	uKey := fmt.Sprintf("%s/%s.key", c.dir, u)
+	if !c.IsFile(uKey) {
 		key, err := GetKey(u)
 		if err != nil {
 			return "", err
 		}
-		err = ioutil.WriteFile(keyPath, []byte(key), 0644)
+		err = ioutil.WriteFile(uKey, []byte(key), 0644)
 		if err != nil {
 			log.Println(err)
 		}
 		return key, nil
 	}
-	return string(key), err
+	return uKey, nil
+}
+
+func (c *cache) IsFile(path string) bool {
+	f, err := os.Stat(path)
+	if err != nil {
+		return false
+	}
+	if m := f.Mode(); !m.IsDir() && m.IsRegular() && m&400 != 0 {
+		return true
+	}
+	return false
 }
