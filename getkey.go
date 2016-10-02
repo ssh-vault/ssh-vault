@@ -29,7 +29,7 @@ func GetKey(u string) (string, error) {
 	for {
 		if line, err := tp.ReadLine(); err != nil {
 			return "", err
-		} else if strings.HasPrefix(line, "ssh-") {
+		} else if strings.HasPrefix(line, "ssh-rsa") {
 			return line, nil
 		}
 	}
