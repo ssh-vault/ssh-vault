@@ -11,7 +11,7 @@ type vault struct {
 	key    string
 	option string
 	vault  string
-	pem    *pem.Block
+	Pem    *pem.Block
 }
 
 // New initialize vault parameters
@@ -47,7 +47,7 @@ func (v *vault) PKCS8() error {
 	if err != nil {
 		return err
 	}
-	if v.pem, _ = pem.Decode(out); v.pem == nil {
+	if v.Pem, _ = pem.Decode(out); v.Pem == nil {
 		return fmt.Errorf("No PEM found")
 	}
 	return nil
