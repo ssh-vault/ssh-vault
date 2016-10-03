@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/base64"
 	"flag"
 	"fmt"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -87,10 +87,23 @@ func main() {
 
 	p, err := vault.EncryptPassword()
 	if err != nil {
-		log.Fatal(err)
+		exit1(err)
 	}
-	fmt.Printf("p = %+v\n", p)
 
+	lorem := "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
+	out, err := vault.Encrypt([]byte(lorem))
+	if err != nil {
+		exit1(err)
+	}
+	enc := base64.StdEncoding.EncodeToString(out)
+
+	fmt.Printf("$SSH-VAULT;AES256\n%s;%s\n\n", p, enc)
+
+	dec, err := vault.Decrypt(out)
+	if err != nil {
+		exit1(err)
+	}
+	fmt.Printf("dec = %s\n", dec)
 	/*
 		// Write data to output file
 		if err := ioutil.WriteFile("/tmp/test.vault", ciphertext, 0600); err != nil {
