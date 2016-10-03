@@ -1,6 +1,11 @@
 package sshvault
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha256"
+	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"os/exec"
@@ -8,10 +13,11 @@ import (
 
 // Vault structure
 type vault struct {
-	key    string
-	option string
-	vault  string
-	Pem    *pem.Block
+	key       string
+	option    string
+	vault     string
+	PublicKey *rsa.PublicKey
+	password  []byte
 }
 
 // New initialize vault parameters
@@ -47,8 +53,39 @@ func (v *vault) PKCS8() error {
 	if err != nil {
 		return err
 	}
-	if v.Pem, _ = pem.Decode(out); v.Pem == nil {
+	pem, _ := pem.Decode(out)
+	if pem == nil {
 		return fmt.Errorf("No PEM found")
 	}
+	pubkeyInterface, err := x509.ParsePKIXPublicKey(pem.Bytes)
+	var ok bool
+	v.PublicKey, ok = pubkeyInterface.(*rsa.PublicKey)
+	if !ok {
+		return fmt.Errorf("No Public key found")
+	}
 	return nil
+}
+
+// GenPassword return a slice of 32 random bytes
+func (v *vault) GenPassword() error {
+	v.password = make([]byte, 32)
+	_, err := rand.Read(v.password)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// GenPassword create password using Rand32
+// and use the ssh public key to encrypt it
+func (v *vault) EncryptPassword() (string, error) {
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(),
+		rand.Reader,
+		v.PublicKey,
+		v.password,
+		[]byte(""))
+	if err != nil {
+		return "", err
+	}
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }

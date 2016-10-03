@@ -1,14 +1,8 @@
 package main
 
 import (
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -85,46 +79,43 @@ func main() {
 		exit1(err)
 	}
 
-	// test
-	message := []byte("test a b c")
-	label := []byte("")
-	hash := sha256.New()
-
-	pubkeyInterface, err := x509.ParsePKIXPublicKey(vault.Pem.Bytes)
-	pubkey, ok := pubkeyInterface.(*rsa.PublicKey)
-	if !ok {
-		log.Fatal("Fatal error")
-	}
-	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, pubkey, message, label)
-
+	// generate password
+	err = vault.GenPassword()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		exit1(err)
 	}
 
-	// Write data to output file
-	if err := ioutil.WriteFile("/tmp/test.vault", ciphertext, 0600); err != nil {
-		log.Fatalf("write output: %s", err)
+	p, err := vault.EncryptPassword()
+	if err != nil {
+		log.Fatal(err)
 	}
+	fmt.Printf("p = %+v\n", p)
 
-	pem_data, err := ioutil.ReadFile("/tmp/priv-key.pem")
-	if err != nil {
-		log.Fatalf("Error reading pem file: %s", err)
-	}
-	block, _ := pem.Decode(pem_data)
-	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		log.Fatal("No valid PEM data found")
-	}
-	private_key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		log.Fatalf("Private key can't be decoded: %s", err)
-	}
-	plainText, err := rsa.DecryptOAEP(hash, rand.Reader, private_key, ciphertext, label)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	fmt.Printf("OAEP decrypted [%x] to \n[%s]\n", ciphertext, plainText)
+	/*
+		// Write data to output file
+		if err := ioutil.WriteFile("/tmp/test.vault", ciphertext, 0600); err != nil {
+			log.Fatalf("write output: %s", err)
+		}
 
-	//	openssl rsa -in xxxx
+		pem_data, err := ioutil.ReadFile("/tmp/priv-key.pem")
+		if err != nil {
+			log.Fatalf("Error reading pem file: %s", err)
+		}
+		block, _ := pem.Decode(pem_data)
+		if block == nil || block.Type != "RSA PRIVATE KEY" {
+			log.Fatal("No valid PEM data found")
+		}
+		private_key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			log.Fatalf("Private key can't be decoded: %s", err)
+		}
+		plainText, err := rsa.DecryptOAEP(hash, rand.Reader, private_key, ciphertext, label)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("OAEP decrypted [%x] to \n[%s]\n", ciphertext, plainText)
+
+		//	openssl rsa -in xxxx
+	*/
 }
