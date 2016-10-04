@@ -27,13 +27,11 @@ func main() {
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|decrypt|edit|encrypt|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
 			"    create    creates a new vault",
-			"    decrypt   decrypt a file",
 			"    edit      open an existing vault",
-			"    encrypt   encrypt a file",
 			"    view      open an existing vault")
 		flag.PrintDefaults()
 	}
@@ -97,7 +95,7 @@ func main() {
 	}
 	enc := base64.StdEncoding.EncodeToString(out)
 
-	fmt.Printf("$SSH-VAULT;AES256\n%s;%s\n\n", p, enc)
+	fmt.Printf("$SSH-VAULT;AES256;%s\n%s;%s\n\n", vault.Fingerprint, p, enc)
 
 	dec, err := vault.Decrypt(out)
 	if err != nil {

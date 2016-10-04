@@ -1,6 +1,7 @@
 package sshvault
 
 import (
+	"crypto/md5"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -9,15 +10,17 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // Vault structure
 type vault struct {
-	key       string
-	option    string
-	vault     string
-	PublicKey *rsa.PublicKey
-	password  []byte
+	key         string
+	option      string
+	vault       string
+	PublicKey   *rsa.PublicKey
+	Fingerprint string
+	password    []byte
 }
 
 // New initialize vault parameters
@@ -53,16 +56,23 @@ func (v *vault) PKCS8() error {
 	if err != nil {
 		return err
 	}
-	pem, _ := pem.Decode(out)
-	if pem == nil {
+	p, _ := pem.Decode(out)
+	if p == nil {
 		return fmt.Errorf("No PEM found")
 	}
-	pubkeyInterface, err := x509.ParsePKIXPublicKey(pem.Bytes)
+	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
 	var ok bool
 	v.PublicKey, ok = pubkeyInterface.(*rsa.PublicKey)
 	if !ok {
 		return fmt.Errorf("No Public key found")
 	}
+	fingerPrint := md5.New()
+	fingerPrint.Write(p.Bytes)
+	v.Fingerprint = strings.Replace(fmt.Sprintf("% x",
+		fingerPrint.Sum(nil)),
+		" ",
+		":",
+		-1)
 	return nil
 }
 
