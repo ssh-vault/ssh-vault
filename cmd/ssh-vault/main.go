@@ -22,7 +22,8 @@ func main() {
 	var (
 		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key`")
 		u       = flag.String("u", "", "GitHub `username`")
-		options = []string{"create", "decrypt", "edit", "encrypt", "view"}
+		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
+		options = []string{"create", "edit", "view"}
 		v       = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
 	)
 
@@ -43,6 +44,28 @@ func main() {
 		os.Exit(0)
 	}
 
+	usr, _ := user.Current()
+	if (*k)[:2] == "~/" {
+		*k = filepath.Join(usr.HomeDir, (*k)[2:])
+	}
+
+	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
+	if err != nil {
+		exit1(err)
+	}
+
+	// ssh-keygen -f id_rsa.pub -e -m PKCS8
+	if err := vault.PKCS8(); err != nil {
+		exit1(err)
+	}
+
+	// print fingerprint and exit
+	if *f {
+		fmt.Println(vault.Fingerprint)
+		os.Exit(0)
+	}
+
+	// check options
 	if flag.NArg() < 1 {
 		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
@@ -61,22 +84,6 @@ func main() {
 	if flag.NArg() < 2 {
 		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
-
-	usr, _ := user.Current()
-	if (*k)[:2] == "~/" {
-		*k = filepath.Join(usr.HomeDir, (*k)[2:])
-	}
-
-	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
-	if err != nil {
-		exit1(err)
-	}
-
-	// ssh-keygen -f id_rsa.pub -e -m PKCS8
-	if err := vault.PKCS8(); err != nil {
-		exit1(err)
-	}
-
 	// generate password
 	err = vault.GenPassword()
 	if err != nil {
