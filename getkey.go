@@ -3,6 +3,7 @@ package sshvault
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net/http"
 	"net/textproto"
 	"strings"
@@ -28,6 +29,9 @@ func GetKey(u string) (string, error) {
 	tp := textproto.NewReader(reader)
 	for {
 		if line, err := tp.ReadLine(); err != nil {
+			if err == io.EOF {
+				return "", fmt.Errorf("key %q not found", u)
+			}
 			return "", err
 		} else if strings.HasPrefix(line, "ssh-rsa") {
 			return line, nil
