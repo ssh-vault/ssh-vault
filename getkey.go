@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// GITHUB  https://github.com/<username>.keys
 const GITHUB = "https://github.com"
 
 // GetKey fetches ssh-key from url
