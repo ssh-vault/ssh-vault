@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"os"
@@ -69,7 +68,6 @@ func main() {
 	if flag.NArg() < 1 {
 		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
-
 	exit := true
 	for _, v := range options {
 		if flag.Arg(0) == v {
@@ -81,59 +79,37 @@ func main() {
 		exit1(fmt.Errorf("Invalid option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
+	// check for vault name
 	if flag.NArg() < 2 {
 		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
+
 	// generate password
 	err = vault.GenPassword()
 	if err != nil {
 		exit1(err)
 	}
 
-	p, err := vault.EncryptPassword()
-	if err != nil {
-		exit1(err)
-	}
-
-	lorem := "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."
-	out, err := vault.Encrypt([]byte(lorem))
-	if err != nil {
-		exit1(err)
-	}
-	enc := base64.StdEncoding.EncodeToString(out)
-
-	fmt.Printf("$SSH-VAULT;AES256;%s\n%s;%s\n\n", vault.Fingerprint, p, enc)
-
-	dec, err := vault.Decrypt(out)
-	if err != nil {
-		exit1(err)
-	}
-	fmt.Printf("dec = %s\n", dec)
-	/*
-		// Write data to output file
-		if err := ioutil.WriteFile("/tmp/test.vault", ciphertext, 0600); err != nil {
-			log.Fatalf("write output: %s", err)
-		}
-
-		pem_data, err := ioutil.ReadFile("/tmp/priv-key.pem")
+	switch flag.Arg(0) {
+	case "create":
+		data, err := vault.Create()
 		if err != nil {
-			log.Fatalf("Error reading pem file: %s", err)
+			exit1(err)
 		}
-		block, _ := pem.Decode(pem_data)
-		if block == nil || block.Type != "RSA PRIVATE KEY" {
-			log.Fatal("No valid PEM data found")
-		}
-		private_key, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		out, err := vault.Encrypt(data)
 		if err != nil {
-			log.Fatalf("Private key can't be decoded: %s", err)
+			exit1(err)
 		}
-		plainText, err := rsa.DecryptOAEP(hash, rand.Reader, private_key, ciphertext, label)
+		err = vault.Close(out)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			exit1(err)
 		}
-		fmt.Printf("OAEP decrypted [%x] to \n[%s]\n", ciphertext, plainText)
-
-		//	openssl rsa -in xxxx
-	*/
+	case "edit":
+		fmt.Println("edit")
+	case "view":
+		err := vault.View()
+		if err != nil {
+			exit1(err)
+		}
+	}
 }

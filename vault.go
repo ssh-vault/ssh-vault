@@ -6,7 +6,6 @@ import (
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"os/exec"
@@ -88,14 +87,14 @@ func (v *vault) GenPassword() error {
 
 // GenPassword create password using Rand32
 // and use the ssh public key to encrypt it
-func (v *vault) EncryptPassword() (string, error) {
+func (v *vault) EncryptPassword() ([]byte, error) {
 	ciphertext, err := rsa.EncryptOAEP(sha256.New(),
 		rand.Reader,
 		v.PublicKey,
 		v.password,
 		[]byte(""))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	return base64.StdEncoding.EncodeToString(ciphertext), nil
+	return ciphertext, nil
 }
