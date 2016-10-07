@@ -10,69 +10,75 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
-	"log"
+	"strings"
 	"syscall"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
 
 // View decrypts data and print it to stdout
-func (v *vault) View() error {
+func (v *vault) View() ([]byte, error) {
 	vault, err := ioutil.ReadFile(v.vault)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// head, pass, body
+
+	// head, password, body
 	parts := bytes.Split(vault, []byte("\n"))
 
-	// get pem
-	pemData, err := ioutil.ReadFile(v.key)
+	// use private key only
+	if strings.HasSuffix(v.key, ".pub") {
+		v.key = strings.Trim(v.key, ".pub")
+	}
+
+	keyFile, err := ioutil.ReadFile(v.key)
 	if err != nil {
-		log.Fatalf("Error reading pem file: %s", err)
+		return nil, fmt.Errorf("Error reading private key: %s", err)
 	}
-	block, _ := pem.Decode(pemData)
+
+	block, _ := pem.Decode(keyFile)
 	if block == nil || block.Type != "RSA PRIVATE KEY" {
-		return fmt.Errorf("No valid PEM (private key) data found")
+		return nil, fmt.Errorf("No valid PEM (private key) data found")
 	}
-	var pemOut []byte
+
 	if x509.IsEncryptedPEMBlock(block) {
 		fmt.Print("Enter key password: ")
 		keyPassword, err := terminal.ReadPassword(int(syscall.Stdin))
 		if err != nil {
-			return err
+			return nil, err
 		}
-		pemOut, err = x509.DecryptPEMBlock(block, keyPassword)
+		fmt.Println()
+		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
 		if err != nil {
-			return err
+			return nil, err
 		}
-	} else {
-		pemOut = block.Bytes
 	}
-	privateKey, err := x509.ParsePKCS1PrivateKey(pemOut)
+
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ciphertext := make([]byte, hex.DecodedLen(len(parts[1])))
 	_, err = hex.Decode(ciphertext, parts[1])
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	v.password, err = rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, ciphertext, []byte(""))
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	ciphertext = make([]byte, hex.DecodedLen(len(parts[2])))
 	_, err = hex.Decode(ciphertext, parts[2])
 	if err != nil {
-		return err
+		return nil, err
 	}
+
 	data, err := v.Decrypt(ciphertext)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Printf("\n%s", data)
-	return nil
+	return data, nil
 }

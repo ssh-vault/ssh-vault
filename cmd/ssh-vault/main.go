@@ -105,11 +105,27 @@ func main() {
 			exit1(err)
 		}
 	case "edit":
-		fmt.Println("edit")
-	case "view":
-		err := vault.View()
+		data, err := vault.View()
 		if err != nil {
 			exit1(err)
 		}
+		out, err := vault.Edit(data)
+		if err != nil {
+			exit1(err)
+		}
+		out, err = vault.Encrypt(out)
+		if err != nil {
+			exit1(err)
+		}
+		err = vault.Close(out)
+		if err != nil {
+			exit1(err)
+		}
+	case "view":
+		out, err := vault.View()
+		if err != nil {
+			exit1(err)
+		}
+		fmt.Printf("\n%s", out)
 	}
 }
