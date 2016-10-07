@@ -60,6 +60,9 @@ func (v *vault) PKCS8() error {
 		return fmt.Errorf("No PEM found")
 	}
 	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
+	if err != nil {
+		return err
+	}
 	var ok bool
 	v.PublicKey, ok = pubkeyInterface.(*rsa.PublicKey)
 	if !ok {
