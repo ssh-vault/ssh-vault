@@ -16,14 +16,4 @@ Usage:
     $ ssh-vault -h
 
 
-To compile, after setting GOPATH etc, just type:
-
-    $ make
-
-Compiling for FreeBSD:
-
-    env GOOS=freebsd GOARCH=amd64 go build -o ssh-vault cmd/ssh-vault/main.go
-
-For Linux:
-
-    env GOOS=linux GOARCH=amd64 go build -o ssh-vault cmd/ssh-vault/main.go
+**ssh-vault** is at an early development stage, please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).
