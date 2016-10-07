@@ -35,7 +35,7 @@ func (c *cache) Get(u string) (string, error) {
 		if err != nil {
 			log.Println(err)
 		}
-		return key, nil
+		return uKey, nil
 	}
 	return uKey, nil
 }

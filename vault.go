@@ -9,7 +9,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 )
@@ -48,9 +47,6 @@ func New(k, u, o, v string) (*vault, error) {
 
 // PKCS8 convert ssh public key to PEM PKCS8
 func (v *vault) PKCS8() error {
-	if _, err := os.Stat(v.key); os.IsNotExist(err) {
-		fmt.Printf("err = %+v\n", err)
-	}
 	out, err := exec.Command("ssh-keygen",
 		"-f",
 		v.key,

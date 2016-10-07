@@ -32,8 +32,8 @@ func main() {
 			os.Args[0],
 			"  Options:",
 			"    create    creates a new vault",
-			"    edit      open an existing vault",
-			"    view      open an existing vault")
+			"    edit      edit an existing vault",
+			"    view      view an existing vault")
 		flag.PrintDefaults()
 	}
 
