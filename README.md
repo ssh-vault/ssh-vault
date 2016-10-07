@@ -1,7 +1,15 @@
-# ssh-vault
+# ssh-vault 🌰
+
+[![Build Status](https://travis-ci.org/ssh-vault/ssh-vault.svg?branch=develop)](https://travis-ci.org/ssh-vault/ssh-vault)
+[![Coverage Status](https://coveralls.io/repos/github/ssh-vault/ssh-vault/badge.svg?branch=develop)](https://coveralls.io/github/ssh-vault/ssh-vault?branch=develop)
+[![Go Report Card](https://goreportcard.com/badge/github.com/ssh-vault/ssh-vault)](https://goreportcard.com/report/github.com/ssh-vault/ssh-vault)
+
 encrypt/decrypt using ssh private keys
 
-Prototype working
+https://ssh-vault.com
+
+
+Usage:
 
     $ ssh-vault -h
 
