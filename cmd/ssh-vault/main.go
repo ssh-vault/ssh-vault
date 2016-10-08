@@ -44,8 +44,10 @@ func main() {
 	}
 
 	usr, _ := user.Current()
-	if (*k)[:2] == "~/" {
-		*k = filepath.Join(usr.HomeDir, (*k)[2:])
+	if len(*k) > 2 {
+		if (*k)[:2] == "~/" {
+			*k = filepath.Join(usr.HomeDir, (*k)[2:])
+		}
 	}
 
 	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
