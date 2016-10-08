@@ -1,6 +1,7 @@
 package sshvault
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -12,7 +13,7 @@ func (v *vault) Create() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(tmpfile.Name())
+	defer Shred(tmpfile.Name())
 	editor := os.Getenv("EDITOR")
 	if editor == "" {
 		editor = "vi"
@@ -28,5 +29,6 @@ func (v *vault) Create() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	fmt.Printf("len(b) = %+v\n", len(b))
 	return b, nil
 }

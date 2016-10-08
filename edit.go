@@ -12,7 +12,7 @@ func (v *vault) Edit(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer os.Remove(tmpfile.Name())
+	defer Shred(tmpfile.Name())
 	err = ioutil.WriteFile(tmpfile.Name(), data, 0600)
 	if err != nil {
 		return nil, err
