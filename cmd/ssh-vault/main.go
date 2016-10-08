@@ -19,7 +19,7 @@ func exit1(err error) {
 
 func main() {
 	var (
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key`")
+		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key` or key index")
 		u       = flag.String("u", "", "GitHub `username`")
 		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
 		options = []string{"create", "edit", "view"}
