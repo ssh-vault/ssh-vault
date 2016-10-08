@@ -24,16 +24,23 @@ func Cache() *cache {
 }
 
 // Get return ssh-key
-func (c *cache) Get(u string) (string, error) {
-	uKey := fmt.Sprintf("%s/%s.key", c.dir, u)
+func (c *cache) Get(u string, k int) (string, error) {
+	uKey := fmt.Sprintf("%s/%s.key-%d", c.dir, u, k)
 	if !c.IsFile(uKey) {
-		key, err := GetKey(u)
+		keys, err := GetKey(u)
 		if err != nil {
 			return "", err
 		}
-		err = ioutil.WriteFile(uKey, []byte(key), 0644)
-		if err != nil {
-			log.Println(err)
+		for k, v := range keys {
+			err = ioutil.WriteFile(fmt.Sprintf("%s/%s.key-%d", c.dir, u, k+1),
+				[]byte(v),
+				0644)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		if !c.IsFile(uKey) {
+			return "", fmt.Errorf("key index not found, try -k with a value between 1 and %d", len(keys))
 		}
 		return uKey, nil
 	}

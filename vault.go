@@ -9,13 +9,13 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os/exec"
+	"strconv"
 	"strings"
 )
 
 // Vault structure
 type vault struct {
 	key         string
-	option      string
 	vault       string
 	PublicKey   *rsa.PublicKey
 	Fingerprint string
@@ -30,17 +30,30 @@ func New(k, u, o, v string) (*vault, error) {
 	)
 	cache := Cache()
 	if u != "" {
-		keyPath, err = cache.Get(u)
+		// use -k N where N is the index to use when multiple keys
+		// are available
+		var ki int
+		if ki, err = strconv.Atoi(k); err != nil {
+			ki = 1
+		}
+		if ki <= 1 {
+			ki = 1
+		}
+		keyPath, err = cache.Get(u, ki)
 		if err != nil {
 			return nil, err
 		}
 	} else if !cache.IsFile(keyPath) {
 		return nil, fmt.Errorf("key not found or unable to read")
 	}
+	if o == "create" {
+		if cache.IsFile(v) {
+			return nil, fmt.Errorf("File already exists: %q", v)
+		}
+	}
 	return &vault{
-		key:    keyPath,
-		option: o,
-		vault:  v,
+		key:   keyPath,
+		vault: v,
 	}, nil
 }
 

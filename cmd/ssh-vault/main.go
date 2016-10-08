@@ -19,7 +19,7 @@ func exit1(err error) {
 
 func main() {
 	var (
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key`")
+		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key` or key index")
 		u       = flag.String("u", "", "GitHub `username`")
 		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
 		options = []string{"create", "edit", "view"}
@@ -44,8 +44,10 @@ func main() {
 	}
 
 	usr, _ := user.Current()
-	if (*k)[:2] == "~/" {
-		*k = filepath.Join(usr.HomeDir, (*k)[2:])
+	if len(*k) > 2 {
+		if (*k)[:2] == "~/" {
+			*k = filepath.Join(usr.HomeDir, (*k)[2:])
+		}
 	}
 
 	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
