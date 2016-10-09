@@ -1,19 +1,14 @@
 package sshvault
 
-import (
-	"fmt"
-	"os"
-)
+import "os"
 
 func Shred(file string) error {
-	fmt.Printf("file = %+v\n", file)
+	defer os.Remove(file)
+
 	f, err := os.OpenFile(file, os.O_RDWR, 0600)
-
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
-
-	defer f.Close()
 
 	fileInfo, err := f.Stat()
 	if err != nil {
@@ -32,5 +27,5 @@ func Shred(file string) error {
 		return err
 	}
 
-	return os.Remove(file)
+	f.Close()
 }
