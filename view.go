@@ -26,6 +26,9 @@ func (v *vault) View() ([]byte, error) {
 	// head, password, body
 	parts := bytes.Split(vault, []byte("\n"))
 
+	// ssh-vault;AES256;fingerprint
+	header := bytes.Split(parts[0], []byte(";"))
+
 	// use private key only
 	if strings.HasSuffix(v.key, ".pub") {
 		v.key = strings.Trim(v.key, ".pub")
@@ -76,7 +79,8 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	data, err := v.Decrypt(ciphertext)
+	// decrypt ciphertext using fingerpring as additionalData
+	data, err := v.Decrypt(ciphertext, header[2])
 	if err != nil {
 		return nil, err
 	}
