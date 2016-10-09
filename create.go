@@ -1,7 +1,6 @@
 package sshvault
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -29,6 +28,5 @@ func (v *vault) Create() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("len(b) = %+v\n", len(b))
 	return b, nil
 }

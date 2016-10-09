@@ -35,7 +35,7 @@ func (v *vault) Encrypt(message []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := gcm.Seal(nonce, nonce, message, nil)
+	out := gcm.Seal(nonce, nonce, message, []byte(v.Fingerprint))
 	return out, nil
 }
 
@@ -54,7 +54,7 @@ func (v *vault) Decrypt(message []byte) ([]byte, error) {
 	nonce := make([]byte, gcm.NonceSize())
 	copy(nonce, message[:gcm.NonceSize()])
 
-	out, err := gcm.Open(nil, nonce, message[gcm.NonceSize():], nil)
+	out, err := gcm.Open(nil, nonce, message[gcm.NonceSize():], []byte("fd:c9:a5:ab:67:c2:6a:3b:6b:c9:72:d6:32:f8:a8:09"))
 	if err != nil {
 		return nil, err
 	}
