@@ -25,7 +25,7 @@ func TestVaultFunctions(t *testing.T) {
 
 	// Skip vault.Create because we don't need/want to interact with an editor
 	// for tests.
-	in := []byte("This is a simple test message")
+	in := []byte("The quick brown fox jumps over the lazy dog")
 
 	byt, err := vault.Encrypt(in)
 	if err != nil {
