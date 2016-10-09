@@ -40,7 +40,7 @@ func (v *vault) Encrypt(message []byte) ([]byte, error) {
 }
 
 // Decrypt
-func (v *vault) Decrypt(message []byte) ([]byte, error) {
+func (v *vault) Decrypt(message, additionalData []byte) ([]byte, error) {
 	c, err := aes.NewCipher(v.password)
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (v *vault) Decrypt(message []byte) ([]byte, error) {
 	nonce := make([]byte, gcm.NonceSize())
 	copy(nonce, message[:gcm.NonceSize()])
 
-	out, err := gcm.Open(nil, nonce, message[gcm.NonceSize():], []byte("fd:c9:a5:ab:67:c2:6a:3b:6b:c9:72:d6:32:f8:a8:09"))
+	out, err := gcm.Open(nil, nonce, message[gcm.NonceSize():], additionalData)
 	if err != nil {
 		return nil, err
 	}
