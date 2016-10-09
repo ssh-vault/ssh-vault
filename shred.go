@@ -2,6 +2,7 @@ package sshvault
 
 import "os"
 
+//Shred securely delete a file
 func Shred(file string) error {
 	defer os.Remove(file)
 
@@ -27,5 +28,5 @@ func Shred(file string) error {
 		return err
 	}
 
-	f.Close()
+	return f.Close()
 }
