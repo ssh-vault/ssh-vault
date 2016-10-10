@@ -13,10 +13,10 @@ type cache struct {
 	dir string
 }
 
-// Cache creates ~/.ssh-vault
+// Cache creates ~/.ssh/vault
 func Cache() *cache {
 	usr, _ := user.Current()
-	sv := filepath.Join(usr.HomeDir, ".ssh-vault", "keys")
+	sv := filepath.Join(usr.HomeDir, ".ssh", "vault", "keys")
 	if _, err := os.Stat(sv); os.IsNotExist(err) {
 		os.MkdirAll(sv, os.ModePerm)
 	}
