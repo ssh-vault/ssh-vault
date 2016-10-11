@@ -8,7 +8,7 @@ encrypt/decrypt using ssh private keys
 
 https://ssh-vault.com
 
-[ ![Download](https://dl.bintray.com/nbari/ssh-vault/) ](https://bintray.com/nbari/ssh-vault/ssh-vault/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
 
 
 Usage:
