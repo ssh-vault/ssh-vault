@@ -23,11 +23,14 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	// head, password, body
+	// header+payload
 	parts := bytes.Split(vault, []byte("\n"))
 
 	// ssh-vault;AES256;fingerprint
 	header := bytes.Split(parts[0], []byte(";"))
+
+	// password, body
+	payload := bytes.Split(parts[1], []byte(";"))
 
 	// use private key only
 	if strings.HasSuffix(v.key, ".pub") {
@@ -62,8 +65,8 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext := make([]byte, hex.DecodedLen(len(parts[1])))
-	_, err = hex.Decode(ciphertext, parts[1])
+	ciphertext := make([]byte, hex.DecodedLen(len(payload[0])))
+	_, err = hex.Decode(ciphertext, payload[0])
 	if err != nil {
 		return nil, err
 	}
@@ -73,8 +76,8 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext = make([]byte, hex.DecodedLen(len(parts[2])))
-	_, err = hex.Decode(ciphertext, parts[2])
+	ciphertext = make([]byte, hex.DecodedLen(len(payload[1])))
+	_, err = hex.Decode(ciphertext, payload[1])
 	if err != nil {
 		return nil, err
 	}

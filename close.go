@@ -12,7 +12,7 @@ func (v *vault) Close(data []byte) error {
 		return err
 	}
 	err = ioutil.WriteFile(v.vault,
-		[]byte(fmt.Sprintf("$SSH-VAULT;AES256;%s\n%x\n%x",
+		[]byte(fmt.Sprintf("$SSH-VAULT;AES256;%s\n%x;%x",
 			v.Fingerprint,
 			p,
 			data)),
