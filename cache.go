@@ -47,6 +47,7 @@ func (c *cache) Get(u string, k int) (string, error) {
 	return uKey, nil
 }
 
+// IsFile check if string is a file
 func (c *cache) IsFile(path string) bool {
 	f, err := os.Stat(path)
 	if err != nil {
