@@ -9,6 +9,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"os/exec"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -21,6 +22,8 @@ type vault struct {
 	Fingerprint string
 	password    []byte
 }
+
+var isURL = regexp.MustCompile(`^https?://`)
 
 // New initialize vault parameters
 func New(k, u, o, v string) (*vault, error) {
