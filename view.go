@@ -1,7 +1,6 @@
 package sshvault
 
 import (
-	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
@@ -18,19 +17,20 @@ import (
 
 // View decrypts data and print it to stdout
 func (v *vault) View() ([]byte, error) {
-	vault, err := ioutil.ReadFile(v.vault)
+	file, err := ioutil.ReadFile(v.vault)
 	if err != nil {
 		return nil, err
 	}
+	vault := string(file)
 
 	// header+payload
-	parts := bytes.Split(vault, []byte("\n"))
+	parts := strings.Split(vault, "\n")
 
 	// ssh-vault;AES256;fingerprint
-	header := bytes.Split(parts[0], []byte(";"))
+	header := strings.Split(parts[0], ";")
 
 	// password, body
-	payload := bytes.Split(parts[1], []byte(";"))
+	payload := strings.Split(parts[1], ";")
 
 	// use private key only
 	if strings.HasSuffix(v.key, ".pub") {
@@ -65,8 +65,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext := make([]byte, hex.DecodedLen(len(payload[0])))
-	_, err = hex.Decode(ciphertext, payload[0])
+	ciphertext, err := hex.DecodeString(payload[0])
 	if err != nil {
 		return nil, err
 	}
@@ -76,14 +75,13 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext = make([]byte, hex.DecodedLen(len(payload[1])))
-	_, err = hex.Decode(ciphertext, payload[1])
+	ciphertext, err = hex.DecodeString(payload[1])
 	if err != nil {
 		return nil, err
 	}
 
 	// decrypt ciphertext using fingerpring as additionalData
-	data, err := v.Decrypt(ciphertext, header[2])
+	data, err := v.Decrypt(ciphertext, []byte(header[2]))
 	if err != nil {
 		return nil, err
 	}

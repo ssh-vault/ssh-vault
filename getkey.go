@@ -14,12 +14,13 @@ const GITHUB = "https://github.com"
 
 // GetKey fetches ssh-key from url
 func GetKey(u string) ([]string, error) {
+	url := u
+	if !isURL.MatchString(u) {
+		url = fmt.Sprintf("%s/%s.keys", GITHUB, u)
+	}
 	client := &http.Client{}
 	// create a new request
-	req, _ := http.NewRequest("GET", fmt.Sprintf("%s/%s.keys",
-		GITHUB,
-		u),
-		nil)
+	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "ssh-vault")
 	res, err := client.Do(req)
 	if err != nil {

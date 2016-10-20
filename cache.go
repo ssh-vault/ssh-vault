@@ -1,6 +1,7 @@
 package sshvault
 
 import (
+	"crypto/md5"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -25,11 +26,23 @@ func Cache() *cache {
 
 // Get return ssh-key
 func (c *cache) Get(u string, k int) (string, error) {
-	uKey := fmt.Sprintf("%s/%s.key-%d", c.dir, u, k)
+	var (
+		uKey string
+		hash string
+	)
+	if !isURL.MatchString(u) {
+		uKey = fmt.Sprintf("%s/%s.key-%d", c.dir, u, k)
+	} else {
+		hash = fmt.Sprintf("%x", md5.Sum([]byte(u)))
+		uKey = fmt.Sprintf("%s/%s.key-%d", c.dir, hash, k)
+	}
 	if !c.IsFile(uKey) {
 		keys, err := GetKey(u)
 		if err != nil {
 			return "", err
+		}
+		if isURL.MatchString(u) {
+			u = hash
 		}
 		for k, v := range keys {
 			err = ioutil.WriteFile(fmt.Sprintf("%s/%s.key-%d", c.dir, u, k+1),
