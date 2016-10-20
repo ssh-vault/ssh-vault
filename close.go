@@ -1,6 +1,8 @@
 package sshvault
 
 import (
+	"bytes"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 )
@@ -11,11 +13,16 @@ func (v *vault) Close(data []byte) error {
 	if err != nil {
 		return err
 	}
+
+	var payload bytes.Buffer
+	payload.WriteString(base64.StdEncoding.EncodeToString(p))
+	payload.WriteString(";")
+	payload.WriteString(base64.StdEncoding.EncodeToString(data))
+
 	err = ioutil.WriteFile(v.vault,
-		[]byte(fmt.Sprintf("$SSH-VAULT;AES256;%s\n%x;%x",
+		[]byte(fmt.Sprintf("SSH-VAULT;AES256;%s\n%s\n",
 			v.Fingerprint,
-			p,
-			data)),
+			v.Encode(payload.String(), 64))),
 		0600,
 	)
 	if err != nil {
