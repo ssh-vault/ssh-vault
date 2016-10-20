@@ -8,10 +8,11 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/ssh-vault/ssh2pem"
 )
 
 // Vault structure
@@ -62,14 +63,9 @@ func New(k, u, o, v string) (*vault, error) {
 
 // PKCS8 convert ssh public key to PEM PKCS8
 func (v *vault) PKCS8() error {
-	out, err := exec.Command("ssh-keygen",
-		"-f",
-		v.key,
-		"-e",
-		"-m",
-		"PKCS8").Output()
+	out, err := ssh2pem.GetPem(v.key)
 	if err != nil {
-		return fmt.Errorf("Error creating PKCS8: %q try again", err)
+		return err
 	}
 	p, _ := pem.Decode(out)
 	if p == nil {
