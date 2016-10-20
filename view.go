@@ -1,14 +1,17 @@
 package sshvault
 
 import (
+	"bufio"
+	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
-	"encoding/hex"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"syscall"
 
@@ -17,20 +20,33 @@ import (
 
 // View decrypts data and print it to stdout
 func (v *vault) View() ([]byte, error) {
-	file, err := ioutil.ReadFile(v.vault)
+	file, err := os.Open(v.vault)
 	if err != nil {
 		return nil, err
 	}
-	vault := string(file)
+	defer file.Close()
 
-	// header+payload
-	parts := strings.Split(vault, "\n")
+	var (
+		// ssh-vault;AES256;fingerprint
+		header     []string
+		rawPayload bytes.Buffer
+	)
 
-	// ssh-vault;AES256;fingerprint
-	header := strings.Split(parts[0], ";")
+	scanner := bufio.NewScanner(file)
+	scanner.Split(bufio.ScanLines)
+	l := 1
+	for scanner.Scan() {
+		line := scanner.Text()
+		if l == 1 {
+			header = strings.Split(line, ";")
+		} else {
+			rawPayload.WriteString(line)
+		}
+		l++
+	}
 
 	// password, body
-	payload := strings.Split(parts[1], ";")
+	payload := strings.Split(rawPayload.String(), ";")
 
 	// use private key only
 	if strings.HasSuffix(v.key, ".pub") {
@@ -65,7 +81,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext, err := hex.DecodeString(payload[0])
+	ciphertext, err := base64.StdEncoding.DecodeString(payload[0])
 	if err != nil {
 		return nil, err
 	}
@@ -75,7 +91,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	ciphertext, err = hex.DecodeString(payload[1])
+	ciphertext, err = base64.StdEncoding.DecodeString(payload[1])
 	if err != nil {
 		return nil, err
 	}
