@@ -27,21 +27,21 @@ func TestVaultFunctions(t *testing.T) {
 	// for tests.
 	in := []byte("The quick brown fox jumps over the lazy dog")
 
-	byt, err := vault.Encrypt(in)
+	out, err := vault.Encrypt(in)
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	if err = vault.Close(byt); err != nil {
+	if err = vault.Close(out); err != nil {
 		t.Error(err.Error())
 	}
 
-	byt, err = vault.View()
+	out, err = vault.View()
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	if !bytes.Equal(in, byt) {
-		t.Error("in != byt")
+	if !bytes.Equal(in, out) {
+		t.Error("in != out")
 	}
 }

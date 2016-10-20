@@ -13,6 +13,7 @@ get:
 	${GO} get
 
 build: get
+	${GO} get -u github.com/ssh-vault/ssh2pem
 	${GO} get -u golang.org/x/crypto/ssh/terminal
 	${GO} build -ldflags "-X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 

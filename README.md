@@ -16,4 +16,26 @@ Usage:
     $ ssh-vault -h
 
 
+## Compile from source
+
+Setup go environment https://golang.org/doc/install
+
+For example using $HOME/go for your workspace
+
+    $ export GOPATH=$HOME/go
+
+Create the directory:
+
+    $ mkdir -p $HOME/go/src/github.com/ssh-vault
+
+Clone project into that directory:
+
+    $ git clone git@github.com:ssh-vault/ssh-vault.git $HOME/go/src/github.com/ssh-vault/ssh-vault
+
+Build by just typing make:
+
+    $ cd $HOME/go/src/github.com/ssh-vault/ssh-vault
+    $ make
+
+
 **ssh-vault** is at an early development stage, please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).
