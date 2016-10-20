@@ -5,9 +5,10 @@ go:
   - tip
 
 before_install:
-  - go get golang.org/x/crypto/ssh/terminal
   - go get github.com/axw/gocov/gocov
   - go get github.com/mattn/goveralls
+  - go get golang.org/ssh-vault/ssh2pem
+  - go get golang.org/x/crypto/ssh/terminal
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 
 script:
