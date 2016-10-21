@@ -2,7 +2,7 @@
 
 GO ?= go
 BIN_NAME=ssh-vault
-GO_XC = ${GOPATH}/bin/goxc -os="freebsd netbsd openbsd darwin linux"
+GO_XC = ${GOPATH}/bin/goxc -os="freebsd netbsd openbsd darwin linux windows"
 GOXC_FILE = .goxc.json
 GOXC_FILE_LOCAL = .goxc.local.json
 VERSION=$(shell git describe --tags --always)
