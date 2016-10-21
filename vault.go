@@ -69,7 +69,7 @@ func (v *vault) PKCS8() error {
 	}
 	p, _ := pem.Decode(out)
 	if p == nil {
-		return fmt.Errorf("No PEM found")
+		return fmt.Errorf("Could not create a PEM from the ssh key")
 	}
 	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
 	if err != nil {
