@@ -72,7 +72,7 @@ func (v *vault) View() ([]byte, error) {
 		fmt.Println()
 		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Password incorrect, Decryption failed.")
 		}
 	}
 
@@ -88,7 +88,7 @@ func (v *vault) View() ([]byte, error) {
 
 	v.password, err = rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, ciphertext, []byte(""))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Decryption failed, use private key with fingerprint: %s", v.Fingerprint)
 	}
 
 	ciphertext, err = base64.StdEncoding.DecodeString(payload[1])
@@ -96,7 +96,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	// decrypt ciphertext using fingerpring as additionalData
+	// decrypt ciphertext using fingerprint as additionalData
 	data, err := v.Decrypt(ciphertext, []byte(header[2]))
 	if err != nil {
 		return nil, err
