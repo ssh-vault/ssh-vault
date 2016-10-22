@@ -3,9 +3,11 @@ package sshvault
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/ssh-vault/crypto"
@@ -15,11 +17,18 @@ import (
 // These are done in one function to avoid declaring global variables in a test
 // file.
 func TestVaultFunctions(t *testing.T) {
-	vault, err := New("test_data/id_rsa.pub", "", "create", "./test")
+	dir, err := ioutil.TempDir("", "vault")
 	if err != nil {
 		t.Error(err)
 	}
-	defer os.Remove("./test")
+	defer os.RemoveAll(dir) // clean up
+
+	tmpfile := filepath.Join(dir, "vault")
+
+	vault, err := New("test_data/id_rsa.pub", "", "create", tmpfile)
+	if err != nil {
+		t.Error(err)
+	}
 
 	if err = vault.PKCS8(); err != nil {
 		t.Error(err)
@@ -42,13 +51,51 @@ func TestVaultFunctions(t *testing.T) {
 		t.Error(err)
 	}
 
-	out, err = vault.View()
+	enc1, err := ioutil.ReadFile(tmpfile)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if !bytes.Equal(in, out) {
+	plaintext, err := vault.View()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !bytes.Equal(in, plaintext) {
 		t.Error("in != out")
+	}
+
+	os.Setenv("EDITOR", "cat")
+	edited, err := vault.Edit(plaintext)
+	if err != nil {
+		t.Error(err)
+	}
+
+	out, err = aead.Encrypt(vault.Password, edited, []byte(vault.Fingerprint))
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err = vault.Close(out); err != nil {
+		t.Error(err)
+	}
+
+	plaintext, err = vault.View()
+	if err != nil {
+		t.Error(err)
+	}
+
+	enc2, err := ioutil.ReadFile(tmpfile)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !bytes.Equal(edited, plaintext) {
+		t.Error("edited != plaintext ")
+	}
+
+	if bytes.Equal(enc1, enc2) {
+		t.Error("Expecting different encrypted outputs")
 	}
 }
 
