@@ -15,6 +15,9 @@ get:
 build: get
 	${GO} get -u github.com/ssh-vault/ssh2pem
 	${GO} get -u golang.org/x/crypto/ssh/terminal
+	${GO} get -u github.com/ssh-vault/crypto
+	${GO} get -u github.com/ssh-vault/crypto/aead
+	${GO} get -u github.com/ssh-vault/crypto/oaep
 	${GO} build -ldflags "-X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
 clean:

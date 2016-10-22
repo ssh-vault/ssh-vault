@@ -3,9 +3,6 @@ package sshvault
 import (
 	"bufio"
 	"bytes"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -14,6 +11,9 @@ import (
 	"os"
 	"strings"
 	"syscall"
+
+	"github.com/ssh-vault/crypto/aead"
+	"github.com/ssh-vault/crypto/oaep"
 
 	"golang.org/x/crypto/ssh/terminal"
 )
@@ -86,7 +86,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	v.password, err = rsa.DecryptOAEP(sha256.New(), rand.Reader, privateKey, ciphertext, []byte(""))
+	v.Password, err = oaep.Decrypt(privateKey, ciphertext, []byte(""))
 	if err != nil {
 		return nil, fmt.Errorf("Decryption failed, use private key with fingerprint: %s", v.Fingerprint)
 	}
@@ -97,7 +97,7 @@ func (v *vault) View() ([]byte, error) {
 	}
 
 	// decrypt ciphertext using fingerprint as additionalData
-	data, err := v.Decrypt(ciphertext, []byte(header[2]))
+	data, err := aead.Decrypt(v.Password, ciphertext, []byte(header[2]))
 	if err != nil {
 		return nil, err
 	}
