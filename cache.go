@@ -25,7 +25,7 @@ func Cache() *cache {
 }
 
 // Get return ssh-key
-func (c *cache) Get(u string, k int) (string, error) {
+func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
 	var (
 		uKey string
 		hash string
@@ -37,7 +37,7 @@ func (c *cache) Get(u string, k int) (string, error) {
 		uKey = fmt.Sprintf("%s/%s.key-%d", c.dir, hash, k)
 	}
 	if !c.IsFile(uKey) {
-		keys, err := GetKey(u)
+		keys, err := s.GetKey(u)
 		if err != nil {
 			return "", err
 		}

@@ -12,8 +12,16 @@ import (
 // GITHUB  https://github.com/<username>.keys
 const GITHUB = "https://github.com"
 
+// Schlosser interface
+type Schlosser interface {
+	GetKey(string) ([]string, error)
+}
+
+// Locksmith implements Schlosser
+type Locksmith struct{}
+
 // GetKey fetches ssh-key from url
-func GetKey(u string) ([]string, error) {
+func (l Locksmith) GetKey(u string) ([]string, error) {
 	url := u
 	if !isURL.MatchString(u) {
 		url = fmt.Sprintf("%s/%s.keys", GITHUB, u)
