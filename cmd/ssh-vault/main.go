@@ -7,6 +7,8 @@ import (
 	"os/user"
 	"path/filepath"
 
+	"github.com/ssh-vault/crypto"
+	"github.com/ssh-vault/crypto/aead"
 	sv "github.com/ssh-vault/ssh-vault"
 )
 
@@ -86,8 +88,7 @@ func main() {
 		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
-	// generate password
-	err = vault.GenPassword()
+	vault.Password, err = crypto.GenerateNonce(32)
 	if err != nil {
 		exit1(err)
 	}
@@ -98,7 +99,7 @@ func main() {
 		if err != nil {
 			exit1(err)
 		}
-		out, err := vault.Encrypt(data)
+		out, err := aead.Encrypt(vault.Password, data, []byte(vault.Fingerprint))
 		if err != nil {
 			exit1(err)
 		}
@@ -115,7 +116,7 @@ func main() {
 		if err != nil {
 			exit1(err)
 		}
-		out, err = vault.Encrypt(out)
+		out, err = aead.Encrypt(vault.Password, out, []byte(vault.Fingerprint))
 		if err != nil {
 			exit1(err)
 		}
