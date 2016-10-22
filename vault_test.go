@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"os"
 	"testing"
+
+	"github.com/ssh-vault/crypto"
+	"github.com/ssh-vault/crypto/aead"
 )
 
 // These are done in one function to avoid declaring global variables in a test
@@ -19,7 +22,7 @@ func TestVaultFunctions(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	if err = vault.GenPassword(); err != nil {
+	if vault.Password, err = crypto.GenerateNonce(32); err != nil {
 		t.Error(err.Error())
 	}
 
@@ -27,7 +30,7 @@ func TestVaultFunctions(t *testing.T) {
 	// for tests.
 	in := []byte("The quick brown fox jumps over the lazy dog")
 
-	out, err := vault.Encrypt(in)
+	out, err := aead.Encrypt(vault.Password, in, []byte(vault.Fingerprint))
 	if err != nil {
 		t.Error(err.Error())
 	}

@@ -5,11 +5,13 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
+
+	"github.com/ssh-vault/crypto/oaep"
 )
 
 // Close saves encrypted data to file
 func (v *vault) Close(data []byte) error {
-	p, err := v.EncryptPassword()
+	p, err := oaep.Encrypt(v.PublicKey, v.Password, []byte(""))
 	if err != nil {
 		return err
 	}
