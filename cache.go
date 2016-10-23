@@ -26,6 +26,9 @@ func Cache() *cache {
 
 // Get return ssh-key
 func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
+	if k == 0 {
+		k = 1
+	}
 	var (
 		uKey string
 		hash string
