@@ -41,6 +41,7 @@ func TestCacheGet(t *testing.T) {
 		out  string
 		err  bool
 	}{
+		{"alice", 0, "alice.key-1", false},
 		{"alice", 1, "alice.key-1", false},
 		{"alice", 2, "", true},
 	}
