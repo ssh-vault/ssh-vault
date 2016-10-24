@@ -22,6 +22,10 @@ type vault struct {
 	Password    []byte
 }
 
+// GITHUB  https://github.com/<username>.keys
+const GITHUB = "https://github.com"
+
+// isURL regex to match if user is an URL
 var isURL = regexp.MustCompile(`^https?://`)
 
 // New initialize vault parameters
@@ -31,6 +35,7 @@ func New(k, u, o, v string) (*vault, error) {
 		keyPath string = k
 	)
 	cache := Cache()
+	s := Locksmith{GITHUB}
 	if u != "" {
 		// use -k N where N is the index to use when multiple keys
 		// are available
@@ -41,7 +46,7 @@ func New(k, u, o, v string) (*vault, error) {
 		if ki <= 1 {
 			ki = 1
 		}
-		keyPath, err = cache.Get(u, ki)
+		keyPath, err = cache.Get(s, u, ki)
 		if err != nil {
 			return nil, err
 		}
