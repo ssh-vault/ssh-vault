@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestGetKeyFound(t *testing.T) {
+func TestGetKeyFoundURL(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
 		fmt.Fprintln(w, "ssh-rsa ABC")
@@ -16,6 +16,21 @@ func TestGetKeyFound(t *testing.T) {
 
 	l := Locksmith{}
 	s, err := l.GetKey(ts.URL)
+	if err != nil {
+		t.Error(err)
+	}
+	expect(t, 1, len(s))
+}
+
+func TestGetKeyFoundUser(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, "ssh-vault", r.Header.Get("User-agent"))
+		fmt.Fprintln(w, "ssh-rsa ABC")
+	}))
+	defer ts.Close()
+
+	l := Locksmith{ts.URL}
+	s, err := l.GetKey("bob")
 	if err != nil {
 		t.Error(err)
 	}

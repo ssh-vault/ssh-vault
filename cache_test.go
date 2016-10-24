@@ -24,6 +24,8 @@ func (m mockSchlosser) GetKey(u string) ([]string, error) {
 	switch u {
 	case "alice":
 		return []string{"ssh-rsa ABC"}, nil
+	case "bob":
+		return nil, nil
 	default:
 		return nil, fmt.Errorf("Error")
 	}
@@ -44,6 +46,7 @@ func TestCacheGet(t *testing.T) {
 		{"alice", 0, "alice.key-1", false},
 		{"alice", 1, "alice.key-1", false},
 		{"alice", 2, "", true},
+		{"bob", 1, "", true},
 	}
 	cache := &cache{dir}
 	gk := mockSchlosser{}

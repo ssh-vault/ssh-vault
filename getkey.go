@@ -9,22 +9,21 @@ import (
 	"strings"
 )
 
-// GITHUB  https://github.com/<username>.keys
-const GITHUB = "https://github.com"
-
 // Schlosser interface
 type Schlosser interface {
 	GetKey(string) ([]string, error)
 }
 
 // Locksmith implements Schlosser
-type Locksmith struct{}
+type Locksmith struct {
+	Github string
+}
 
 // GetKey fetches ssh-key from url
 func (l Locksmith) GetKey(u string) ([]string, error) {
 	url := u
 	if !isURL.MatchString(u) {
-		url = fmt.Sprintf("%s/%s.keys", GITHUB, u)
+		url = fmt.Sprintf("%s/%s.keys", l.Github, u)
 	}
 	client := &http.Client{}
 	// create a new request
