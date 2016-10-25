@@ -26,6 +26,8 @@ func (m mockSchlosser) GetKey(u string) ([]string, error) {
 		return []string{"ssh-rsa ABC"}, nil
 	case "bob":
 		return nil, nil
+	case "matilde":
+		return []string{"ssh-rsa ABC", "ssh-rsa ABC", "ssh-rsa ABC"}, nil
 	default:
 		return nil, fmt.Errorf("Error")
 	}
@@ -47,6 +49,10 @@ func TestCacheGet(t *testing.T) {
 		{"alice", 1, "alice.key-1", false},
 		{"alice", 2, "", true},
 		{"bob", 1, "", true},
+		{"matilde", 3, "matilde.key-3", false},
+		{"matilde", 2, "matilde.key-2", false},
+		{"matilde", 0, "matilde.key-1", false},
+		{"matilde", 4, "", true},
 	}
 	cache := &cache{dir}
 	gk := mockSchlosser{}
@@ -59,7 +65,5 @@ func TestCacheGet(t *testing.T) {
 		} else if strings.HasPrefix(out, tt.out) {
 			t.Errorf("%q != %q", tt.out, out)
 		}
-		//fmt.Printf("out = %+v\n", out)
-		//fmt.Printf("err = %+v\n", err)
 	}
 }
