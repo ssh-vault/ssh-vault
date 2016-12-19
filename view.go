@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"syscall"
 
+	"github.com/keybase/go-keychain"
 	"github.com/ssh-vault/crypto/aead"
 	"github.com/ssh-vault/crypto/oaep"
 
@@ -30,6 +32,7 @@ func (v *vault) View() ([]byte, error) {
 		// ssh-vault;AES256;fingerprint
 		header     []string
 		rawPayload bytes.Buffer
+		keyPassword []byte
 	)
 
 	scanner := bufio.NewScanner(file)
@@ -64,12 +67,20 @@ func (v *vault) View() ([]byte, error) {
 	}
 
 	if x509.IsEncryptedPEMBlock(block) {
-		fmt.Print("Enter key password: ")
-		keyPassword, err := terminal.ReadPassword(int(syscall.Stdin))
-		if err != nil {
-			return nil, err
+		key_path, err := filepath.Abs(v.key)
+		if err == nil {
+			keyPassword, _ = keychain.GetGenericPassword("SSH", key_path, "", "")
 		}
-		fmt.Println()
+
+		if len(keyPassword) == 0 {
+			// No keychain entry for this, so use
+			fmt.Print("Enter key password: ")
+			keyPassword, err = terminal.ReadPassword(int(syscall.Stdin))
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println()
+		}
 		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
 		if err != nil {
 			return nil, fmt.Errorf("Password incorrect, Decryption failed.")
