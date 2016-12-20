@@ -6,11 +6,13 @@ go:
 
 before_install:
   - go get github.com/axw/gocov/gocov
+  - go get github.com/keybase/go-keychain
+  - go get github.com/kr/pty
   - go get github.com/mattn/goveralls
-  - go get github.com/ssh-vault/ssh2pem
   - go get github.com/ssh-vault/crypto
   - go get github.com/ssh-vault/crypto/aead
   - go get github.com/ssh-vault/crypto/oaep
+  - go get github.com/ssh-vault/ssh2pem
   - go get golang.org/x/crypto/ssh/terminal
   - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
 
