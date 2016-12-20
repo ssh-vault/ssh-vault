@@ -3,7 +3,7 @@
 // Apple's OpenSSH fork uses Keychain for private key passphrases.
 // They're indexed by the absolute file path to the private key,
 // e.g. ~/.ssh/id_rsa
-//
+// ssh-add -K ~/.ssh/[your-private-key]
 // If the passphrase isn't in keychain, prompt the user.
 
 package sshvault
