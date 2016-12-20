@@ -1,4 +1,5 @@
 // +build darwin
+// +build amd64
 
 // Apple's OpenSSH fork uses Keychain for private key passphrases.
 // They're indexed by the absolute file path to the private key,
