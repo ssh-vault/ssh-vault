@@ -10,12 +10,9 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-	"syscall"
 
 	"github.com/ssh-vault/crypto/aead"
 	"github.com/ssh-vault/crypto/oaep"
-
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // View decrypts data and print it to stdout
@@ -64,12 +61,11 @@ func (v *vault) View() ([]byte, error) {
 	}
 
 	if x509.IsEncryptedPEMBlock(block) {
-		fmt.Print("Enter key password: ")
-		keyPassword, err := terminal.ReadPassword(int(syscall.Stdin))
+		keyPassword, err := v.GetPassword()
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("Unable to get private key password, Decryption failed.")
 		}
-		fmt.Println()
+
 		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
 		if err != nil {
 			return nil, fmt.Errorf("Password incorrect, Decryption failed.")
