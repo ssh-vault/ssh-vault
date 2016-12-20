@@ -63,7 +63,7 @@ func TestKeychain(t *testing.T) {
 	}
 	defer DeleteKeychainPassword(key_path) // clean up
 
-	_, tty, err := pty.Open()
+	pty, tty, err := pty.Open()
 	if err != nil {
 		t.Errorf("Unable to open pty: %s", err)
 	}
@@ -77,7 +77,7 @@ func TestKeychain(t *testing.T) {
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdin))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdout))
 
-	//	go PtyWriteback(pty, key_bad_pw)
+	go PtyWriteback(pty, key_bad_pw)
 
 	key_pw_test, err := vault.GetPassword()
 

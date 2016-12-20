@@ -11,19 +11,11 @@ import (
 	"strings"
 	"syscall"
 	"testing"
-	"time"
 
 	"github.com/kr/pty"
 	"github.com/ssh-vault/crypto"
 	"github.com/ssh-vault/crypto/aead"
 )
-
-// zomg this is a race condition
-func PtyWriteback(pty *os.File, msg string) {
-	time.Sleep(500 * time.Millisecond)
-	defer pty.Sync()
-	pty.Write([]byte(msg))
-}
 
 // These are done in one function to avoid declaring global variables in a test
 // file.
