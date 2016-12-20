@@ -52,13 +52,16 @@ func TestVaultFunctions(t *testing.T) {
 	// point stdin at the file, run the system under test, and
 	// finally restore the original stdin
 	old_stdin, _ := syscall.Dup(int(syscall.Stdin))
+	old_stdout, _ := syscall.Dup(int(syscall.Stdout))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdin))
+	syscall.Dup2(int(tty.Fd()), int(syscall.Stdout))
 
 	go PtyWriteback(pty, key_pw)
 
 	key_pw_test, err := vault.GetPasswordPrompt()
 
-	syscall.Dup2(old_stdin, int(syscall.Stdin))
+	syscall.Dup2(old_stdin,  int(syscall.Stdin))
+	syscall.Dup2(old_stdout, int(syscall.Stdout))
 
 	if err != nil {
 		t.Error(err)
