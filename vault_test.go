@@ -60,7 +60,7 @@ func TestVaultFunctions(t *testing.T) {
 
 	key_pw_test, err := vault.GetPasswordPrompt()
 
-	syscall.Dup2(old_stdin,  int(syscall.Stdin))
+	syscall.Dup2(old_stdin, int(syscall.Stdin))
 	syscall.Dup2(old_stdout, int(syscall.Stdout))
 
 	if err != nil {

@@ -12,27 +12,27 @@ import (
 	"fmt"
 	"path/filepath"
 
-  "github.com/keybase/go-keychain"
+	"github.com/keybase/go-keychain"
 )
 
 func (v *vault) GetPassword() ([]byte, error) {
-  var keyPassword []byte
+	var keyPassword []byte
 
-  key_path, err := filepath.Abs(v.key)
-  if err != nil {
-    return nil, fmt.Errorf("Error finding private key: %s", err)
-  }
+	key_path, err := filepath.Abs(v.key)
+	if err != nil {
+		return nil, fmt.Errorf("Error finding private key: %s", err)
+	}
 
-  keyPassword, err = keychain.GetGenericPassword("SSH", key_path, "", "")
-  if err == nil {
-    return keyPassword, nil
-  }
+	keyPassword, err = keychain.GetGenericPassword("SSH", key_path, "", "")
+	if err == nil {
+		return keyPassword, nil
+	}
 
-  // Darn, Keychain doesn't have the password for that file. Prompt the user.
-  keyPassword, err = v.GetPasswordPrompt()
-  if err != nil {
-    return nil, err
-  }
+	// Darn, Keychain doesn't have the password for that file. Prompt the user.
+	keyPassword, err = v.GetPasswordPrompt()
+	if err != nil {
+		return nil, err
+	}
 
-  return keyPassword, nil
+	return keyPassword, nil
 }
