@@ -19,6 +19,7 @@ build: get
 	${GO} get -u github.com/ssh-vault/crypto/aead
 	${GO} get -u github.com/ssh-vault/crypto/oaep
 	${GO} get -u github.com/keybase/go-keychain
+	${GO} get -u github.com/kr/pty
 	${GO} build -ldflags "-X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
 clean:
