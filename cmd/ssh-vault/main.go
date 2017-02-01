@@ -45,6 +45,10 @@ func main() {
 		os.Exit(0)
 	}
 
+	if flag.NArg() < 1 {
+		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
+	}
+
 	usr, _ := user.Current()
 	if len(*k) > 2 {
 		if (*k)[:2] == "~/" {
@@ -69,9 +73,6 @@ func main() {
 	}
 
 	// check options
-	if flag.NArg() < 1 {
-		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
-	}
 	exit := true
 	for _, v := range options {
 		if flag.Arg(0) == v {
