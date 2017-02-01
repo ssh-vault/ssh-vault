@@ -41,7 +41,7 @@ func main() {
 	flag.Parse()
 
 	if *v {
-		fmt.Printf("%s - ssh-vault.com\n", version)
+		fmt.Printf("%s\n", version)
 		os.Exit(0)
 	}
 
