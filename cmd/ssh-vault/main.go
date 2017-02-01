@@ -45,10 +45,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	if flag.NArg() < 1 {
-		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
-	}
-
 	usr, _ := user.Current()
 	if len(*k) > 2 {
 		if (*k)[:2] == "~/" {
@@ -58,12 +54,12 @@ func main() {
 
 	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
 	if err != nil {
-		exit1(err)
+		exit1(fmt.Errorf("%s, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	// ssh-keygen -f id_rsa.pub -e -m PKCS8
 	if err := vault.PKCS8(); err != nil {
-		exit1(err)
+		exit1(fmt.Errorf("%s, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	// print fingerprint and exit
@@ -72,6 +68,9 @@ func main() {
 		os.Exit(0)
 	}
 
+	if flag.NArg() < 1 {
+		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
+	}
 	// check options
 	exit := true
 	for _, v := range options {
