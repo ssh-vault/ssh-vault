@@ -21,7 +21,7 @@ func exit1(err error) {
 
 func main() {
 	var (
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "public `ssh key or index` when using option -u")
+		k       = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
 		u       = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
 		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
 		options = []string{"create", "edit", "view"}
@@ -32,9 +32,9 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
-			"    create    creates a new vault",
-			"    edit      edit an existing vault",
-			"    view      view an existing vault")
+			"    create    Creates a new vault",
+			"    edit      Edit an existing vault",
+			"    view      View an existing vault")
 		flag.PrintDefaults()
 	}
 
@@ -43,6 +43,10 @@ func main() {
 	if *v {
 		fmt.Printf("%s\n", version)
 		os.Exit(0)
+	}
+
+	if flag.NArg() < 1 && !*f {
+		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
 	usr, _ := user.Current()
@@ -69,9 +73,6 @@ func main() {
 	}
 
 	// check options
-	if flag.NArg() < 1 {
-		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
-	}
 	exit := true
 	for _, v := range options {
 		if flag.Arg(0) == v {
