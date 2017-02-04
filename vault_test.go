@@ -33,7 +33,7 @@ func TestVaultFunctions(t *testing.T) {
 		t.Error(err)
 	}
 
-	key_pw := string("argle-bargle\n")
+	keyPw := string("argle-bargle\n")
 	pty, tty, err := pty.Open()
 	if err != nil {
 		t.Errorf("Unable to open pty: %s", err)
@@ -43,23 +43,23 @@ func TestVaultFunctions(t *testing.T) {
 	// from stdin. For the test, we save stdin to a spare FD,
 	// point stdin at the file, run the system under test, and
 	// finally restore the original stdin
-	old_stdin, _ := syscall.Dup(int(syscall.Stdin))
-	old_stdout, _ := syscall.Dup(int(syscall.Stdout))
+	oldStdin, _ := syscall.Dup(int(syscall.Stdin))
+	oldStdout, _ := syscall.Dup(int(syscall.Stdout))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdin))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdout))
 
-	go PtyWriteback(pty, key_pw)
+	go PtyWriteback(pty, keyPw)
 
-	key_pw_test, err := vault.GetPasswordPrompt()
+	keyPwTest, err := vault.GetPasswordPrompt()
 
-	syscall.Dup2(old_stdin, int(syscall.Stdin))
-	syscall.Dup2(old_stdout, int(syscall.Stdout))
+	syscall.Dup2(oldStdin, int(syscall.Stdin))
+	syscall.Dup2(oldStdout, int(syscall.Stdout))
 
 	if err != nil {
 		t.Error(err)
 	}
-	if string(strings.Trim(key_pw, "\n")) != string(key_pw_test) {
-		t.Errorf("password prompt: expected %s, got %s\n", key_pw, key_pw_test)
+	if string(strings.Trim(keyPw, "\n")) != string(keyPwTest) {
+		t.Errorf("password prompt: expected %s, got %s\n", keyPw, keyPwTest)
 	}
 
 	if err = vault.PKCS8(); err != nil {
