@@ -17,19 +17,24 @@ import (
 
 // View decrypts data and print it to stdout
 func (v *vault) View() ([]byte, error) {
-	file, err := os.Open(v.vault)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
 	var (
-		// ssh-vault;AES256;fingerprint
 		header     []string
 		rawPayload bytes.Buffer
+		scanner    *bufio.Scanner
 	)
 
-	scanner := bufio.NewScanner(file)
+	// check if there is someting to read on STDIN
+	stat, _ := os.Stdin.Stat()
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		scanner = bufio.NewScanner(os.Stdin)
+	} else {
+		file, err := os.Open(v.vault)
+		if err != nil {
+			return nil, fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0])
+		}
+		defer file.Close()
+		scanner = bufio.NewScanner(file)
+	}
 	scanner.Split(bufio.ScanLines)
 	l := 1
 	for scanner.Scan() {
@@ -42,8 +47,16 @@ func (v *vault) View() ([]byte, error) {
 		l++
 	}
 
+	// ssh-vault;AES256;fingerprint
+	if len(header) != 3 {
+		return nil, fmt.Errorf("Bad ssh-vault signature, verify the input\n")
+	}
+
 	// password, body
 	payload := strings.Split(rawPayload.String(), ";")
+	if len(payload) != 2 {
+		return nil, fmt.Errorf("Bad ssh-vault payload, verify the input\n")
+	}
 
 	// use private key only
 	if strings.HasSuffix(v.key, ".pub") {
