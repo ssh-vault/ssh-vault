@@ -8,7 +8,7 @@ import (
 )
 
 func (v *vault) GetPasswordPrompt() ([]byte, error) {
-	fmt.Printf("Enter key password (%s): ", v.key)
+	fmt.Printf("Enter key password (%s)\n", v.key)
 	keyPassword, err := terminal.ReadPassword(int(syscall.Stdin))
 	if err != nil {
 		return nil, err
