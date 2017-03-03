@@ -21,14 +21,13 @@ func (v *vault) Close(data []byte) error {
 	payload.WriteString(";")
 	payload.WriteString(base64.StdEncoding.EncodeToString(data))
 
-	err = ioutil.WriteFile(v.vault,
-		[]byte(fmt.Sprintf("SSH-VAULT;AES256;%s\n%s\n",
-			v.Fingerprint,
-			v.Encode(payload.String(), 64))),
-		0600,
+	vault := []byte(fmt.Sprintf("SSH-VAULT;AES256;%s\n%s\n",
+		v.Fingerprint,
+		v.Encode(payload.String(), 64)),
 	)
-	if err != nil {
-		return err
+	if v.vault != "" {
+		return ioutil.WriteFile(v.vault, vault, 0600)
 	}
-	return nil
+	_, err = fmt.Printf("%s", vault)
+	return err
 }

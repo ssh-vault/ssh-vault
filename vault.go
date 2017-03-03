@@ -54,7 +54,7 @@ func New(k, u, o, v string) (*vault, error) {
 		return nil, fmt.Errorf("SSH key %q not found or unable to read", keyPath)
 	}
 	if o == "create" {
-		if cache.IsFile(v) {
+		if v != "" && cache.IsFile(v) {
 			return nil, fmt.Errorf("File already exists: %q", v)
 		}
 	}

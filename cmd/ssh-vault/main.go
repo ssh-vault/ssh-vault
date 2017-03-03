@@ -29,10 +29,12 @@ func main() {
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
-			"    create    Creates a new vault",
+			"    create    Creates a new vault, if no vault defined outputs to stdout.",
+			"              Can read from stdin, example:",
+			"                  echo \"secret\" | ssh-vault -u <user> create",
 			"    edit      Edit an existing vault",
 			"    view      View an existing vault")
 		flag.PrintDefaults()
@@ -84,11 +86,6 @@ func main() {
 		exit1(fmt.Errorf("Invalid option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
-	// check for vault name
-	if flag.NArg() < 2 {
-		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
-	}
-
 	vault.Password, err = crypto.GenerateNonce(32)
 	if err != nil {
 		exit1(err)
@@ -111,7 +108,7 @@ func main() {
 	case "edit":
 		data, err := vault.View()
 		if err != nil {
-			exit1(err)
+			exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 		}
 		out, err := vault.Edit(data)
 		if err != nil {
@@ -128,7 +125,7 @@ func main() {
 	case "view":
 		out, err := vault.View()
 		if err != nil {
-			exit1(err)
+			exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 		}
 		fmt.Printf("\n%s", out)
 	}
