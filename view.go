@@ -84,7 +84,7 @@ func (v *vault) View() ([]byte, error) {
 
 	v.Password, err = oaep.Decrypt(privateKey, ciphertext, []byte(""))
 	if err != nil {
-		return nil, fmt.Errorf("Decryption failed, use private key with fingerprint: %s", v.Fingerprint)
+		return nil, fmt.Errorf("Decryption failed, use private key with fingerprint: %s", header[2])
 	}
 
 	ciphertext, err = base64.StdEncoding.DecodeString(payload[1])
