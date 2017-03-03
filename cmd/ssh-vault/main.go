@@ -29,14 +29,16 @@ func main() {
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
 			"    create    Creates a new vault, if no vault defined outputs to stdout.",
 			"              Can read from stdin, example:",
 			"                  echo \"secret\" | ssh-vault -u <user> create",
-			"    edit      Edit an existing vault",
-			"    view      View an existing vault")
+			"    edit      Edit an existing vault.",
+			"    view      View an existing vault, can read from stdin, example:",
+			"                  echo \"SSH-VAULT...\" | ssh-vault view",
+		)
 		flag.PrintDefaults()
 	}
 
@@ -127,6 +129,6 @@ func main() {
 		if err != nil {
 			exit1(err)
 		}
-		fmt.Printf("\n%s", out)
+		fmt.Printf("%s", out)
 	}
 }
