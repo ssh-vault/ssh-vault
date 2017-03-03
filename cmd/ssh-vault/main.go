@@ -84,11 +84,6 @@ func main() {
 		exit1(fmt.Errorf("Invalid option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
-	// check for vault name
-	if flag.NArg() < 2 {
-		exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
-	}
-
 	vault.Password, err = crypto.GenerateNonce(32)
 	if err != nil {
 		exit1(err)
@@ -111,7 +106,7 @@ func main() {
 	case "edit":
 		data, err := vault.View()
 		if err != nil {
-			exit1(err)
+			exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 		}
 		out, err := vault.Edit(data)
 		if err != nil {
@@ -128,7 +123,7 @@ func main() {
 	case "view":
 		out, err := vault.View()
 		if err != nil {
-			exit1(err)
+			exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
 		}
 		fmt.Printf("\n%s", out)
 	}
