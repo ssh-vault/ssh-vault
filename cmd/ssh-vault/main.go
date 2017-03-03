@@ -125,7 +125,7 @@ func main() {
 	case "view":
 		out, err := vault.View()
 		if err != nil {
-			exit1(fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0]))
+			exit1(err)
 		}
 		fmt.Printf("\n%s", out)
 	}
