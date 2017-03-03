@@ -15,6 +15,10 @@ Usage:
 
     $ ssh-vault -h
 
+Example:
+
+    $ echo "secret" | ssh-vault -u <github.com/user> create
+
 
 ## Compile from source
 
@@ -38,4 +42,10 @@ Build by just typing make:
     $ make
 
 
-**ssh-vault** is at an early development stage, please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).
+## Issues
+
+Please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).
+
+## Donate
+
+If you like this project, please do consider becoming a [patron!](https://www.patreon.com/nbari).

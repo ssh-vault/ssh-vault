@@ -131,6 +131,62 @@ func TestVaultFunctions(t *testing.T) {
 	}
 }
 
+func TestVaultFunctionsSTDOUT(t *testing.T) {
+	dir, err := ioutil.TempDir("", "vault")
+	if err != nil {
+		t.Error(err)
+	}
+	defer os.RemoveAll(dir) // clean up
+
+	vault, err := New("test_data/id_rsa.pub", "", "create", "")
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err = vault.PKCS8(); err != nil {
+		t.Error(err)
+	}
+
+	if vault.Password, err = crypto.GenerateNonce(32); err != nil {
+		t.Error(err)
+	}
+
+	// Skip vault.Create because we don't need/want to interact with an editor
+	in := []byte("The quick brown fox jumps over the lazy dog")
+
+	out, err := aead.Encrypt(vault.Password, in, []byte(vault.Fingerprint))
+	if err != nil {
+		t.Error(err)
+	}
+
+	rescueStdout := os.Stdout // keep backup of the real stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	if err = vault.Close(out); err != nil {
+		t.Error(err)
+	}
+
+	w.Close()
+	outStdout, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
+	tmpfile, err := ioutil.TempFile("", "stdout")
+	if err != nil {
+		t.Error(err)
+	}
+	tmpfile.Write([]byte(outStdout))
+	vault.vault = tmpfile.Name()
+
+	plaintext, err := vault.View()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if !bytes.Equal(in, plaintext) {
+		t.Error("in != out")
+	}
+}
+
 func TestVaultNew(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
