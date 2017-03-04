@@ -19,12 +19,12 @@ import (
 func (v *vault) GetPassword() ([]byte, error) {
 	var keyPassword []byte
 
-	key_path, err := filepath.Abs(v.key)
+	keyPath, err := filepath.Abs(v.key)
 	if err != nil {
 		return nil, fmt.Errorf("Error finding private key: %s", err)
 	}
 
-	keyPassword, err = keychain.GetGenericPassword("SSH", key_path, "", "")
+	keyPassword, err = keychain.GetGenericPassword("SSH", keyPath, "", "")
 	if err == nil {
 		return keyPassword, nil
 	}
