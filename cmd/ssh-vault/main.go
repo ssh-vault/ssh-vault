@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -21,15 +22,16 @@ func exit1(err error) {
 
 func main() {
 	var (
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
-		u       = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
 		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
-		options = []string{"create", "edit", "view"}
+		k       = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
+		o       = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
+		u       = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
 		v       = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
+		options = []string{"create", "edit", "view"}
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-o file] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
 			"    create    Creates a new vault, if no vault defined outputs to stdout.",
@@ -129,6 +131,12 @@ func main() {
 		if err != nil {
 			exit1(err)
 		}
-		fmt.Printf("%s", out)
+		if *o != "" {
+			if err := ioutil.WriteFile(*o, out, 0600); err != nil {
+				exit1(err)
+			}
+		} else {
+			fmt.Printf("%s", out)
+		}
 	}
 }
