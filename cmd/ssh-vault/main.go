@@ -63,7 +63,7 @@ func main() {
 	// using -f with fingerprint
 	if *f {
 		if flag.NArg() == 1 {
-			exit1(fmt.Errorf("Missing fingerprint, use (\"%s -h\") for help.\n", os.Args[0]))
+			exit1(fmt.Errorf("Missing option %q, use (\"%s -h\") for help.\n", "create", os.Args[0]))
 		}
 		if flag.NArg() >= 1 {
 			if !rxFingerprint.Match([]byte(flag.Arg(0))) {
@@ -85,8 +85,7 @@ func main() {
 		}
 	}
 
-	fmt.Printf("fingerprint = %+v\n", fingerprint)
-	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
+	vault, err := sv.New(fingerprint, *k, *u, flag.Arg(0), flag.Arg(1))
 	if err != nil {
 		exit1(err)
 	}

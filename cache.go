@@ -28,20 +28,27 @@ func Cache() *cache {
 }
 
 // Get return ssh-key
-func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
+func (c *cache) Get(s Schlosser, u, f string, k int) (string, error) {
 	if k == 0 {
 		k = 1
 	}
+
+	// storage format
+	// ~/.ssh/vault/keys/user.key-N
+	// or
+	// ~/.ssh/vault/keys/<md5>.key-N
 	var (
 		uKey string
 		hash string
 	)
 	if !isURL.MatchString(u) {
-		uKey = fmt.Sprintf("%s/%s.key-%d", c.dir, u, k)
+		uKey = fmt.Sprintf("%s/%s.%d", c.dir, u, k)
 	} else {
 		hash = fmt.Sprintf("%x", md5.Sum([]byte(u)))
-		uKey = fmt.Sprintf("%s/%s.key-%d", c.dir, hash, k)
+		uKey = fmt.Sprintf("%s/%s.%d", c.dir, hash, k)
 	}
+
+	// if key not found, fetch it
 	if !c.IsFile(uKey) {
 		keys, err := s.GetKey(u)
 		if err != nil {
@@ -51,18 +58,7 @@ func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
 			u = hash
 		}
 		for k, v := range keys {
-			pubKey, err := ssh2pem.GetPublicKeyPem(v)
-			if err != nil {
-				log.Println(err)
-			}
-			p, _ := pem.Decode(pubKey)
-			x := &vault{}
-			fingerprint, err := x.GenFingerprint(p)
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Printf("fingerprint = %+v\n", fingerprint)
-			err = ioutil.WriteFile(fmt.Sprintf("%s/%s.key-%d", c.dir, u, k+1),
+			err = ioutil.WriteFile(fmt.Sprintf("%s/%s.%d", c.dir, u, k+1),
 				[]byte(v),
 				0644)
 			if err != nil {
@@ -72,8 +68,17 @@ func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
 		if !c.IsFile(uKey) {
 			return "", fmt.Errorf("key index not found, try -k with a value between 1 and %d", len(keys))
 		}
-		return uKey, nil
 	}
+
+	// if fingerprint, find the key that matches
+	if f != "" {
+		key, err := c.FindFingerprint(uKey, f)
+		if err != nil {
+			return "", err
+		}
+		return key, nil
+	}
+
 	return uKey, nil
 }
 
@@ -87,4 +92,27 @@ func (c *cache) IsFile(path string) bool {
 		return true
 	}
 	return false
+}
+
+// Find searches for key
+func (c *cache) FindFingerprint(u, f string) (string, error) {
+	files, err := ioutil.ReadDir(c.dir)
+	if err != nil {
+		return "", err
+	}
+	for _, file := range files {
+		if file.Name() == filepath.Base(u) {
+			out, err := ssh2pem.GetPem(filepath.Join(c.dir, file.Name()))
+			if err != nil {
+				return "", err
+			}
+			p, _ := pem.Decode(out)
+			x := &vault{}
+			fingerprint, _ := x.GenFingerprint(p)
+			if f == fingerprint {
+				return u, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("key fingerprint: %q not found", f)
 }

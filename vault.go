@@ -29,7 +29,7 @@ const GITHUB = "https://github.com"
 var isURL = regexp.MustCompile(`^https?://`)
 
 // New initialize vault parameters
-func New(k, u, o, v string) (*vault, error) {
+func New(f, k, u, o, v string) (*vault, error) {
 	var (
 		err     error
 		keyPath string = k
@@ -46,7 +46,7 @@ func New(k, u, o, v string) (*vault, error) {
 		if ki <= 1 {
 			ki = 1
 		}
-		keyPath, err = cache.Get(s, u, ki)
+		keyPath, err = cache.Get(s, u, f, ki)
 		if err != nil {
 			return nil, err
 		}
