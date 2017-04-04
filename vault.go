@@ -15,11 +15,11 @@ import (
 
 // Vault structure
 type vault struct {
-	key         string
-	vault       string
+	Password    []byte
 	PublicKey   *rsa.PublicKey
 	Fingerprint string
-	Password    []byte
+	key         string
+	vault       string
 }
 
 // GITHUB  https://github.com/<username>.keys
@@ -65,30 +65,34 @@ func New(k, u, o, v string) (*vault, error) {
 }
 
 // PKCS8 convert ssh public key to PEM PKCS8
-func (v *vault) PKCS8() error {
+func (v *vault) PKCS8() (*pem.Block, error) {
 	out, err := ssh2pem.GetPem(v.key)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	p, _ := pem.Decode(out)
+	p, rest := pem.Decode(out)
 	if p == nil {
-		return fmt.Errorf("Could not create a PEM from the ssh key")
+		return nil, fmt.Errorf("Could not create a PEM from the ssh key, %q", rest)
 	}
+	return p, nil
+}
+
+// Fingerprint return finerprint of ssh-key
+func (v *vault) GenFingerprint(p *pem.Block) (string, error) {
 	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
 	if err != nil {
-		return err
+		return "", err
 	}
 	var ok bool
 	v.PublicKey, ok = pubkeyInterface.(*rsa.PublicKey)
 	if !ok {
-		return fmt.Errorf("No Public key found")
+		return "", fmt.Errorf("No Public key found")
 	}
 	fingerPrint := md5.New()
 	fingerPrint.Write(p.Bytes)
-	v.Fingerprint = strings.Replace(fmt.Sprintf("% x",
+	return strings.Replace(fmt.Sprintf("% x",
 		fingerPrint.Sum(nil)),
 		" ",
 		":",
-		-1)
-	return nil
+		-1), nil
 }

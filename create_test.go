@@ -24,7 +24,13 @@ func TestCreate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = vault.PKCS8(); err != nil {
+	PKCS8, err := vault.PKCS8()
+	if err != nil {
+		t.Error(err)
+	}
+
+	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
+	if err != nil {
 		t.Error(err)
 	}
 

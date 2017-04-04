@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 
 	"github.com/ssh-vault/crypto"
 	"github.com/ssh-vault/crypto/aead"
@@ -22,12 +23,15 @@ func exit1(err error) {
 
 func main() {
 	var (
-		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
-		o       = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
-		u       = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
-		v       = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
-		options = []string{"create", "edit", "view"}
+		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault for the specified fingerprint")
+		k             = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
+		o             = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
+		u             = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
+		v             = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
+		options       = []string{"create", "edit", "view"}
+		rxFingerprint = regexp.MustCompile(`^([0-9a-f]{2}[:-]){15}([0-9a-f]{2})$`)
+		fingerprint   string
+		err           error
 	)
 
 	flag.Usage = func() {
@@ -51,8 +55,27 @@ func main() {
 		os.Exit(0)
 	}
 
+	// only print fingerprint
 	if flag.NArg() < 1 && !*f {
 		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
+	}
+
+	// using -f with fingerprint
+	if *f {
+		if flag.NArg() == 1 {
+			exit1(fmt.Errorf("Missing fingerprint, use (\"%s -h\") for help.\n", os.Args[0]))
+		}
+		if flag.NArg() >= 1 {
+			if !rxFingerprint.Match([]byte(flag.Arg(0))) {
+				exit1(fmt.Errorf("Bad fingerprint format, use (\"%s -h\") for help.\n", os.Args[0]))
+			}
+			if flag.Arg(1) != "create" {
+				exit1(fmt.Errorf("-f fingerprint can only be used with the %q option (\"%s -h\") for help.\n", "create", os.Args[0]))
+			}
+			// create using fingerprint
+			*f = false
+			fingerprint = flag.Arg(0)
+		}
 	}
 
 	usr, _ := user.Current()
@@ -68,13 +91,18 @@ func main() {
 	}
 
 	// ssh-keygen -f id_rsa.pub -e -m PKCS8
-	if err := vault.PKCS8(); err != nil {
+	PKCS8, err := vault.PKCS8()
+	if err != nil {
 		exit1(err)
 	}
 
-	// print fingerprint and exit
+	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
+	if err != nil {
+		exit1(err)
+	}
+
 	if *f {
-		fmt.Println(vault.Fingerprint)
+		fmt.Printf("%s\n", vault.Fingerprint)
 		os.Exit(0)
 	}
 
