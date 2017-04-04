@@ -85,6 +85,7 @@ func main() {
 		}
 	}
 
+	fmt.Printf("fingerprint = %+v\n", fingerprint)
 	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
 	if err != nil {
 		exit1(err)

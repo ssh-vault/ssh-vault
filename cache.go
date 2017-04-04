@@ -2,12 +2,15 @@ package sshvault
 
 import (
 	"crypto/md5"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
 	"path/filepath"
+
+	"github.com/ssh-vault/ssh2pem"
 )
 
 type cache struct {
@@ -48,6 +51,17 @@ func (c *cache) Get(s Schlosser, u string, k int) (string, error) {
 			u = hash
 		}
 		for k, v := range keys {
+			pubKey, err := ssh2pem.GetPublicKeyPem(v)
+			if err != nil {
+				log.Println(err)
+			}
+			p, _ := pem.Decode(pubKey)
+			x := &vault{}
+			fingerprint, err := x.GenFingerprint(p)
+			if err != nil {
+				log.Println(err)
+			}
+			fmt.Printf("fingerprint = %+v\n", fingerprint)
 			err = ioutil.WriteFile(fmt.Sprintf("%s/%s.key-%d", c.dir, u, k+1),
 				[]byte(v),
 				0644)
