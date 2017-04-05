@@ -69,20 +69,26 @@ func main() {
 	// using -f with fingerprint
 	if *f {
 		if flag.NArg() == 1 {
-			exit1(fmt.Errorf("Missing option %q, use (\"%s -h\") for help.", "create", os.Args[0]))
+			exit1(fmt.Errorf("Missing fingerprint/option, use (\"%s -h\") for help.", os.Args[0]))
 		}
 		if flag.NArg() >= 1 {
 			if !rxFingerprint.Match([]byte(flag.Arg(0))) {
 				exit1(fmt.Errorf("Bad fingerprint format, use (\"%s -h\") for help.", os.Args[0]))
 			}
 			if flag.Arg(1) != "create" {
-				exit1(fmt.Errorf("-f fingerprint can only be used with the %q option (\"%s -h\") for help.", "create", os.Args[0]))
+				exit1(fmt.Errorf("-f fingerprint can only be used with the %q option, use (\"%s -h\") for help.", "create", os.Args[0]))
 			}
 			// create using fingerprint
 			*f = false
 			fingerprint = flag.Arg(0)
 			option = flag.Arg(1)
 			outFile = flag.Arg(2)
+
+			flagset := make(map[string]bool)
+			flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
+			if flagset["k"] {
+				exit1(fmt.Errorf("-f fingerprint have no effect when specifying key using -k, use (\"%s -h\") for help.", os.Args[0]))
+			}
 		}
 	}
 
