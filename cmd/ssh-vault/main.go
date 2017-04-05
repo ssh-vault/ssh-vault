@@ -23,7 +23,7 @@ func exit1(err error) {
 
 func main() {
 	var (
-		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault for the specified fingerprint")
+		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault using the key matching the specified fingerprint")
 		k             = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
 		o             = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
 		u             = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
