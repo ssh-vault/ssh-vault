@@ -28,7 +28,7 @@ func TestVaultFunctions(t *testing.T) {
 
 	tmpfile := filepath.Join(dir, "vault")
 
-	vault, err := New("test_data/id_rsa.pub", "", "create", tmpfile)
+	vault, err := New("", "test_data/id_rsa.pub", "", "create", tmpfile)
 	if err != nil {
 		t.Error(err)
 	}
@@ -144,7 +144,7 @@ func TestVaultFunctionsSTDOUT(t *testing.T) {
 	}
 	defer os.RemoveAll(dir) // clean up
 
-	vault, err := New("test_data/id_rsa.pub", "", "create", "")
+	vault, err := New("", "test_data/id_rsa.pub", "", "create", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -205,7 +205,7 @@ func TestVaultNew(t *testing.T) {
 		fmt.Fprintln(w, "ssh-rsa ABC")
 	}))
 	defer ts.Close()
-	_, err := New("", ts.URL, "view", "")
+	_, err := New("", "", ts.URL, "view", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -216,7 +216,7 @@ func TestVaultNewNoKey(t *testing.T) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
 	}))
 	defer ts.Close()
-	_, err := New("", ts.URL, "view", "")
+	_, err := New("", "", ts.URL, "view", "")
 	if err == nil {
 		t.Error("Expecting error")
 	}

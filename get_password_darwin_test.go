@@ -49,7 +49,7 @@ func TestKeychain(t *testing.T) {
 
 	tmpfile := filepath.Join(dir, "vault")
 
-	vault, err := New("test_data/id_rsa.pub", "", "create", tmpfile)
+	vault, err := New("", "test_data/id_rsa.pub", "", "create", tmpfile)
 	if err != nil {
 		t.Error(err)
 	}

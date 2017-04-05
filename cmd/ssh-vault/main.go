@@ -30,8 +30,10 @@ func main() {
 		v             = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
 		options       = []string{"create", "edit", "view"}
 		rxFingerprint = regexp.MustCompile(`^([0-9a-f]{2}[:-]){15}([0-9a-f]{2})$`)
-		fingerprint   string
 		err           error
+		fingerprint   string
+		option        string
+		outFile       string
 	)
 
 	flag.Usage = func() {
@@ -60,6 +62,10 @@ func main() {
 		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
 	}
 
+	// set option to be the first argument if no -f <fingerprint> is defined
+	option = flag.Arg(0)
+	outFile = flag.Arg(1)
+
 	// using -f with fingerprint
 	if *f {
 		if flag.NArg() == 1 {
@@ -75,6 +81,8 @@ func main() {
 			// create using fingerprint
 			*f = false
 			fingerprint = flag.Arg(0)
+			option = flag.Arg(1)
+			outFile = flag.Arg(2)
 		}
 	}
 
@@ -85,7 +93,7 @@ func main() {
 		}
 	}
 
-	vault, err := sv.New(fingerprint, *k, *u, flag.Arg(0), flag.Arg(1))
+	vault, err := sv.New(fingerprint, *k, *u, option, outFile)
 	if err != nil {
 		exit1(err)
 	}
@@ -109,7 +117,7 @@ func main() {
 	// check options
 	exit := true
 	for _, v := range options {
-		if flag.Arg(0) == v {
+		if option == v {
 			exit = false
 			break
 		}
@@ -123,7 +131,7 @@ func main() {
 		exit1(err)
 	}
 
-	switch flag.Arg(0) {
+	switch option {
 	case "create":
 		data, err := vault.Create()
 		if err != nil {

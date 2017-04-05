@@ -57,7 +57,7 @@ func TestCacheGet(t *testing.T) {
 	cache := &cache{dir}
 	gk := mockSchlosser{}
 	for _, tt := range testTable {
-		out, err := cache.Get(gk, tt.user, tt.key)
+		out, err := cache.Get(gk, tt.user, "", tt.key)
 		if tt.err {
 			if err == nil {
 				t.Error("Expecting error")
