@@ -79,15 +79,6 @@ func (v *vault) PKCS8() (*pem.Block, error) {
 
 // Fingerprint return finerprint of ssh-key
 func (v *vault) GenFingerprint(p *pem.Block) (string, error) {
-	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
-	if err != nil {
-		return "", err
-	}
-	var ok bool
-	v.PublicKey, ok = pubkeyInterface.(*rsa.PublicKey)
-	if !ok {
-		return "", fmt.Errorf("No Public key found")
-	}
 	fingerPrint := md5.New()
 	fingerPrint.Write(p.Bytes)
 	return strings.Replace(fmt.Sprintf("% x",
@@ -95,4 +86,17 @@ func (v *vault) GenFingerprint(p *pem.Block) (string, error) {
 		" ",
 		":",
 		-1), nil
+}
+
+// GetRSAPublicKey return rsa.PublicKey
+func (v *vault) GetRSAPublicKey(p *pem.Block) (*rsa.PublicKey, error) {
+	pubkeyInterface, err := x509.ParsePKIXPublicKey(p.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	rsaPublicKey, ok := pubkeyInterface.(*rsa.PublicKey)
+	if !ok {
+		return nil, fmt.Errorf("No Public key found")
+	}
+	return rsaPublicKey, nil
 }

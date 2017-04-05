@@ -29,6 +29,11 @@ func TestCreate(t *testing.T) {
 		t.Error(err)
 	}
 
+	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
+	if err != nil {
+		t.Error(err)
+	}
+
 	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
 	if err != nil {
 		t.Error(err)

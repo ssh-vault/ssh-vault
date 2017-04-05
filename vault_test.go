@@ -67,6 +67,11 @@ func TestVaultFunctions(t *testing.T) {
 		t.Error(err)
 	}
 
+	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
+	if err != nil {
+		t.Error(err)
+	}
+
 	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
 	if err != nil {
 		t.Error(err)
@@ -150,6 +155,11 @@ func TestVaultFunctionsSTDOUT(t *testing.T) {
 	}
 
 	PKCS8, err := vault.PKCS8()
+	if err != nil {
+		t.Error(err)
+	}
+
+	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
 	if err != nil {
 		t.Error(err)
 	}

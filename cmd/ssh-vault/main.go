@@ -104,6 +104,10 @@ func main() {
 		exit1(err)
 	}
 
+	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
+	if err != nil {
+		exit1(err)
+	}
 	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
 	if err != nil {
 		exit1(err)
