@@ -220,6 +220,17 @@ func TestVaultNewFingerprint(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestVaultNewFingerprintBadKey(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, "ssh-vault", r.Header.Get("User-agent"))
+		fmt.Fprintln(w, "ssh-rsa FOO")
+	}))
+	defer ts.Close()
+	_, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "", ts.URL, "view", "")
+	if err == nil {
+		t.Error("Expecting error: Use a public ssh key: illegal base64 ...")
+	}
+}
 
 func TestVaultNewNoKeyFingerprint(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
