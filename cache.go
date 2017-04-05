@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"strings"
 
 	"github.com/ssh-vault/ssh2pem"
 )
@@ -100,8 +101,9 @@ func (c *cache) FindFingerprint(u, f string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	var user = strings.TrimSuffix(filepath.Base(u), filepath.Ext(filepath.Base(u)))
 	for _, file := range files {
-		if file.Name() == filepath.Base(u) {
+		if strings.HasPrefix(file.Name(), user) {
 			out, err := ssh2pem.GetPem(filepath.Join(c.dir, file.Name()))
 			if err != nil {
 				return "", err
