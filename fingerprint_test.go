@@ -19,7 +19,7 @@ import (
 
 // These are done in one function to avoid declaring global variables in a test
 // file.
-func TestVaultFunctions(t *testing.T) {
+func TestVaultFunctionsFingerprint(t *testing.T) {
 	dir, err := ioutil.TempDir("", "vault")
 	if err != nil {
 		t.Error(err)
@@ -28,7 +28,7 @@ func TestVaultFunctions(t *testing.T) {
 
 	tmpfile := filepath.Join(dir, "vault")
 
-	vault, err := New("", "test_data/id_rsa.pub", "", "create", tmpfile)
+	vault, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa.pub", "", "create", tmpfile)
 	if err != nil {
 		t.Error(err)
 	}
@@ -142,14 +142,14 @@ func TestVaultFunctions(t *testing.T) {
 	}
 }
 
-func TestVaultFunctionsSTDOUT(t *testing.T) {
+func TestVaultFunctionsSTDOUTFingerprint(t *testing.T) {
 	dir, err := ioutil.TempDir("", "vault")
 	if err != nil {
 		t.Error(err)
 	}
 	defer os.RemoveAll(dir) // clean up
 
-	vault, err := New("", "test_data/id_rsa.pub", "", "create", "")
+	vault, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa.pub", "", "create", "")
 	if err != nil {
 		t.Error(err)
 	}
@@ -209,24 +209,35 @@ func TestVaultFunctionsSTDOUT(t *testing.T) {
 	}
 }
 
-func TestVaultNew(t *testing.T) {
+func TestVaultNewFingerprint(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
-		fmt.Fprintln(w, "ssh-rsa ABC")
+		fmt.Fprintln(w, "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjjM4JEyg1T8j5YICtqslLNp2UGg80CppTM3ZYu73pEmDhMwbLfdhuI56AQZgWViFsF/7QHDJPcRY2Piu38b4kizTSM0QHEOC7CTo+vnzxptlKLGT1y2mcY1P9VXzCBMSWQN9/vGasgl/sUp1zcTvVT0CjjA6k1dJM6/+aDVtCsFa851VkwbeIsWl5BAHLyL+ur5BX93/BxYnRcYl7ooheuEWWokyWJ0IwEFToPMHAthTbDn1P17wYF43oscTORsFBfkP1JLBKHPDPJCGcBgQButL/srLJf6o44fScAYL99s1dQ/Qqv31aygDmwLdKEDldNnWEaJZ+iidEiIlPtAnLYGnVVA4u+NA2p3egrUrLWmpPjMX6XSb2VRHllzCcY4vZ4F2ud2TFaYG6N+9+vRCdxB+LFcHhm7ottI4vnC5P1bbMagjmFne0+TSKrAfMCw59eiQd8yZVMoE2yPXjFOQt6EOBvB4OHv1AaVt2q0PGqSkv5vIhgsKJWx/6IUj0Kz24hDiMipFb0jL3xstvizAllpC6yF26Ju/nwF03eJJGGxJjrxYd4P5/rY6SWY3yakiUN7pUBgUK2Ok3K3/+BTy5Aag8OXcvOZJumr2X2Wn9DweQeCRjC8UqFDKALqA/3vopZ2S59V4WOg3sV94hEig/KHLISNge1Uatn+qosK2sPw==")
 	}))
 	defer ts.Close()
-	_, err := New("", "", ts.URL, "view", "")
+	_, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "", ts.URL, "view", "")
 	if err != nil {
 		t.Error(err)
 	}
 }
+func TestVaultNewFingerprintBadKey(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, "ssh-vault", r.Header.Get("User-agent"))
+		fmt.Fprintln(w, "ssh-rsa FOO")
+	}))
+	defer ts.Close()
+	_, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "", ts.URL, "view", "")
+	if err == nil {
+		t.Error("Expecting error: Use a public ssh key: illegal base64 ...")
+	}
+}
 
-func TestVaultNewNoKey(t *testing.T) {
+func TestVaultNewNoKeyFingerprint(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
 	}))
 	defer ts.Close()
-	_, err := New("", "", ts.URL, "view", "")
+	_, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:XX", "", ts.URL, "view", "")
 	if err == nil {
 		t.Error("Expecting error")
 	}

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 
 	"github.com/ssh-vault/crypto"
 	"github.com/ssh-vault/crypto/aead"
@@ -22,16 +23,21 @@ func exit1(err error) {
 
 func main() {
 	var (
-		f       = flag.Bool("f", false, "Print ssh key `fingerprint`")
-		k       = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
-		o       = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
-		u       = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
-		v       = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
-		options = []string{"create", "edit", "view"}
+		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault using the key matching the specified fingerprint")
+		k             = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
+		o             = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
+		u             = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
+		v             = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
+		options       = []string{"create", "edit", "view"}
+		rxFingerprint = regexp.MustCompile(`^([0-9a-f]{2}[:-]){15}([0-9a-f]{2})$`)
+		err           error
+		fingerprint   string
+		option        string
+		outFile       string
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-k key] [-o file] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-f fingerprint] [-k key] [-o file] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
 			os.Args[0],
 			"  Options:",
 			"    create    Creates a new vault, if no vault defined outputs to stdout.",
@@ -51,8 +57,39 @@ func main() {
 		os.Exit(0)
 	}
 
+	// only print fingerprint
 	if flag.NArg() < 1 && !*f {
-		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.\n", os.Args[0]))
+		exit1(fmt.Errorf("Missing option, use (\"%s -h\") for help.", os.Args[0]))
+	}
+
+	// set option to be the first argument if no -f <fingerprint> is defined
+	option = flag.Arg(0)
+	outFile = flag.Arg(1)
+
+	// using -f with fingerprint
+	if *f {
+		if flag.NArg() == 1 {
+			exit1(fmt.Errorf("Missing fingerprint/option, use (\"%s -h\") for help.", os.Args[0]))
+		}
+		if flag.NArg() >= 1 {
+			if !rxFingerprint.Match([]byte(flag.Arg(0))) {
+				exit1(fmt.Errorf("Bad fingerprint format, use (\"%s -h\") for help.", os.Args[0]))
+			}
+			if flag.Arg(1) != "create" {
+				exit1(fmt.Errorf("-f fingerprint can only be used with the %q option, use (\"%s -h\") for help.", "create", os.Args[0]))
+			}
+			// create using fingerprint
+			*f = false
+			fingerprint = flag.Arg(0)
+			option = flag.Arg(1)
+			outFile = flag.Arg(2)
+
+			flagset := make(map[string]bool)
+			flag.Visit(func(f *flag.Flag) { flagset[f.Name] = true })
+			if flagset["k"] {
+				exit1(fmt.Errorf("-f fingerprint have no effect when specifying key using -k, use (\"%s -h\") for help.", os.Args[0]))
+			}
+		}
 	}
 
 	usr, _ := user.Current()
@@ -62,26 +99,35 @@ func main() {
 		}
 	}
 
-	vault, err := sv.New(*k, *u, flag.Arg(0), flag.Arg(1))
+	vault, err := sv.New(fingerprint, *k, *u, option, outFile)
 	if err != nil {
 		exit1(err)
 	}
 
 	// ssh-keygen -f id_rsa.pub -e -m PKCS8
-	if err := vault.PKCS8(); err != nil {
+	PKCS8, err := vault.PKCS8()
+	if err != nil {
 		exit1(err)
 	}
 
-	// print fingerprint and exit
+	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
+	if err != nil {
+		exit1(err)
+	}
+	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
+	if err != nil {
+		exit1(err)
+	}
+
 	if *f {
-		fmt.Println(vault.Fingerprint)
+		fmt.Printf("%s\n", vault.Fingerprint)
 		os.Exit(0)
 	}
 
 	// check options
 	exit := true
 	for _, v := range options {
-		if flag.Arg(0) == v {
+		if option == v {
 			exit = false
 			break
 		}
@@ -95,7 +141,7 @@ func main() {
 		exit1(err)
 	}
 
-	switch flag.Arg(0) {
+	switch option {
 	case "create":
 		data, err := vault.Create()
 		if err != nil {
