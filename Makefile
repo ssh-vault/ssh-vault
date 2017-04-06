@@ -20,7 +20,7 @@ build: get
 	${GO} get -u github.com/ssh-vault/crypto/oaep
 	${GO} get -u github.com/ssh-vault/ssh2pem
 	${GO} get -u golang.org/x/crypto/ssh/terminal
-	${GO} build -ldflags "-X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
+	${GO} build -ldflags "-w -s -X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
 clean:
 	@rm -rf ssh-vault-* ${BIN_NAME} ${BIN_NAME}.debug *.out build debian
