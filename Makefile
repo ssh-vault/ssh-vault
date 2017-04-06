@@ -20,7 +20,7 @@ build: get
 	${GO} get -u github.com/ssh-vault/crypto/oaep
 	${GO} get -u github.com/ssh-vault/ssh2pem
 	${GO} get -u golang.org/x/crypto/ssh/terminal
-	${GO} build -ldflags "-w -s -X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
+	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
 clean:
 	@rm -rf ssh-vault-* ${BIN_NAME} ${BIN_NAME}.debug *.out build debian
@@ -48,7 +48,7 @@ goxc:
 	$(shell echo '      "subject": "nbari"' >> $(GOXC_FILE))
 	$(shell echo '    }\n  },' >> $(GOXC_FILE))
 	$(shell echo '  "BuildSettings": {' >> $(GOXC_FILE))
-	$(shell echo '    "LdFlags": "-w -s -X main.version=${VERSION}"' >> $(GOXC_FILE))
+	$(shell echo '    "LdFlags": "-s -w -X main.version=${VERSION}"' >> $(GOXC_FILE))
 	$(shell echo '  }\n}' >> $(GOXC_FILE))
 	$(shell echo '{\n "ConfigVersion": "0.9",' > $(GOXC_FILE_LOCAL))
 	$(shell echo ' "TaskSettings": {' >> $(GOXC_FILE_LOCAL))
