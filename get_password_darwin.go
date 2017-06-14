@@ -16,6 +16,7 @@ import (
 	"github.com/keybase/go-keychain"
 )
 
+// GetPassword read password from keychain or promp the user
 func (v *vault) GetPassword() ([]byte, error) {
 	var keyPassword []byte
 

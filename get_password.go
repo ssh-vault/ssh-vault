@@ -5,6 +5,7 @@
 
 package sshvault
 
+// GetPassword calls GetPasswordPrompt
 func (v *vault) GetPassword() ([]byte, error) {
 	return v.GetPasswordPrompt()
 }
