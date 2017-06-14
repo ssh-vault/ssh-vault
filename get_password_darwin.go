@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/keybase/go-keychain"
+	"github.com/ssh-vault/go-keychain"
 )
 
 // GetPassword read password from keychain or promp the user
