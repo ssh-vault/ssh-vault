@@ -26,7 +26,7 @@ func (v *vault) GetPassword() ([]byte, error) {
 	}
 
 	keyPassword, err = keychain.GetGenericPassword("SSH", keyPath, "", "")
-	if err == nil &&  keyPassword != nil {
+	if err == nil && keyPassword != nil {
 		return keyPassword, nil
 	}
 
