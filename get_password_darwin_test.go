@@ -12,8 +12,8 @@ import (
 	"syscall"
 	"testing"
 
-	"github.com/keybase/go-keychain"
 	"github.com/kr/pty"
+	"github.com/ssh-vault/go-keychain"
 )
 
 func InjectKeychainPassword(path, pw string) error {
