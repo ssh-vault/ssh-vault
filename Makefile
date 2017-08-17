@@ -11,8 +11,6 @@ all: clean build
 
 get:
 	${GO} get
-
-build: get
 	${GO} get -u github.com/kr/pty
 	${GO} get -u github.com/ssh-vault/crypto
 	${GO} get -u github.com/ssh-vault/crypto/aead
@@ -20,6 +18,8 @@ build: get
 	${GO} get -u github.com/ssh-vault/go-keychain
 	${GO} get -u github.com/ssh-vault/ssh2pem
 	${GO} get -u golang.org/x/crypto/ssh/terminal
+
+build: get
 	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
 clean:
