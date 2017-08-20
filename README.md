@@ -45,7 +45,3 @@ Build by just typing make:
 ## Issues
 
 Please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).
-
-## Donate
-
-If you like this project, please do consider becoming a [patron!](https://www.patreon.com/nbari).
