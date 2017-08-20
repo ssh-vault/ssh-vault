@@ -112,7 +112,7 @@ func (c *cache) FindFingerprint(u, f string) (string, error) {
 			x := &vault{}
 			fingerprint, _ := x.GenFingerprint(p)
 			if f == fingerprint {
-				return u, nil
+				return filepath.Join(c.dir, file.Name()), nil
 			}
 		}
 	}
