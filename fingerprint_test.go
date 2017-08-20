@@ -117,134 +117,77 @@ func TestVaultFunctionsSTDOUTFingerprint(t *testing.T) {
 	}
 	defer os.RemoveAll(dir) // clean up
 
-	vault, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa.pub", "", "create", "")
-	if err != nil {
-		t.Error(err)
+	var testTable = []struct {
+		Fingerprint string
+		KeyPath     string
+		Option      string
+	}{
+		{"55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa.pub", "create"},
+		{"55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa_extra_linebreak", "create"},
 	}
 
-	PKCS8, err := vault.PKCS8()
-	if err != nil {
-		t.Error(err)
-	}
+	for _, tt := range testTable {
+		vault, err := New(tt.Fingerprint, tt.KeyPath, "", tt.Option, "")
+		if err != nil {
+			t.Error(err)
+		}
 
-	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
-	if err != nil {
-		t.Error(err)
-	}
+		PKCS8, err := vault.PKCS8()
+		if err != nil {
+			t.Error(err)
+		}
 
-	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
-	if err != nil {
-		t.Error(err)
-	}
+		vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
+		if err != nil {
+			t.Error(err)
+		}
 
-	if vault.Password, err = crypto.GenerateNonce(32); err != nil {
-		t.Error(err)
-	}
+		vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
+		if err != nil {
+			t.Error(err)
+		}
 
-	// Skip vault.Create because we don't need/want to interact with an editor
-	in := []byte("The quick brown fox jumps over the lazy dog")
+		if vault.Password, err = crypto.GenerateNonce(32); err != nil {
+			t.Error(err)
+		}
 
-	out, err := aead.Encrypt(vault.Password, in, []byte(vault.Fingerprint))
-	if err != nil {
-		t.Error(err)
-	}
+		// Skip vault.Create because we don't need/want to interact with an editor
+		in := []byte("The quick brown fox jumps over the lazy dog")
 
-	rescueStdout := os.Stdout // keep backup of the real stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
+		out, err := aead.Encrypt(vault.Password, in, []byte(vault.Fingerprint))
+		if err != nil {
+			t.Error(err)
+		}
 
-	if err = vault.Close(out); err != nil {
-		t.Error(err)
-	}
+		rescueStdout := os.Stdout // keep backup of the real stdout
+		r, w, _ := os.Pipe()
+		os.Stdout = w
 
-	w.Close()
-	outStdout, _ := ioutil.ReadAll(r)
-	os.Stdout = rescueStdout
-	tmpfile, err := ioutil.TempFile("", "stdout")
-	if err != nil {
-		t.Error(err)
-	}
-	tmpfile.Write([]byte(outStdout))
-	vault.vault = tmpfile.Name()
+		if err = vault.Close(out); err != nil {
+			t.Error(err)
+		}
 
-	plaintext, err := vault.View()
-	if err != nil {
-		t.Error(err)
-	}
+		w.Close()
+		outStdout, _ := ioutil.ReadAll(r)
+		os.Stdout = rescueStdout
+		tmpfile, err := ioutil.TempFile("", "stdout")
+		if err != nil {
+			t.Error(err)
+		}
+		tmpfile.Write([]byte(outStdout))
+		vault.vault = tmpfile.Name()
 
-	if !bytes.Equal(in, plaintext) {
-		t.Error("in != out")
-	}
-}
+		plaintext, err := vault.View()
+		if err != nil {
+			t.Error(err)
+		}
 
-/*
-func TestVaultFunctionsSTDOUTFingerprintCRprivate(t *testing.T) {
-	dir, err := ioutil.TempDir("", "vault")
-	if err != nil {
-		t.Error(err)
-	}
-	defer os.RemoveAll(dir) // clean up
-
-	vault, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa_extra_linebreak", "", "create", "")
-	if err != nil {
-		t.Error(err)
-	}
-
-	PKCS8, err := vault.PKCS8()
-	if err != nil {
-		t.Error(err)
-	}
-
-	vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
-	if err != nil {
-		t.Error(err)
-	}
-
-	vault.Fingerprint, err = vault.GenFingerprint(PKCS8)
-	if err != nil {
-		t.Error(err)
-	}
-
-	if vault.Password, err = crypto.GenerateNonce(32); err != nil {
-		t.Error(err)
-	}
-
-	// Skip vault.Create because we don't need/want to interact with an editor
-	in := []byte("The quick brown fox jumps over the lazy dog")
-
-	out, err := aead.Encrypt(vault.Password, in, []byte(vault.Fingerprint))
-	if err != nil {
-		t.Error(err)
-	}
-
-	rescueStdout := os.Stdout // keep backup of the real stdout
-	r, w, _ := os.Pipe()
-	os.Stdout = w
-
-	if err = vault.Close(out); err != nil {
-		t.Error(err)
-	}
-
-	w.Close()
-	outStdout, _ := ioutil.ReadAll(r)
-	os.Stdout = rescueStdout
-	tmpfile, err := ioutil.TempFile("", "stdout")
-	if err != nil {
-		t.Error(err)
-	}
-	tmpfile.Write([]byte(outStdout))
-	vault.vault = tmpfile.Name()
-
-	plaintext, err := vault.View()
-	if err != nil {
-		t.Error(err)
-	}
-
-	if !bytes.Equal(in, plaintext) {
-		t.Error("in != out")
+		if !bytes.Equal(in, plaintext) {
+			t.Error("in != out")
+		}
 	}
 }
-*/
+
 func TestVaultNewFingerprint(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))
