@@ -85,6 +85,6 @@ func TestCacheGetFingerprint(t *testing.T) {
 	pubKey, err := ioutil.ReadFile(out)
 	expectedKey := "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDGOhBrPToSBJCblZoK44w3/ub3K6Vx39ilHB/2sJIDqLZTx8I1U2l2RD3WhwKXdqqpH6RZh0piGlWuGV/E7xOseH9qEOKZMgscdvNO9nzD8jkSlShhZQUmhWOqLPcVUDlgIubxrFRVODcFxqgJwjm+qR2X2GaHJottrn5jFhNBEYcjdnuDKXZQ7Cr+K2bOcD+pvhMI7/qtR7jKa7Q5BoRxQEsNQEZvvgJpen2CqAsnjpJXjAXttnXJnAXcyYyOe8ZOCY/tkmXWvn9Fkd1EYmK14rB8WNEe+vraNCS9tSi1PyLMJWr3XNeluLr2/y7gHSyO6xzQNoXiTDDBFW2y3VK5"
 	if string(pubKey) != expectedKey {
-		t.Error("Expecting %q got %q", expectedKey, pubKey)
+		t.Errorf("Expecting %q got %q", expectedKey, pubKey)
 	}
 }
