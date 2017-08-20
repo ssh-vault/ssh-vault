@@ -136,6 +136,7 @@ func TestVaultFunctionsSTDOUTFingerprint(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
+		t.Logf("%x", PKCS8)
 
 		vault.PublicKey, err = vault.GetRSAPublicKey(PKCS8)
 		if err != nil {
