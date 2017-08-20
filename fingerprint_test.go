@@ -177,6 +177,7 @@ func TestVaultFunctionsSTDOUTFingerprint(t *testing.T) {
 	}
 }
 
+/*
 func TestVaultFunctionsSTDOUTFingerprintCRprivate(t *testing.T) {
 	dir, err := ioutil.TempDir("", "vault")
 	if err != nil {
@@ -243,7 +244,7 @@ func TestVaultFunctionsSTDOUTFingerprintCRprivate(t *testing.T) {
 		t.Error("in != out")
 	}
 }
-
+*/
 func TestVaultNewFingerprint(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		expect(t, "ssh-vault", r.Header.Get("User-agent"))

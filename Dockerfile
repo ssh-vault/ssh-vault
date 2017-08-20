@@ -7,6 +7,6 @@ ENV GOPATH /go
 ENV GOROOT /usr/local/go
 ENV PATH /usr/local/go/bin:/go/bin:/usr/local/bin:$PATH
 
-RUN make
+RUN make test
 
-ENTRYPOINT ["/bin/bash"]
+CMD /bin/bash
