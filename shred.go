@@ -16,8 +16,7 @@ func Shred(file string) error {
 		return err
 	}
 
-	var size int64 = fileInfo.Size()
-	zeroBytes := make([]byte, size)
+	zeroBytes := make([]byte, fileInfo.Size())
 
 	// fill out the new slice with 0 value
 	copy(zeroBytes[:], "0")

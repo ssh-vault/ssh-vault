@@ -23,10 +23,10 @@ func exit1(err error) {
 
 func main() {
 	var (
-		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault using the key matching the specified fingerprint")
+		f             = flag.Bool("f", false, "Print ssh key `fingerprint` or create a vault using the key matching the specified fingerprint, example:\n            echo \"secret\" | ssh-vault -u <user> -f 00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff create")
 		k             = flag.String("k", "~/.ssh/id_rsa.pub", "Public `ssh key or index` when using option -u")
-		o             = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view")
-		u             = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use")
+		o             = flag.String("o", "", "Write output to `file` instead of stdout. Only for option view, example:\n            ssh-vault -o /tmp/out.txt view vault.ssh")
+		u             = flag.String("u", "", "GitHub `username or URL`, optional [-k N] where N is the key index to use, example:\n            ssh-vault -u <user> create      # Using first key found in github.com/<user>.keys\n            ssh-vault -u <user> -k 2 create # Using second key")
 		v             = flag.Bool("v", false, fmt.Sprintf("Print version: %s", version))
 		options       = []string{"create", "edit", "view"}
 		rxFingerprint = regexp.MustCompile(`^([0-9a-f]{2}[:-]){15}([0-9a-f]{2})$`)
@@ -37,7 +37,7 @@ func main() {
 	)
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, "Usage: %s [-f fingerprint] [-k key] [-o file] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n",
+		fmt.Fprintf(os.Stderr, "Usage: %s [-f fingerprint] [-k key] [-o file] [-u user] [create|edit|view] vault\n\n%s\n%s\n%s\n%s\n%s\n%s\n%s\n\n%s\n\n",
 			os.Args[0],
 			"  Options:",
 			"    create    Creates a new vault, if no vault defined outputs to stdout.",
@@ -46,6 +46,7 @@ func main() {
 			"    edit      Edit an existing vault.",
 			"    view      View an existing vault, can read from stdin, example:",
 			"                  echo \"SSH-VAULT...\" | ssh-vault view",
+			"    vault     Path off the file where the output will be written, example: vault.ssh",
 		)
 		flag.PrintDefaults()
 	}

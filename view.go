@@ -30,7 +30,7 @@ func (v *vault) View() ([]byte, error) {
 	} else {
 		file, err := os.Open(v.vault)
 		if err != nil {
-			return nil, fmt.Errorf("Missing vault name, use (\"%s -h\") for help.\n", os.Args[0])
+			return nil, fmt.Errorf("missing vault name, use (\"%s -h\") for help", os.Args[0])
 		}
 		defer file.Close()
 		scanner = bufio.NewScanner(file)
@@ -49,13 +49,13 @@ func (v *vault) View() ([]byte, error) {
 
 	// ssh-vault;AES256;fingerprint
 	if len(header) != 3 {
-		return nil, fmt.Errorf("Bad ssh-vault signature, verify the input\n")
+		return nil, fmt.Errorf("bad ssh-vault signature, verify the input")
 	}
 
 	// password, body
 	payload := strings.Split(rawPayload.String(), ";")
 	if len(payload) != 2 {
-		return nil, fmt.Errorf("Bad ssh-vault payload, verify the input\n")
+		return nil, fmt.Errorf("bad ssh-vault payload, verify the input")
 	}
 
 	// use private key only
@@ -76,12 +76,12 @@ func (v *vault) View() ([]byte, error) {
 	if x509.IsEncryptedPEMBlock(block) {
 		keyPassword, err := v.GetPassword()
 		if err != nil {
-			return nil, fmt.Errorf("Unable to get private key password, Decryption failed.")
+			return nil, fmt.Errorf("unable to get private key password, Decryption failed")
 		}
 
 		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
 		if err != nil {
-			return nil, fmt.Errorf("Password incorrect, Decryption failed.")
+			return nil, fmt.Errorf("password incorrect, Decryption failed")
 		}
 	}
 

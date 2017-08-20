@@ -32,7 +32,7 @@ var isURL = regexp.MustCompile(`^https?://`)
 func New(f, k, u, o, v string) (*vault, error) {
 	var (
 		err     error
-		keyPath string = k
+		keyPath = k
 	)
 	cache := Cache()
 	s := Locksmith{GITHUB}
