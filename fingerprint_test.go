@@ -8,11 +8,8 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"strings"
-	"syscall"
 	"testing"
 
-	"github.com/kr/pty"
 	"github.com/ssh-vault/crypto"
 	"github.com/ssh-vault/crypto/aead"
 )
@@ -31,35 +28,6 @@ func TestVaultFunctionsFingerprint(t *testing.T) {
 	vault, err := New("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15", "test_data/id_rsa.pub", "", "create", tmpfile)
 	if err != nil {
 		t.Error(err)
-	}
-
-	keyPw := string("argle-bargle\n")
-	pty, tty, err := pty.Open()
-	if err != nil {
-		t.Errorf("Unable to open pty: %s", err)
-	}
-
-	// File Descriptor magic. GetPasswordPrompt() reads the password
-	// from stdin. For the test, we save stdin to a spare FD,
-	// point stdin at the file, run the system under test, and
-	// finally restore the original stdin
-	oldStdin, _ := syscall.Dup(int(syscall.Stdin))
-	oldStdout, _ := syscall.Dup(int(syscall.Stdout))
-	syscall.Dup2(int(tty.Fd()), int(syscall.Stdin))
-	syscall.Dup2(int(tty.Fd()), int(syscall.Stdout))
-
-	go PtyWriteback(pty, keyPw)
-
-	keyPwTest, err := vault.GetPasswordPrompt()
-
-	syscall.Dup2(oldStdin, int(syscall.Stdin))
-	syscall.Dup2(oldStdout, int(syscall.Stdout))
-
-	if err != nil {
-		t.Error(err)
-	}
-	if string(strings.Trim(keyPw, "\n")) != string(keyPwTest) {
-		t.Errorf("password prompt: expected %s, got %s\n", keyPw, keyPwTest)
 	}
 
 	PKCS8, err := vault.PKCS8()
