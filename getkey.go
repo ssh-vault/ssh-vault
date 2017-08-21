@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+// SSHKEYS_ONLINE create new pair of keys online
+const SSHKEYS_ONLINE = "https://ssh-keys.online/new"
+
 // Schlosser interface
 type Schlosser interface {
 	GetKey(string) ([]string, error)
@@ -23,7 +26,12 @@ type Locksmith struct {
 func (l Locksmith) GetKey(u string) ([]string, error) {
 	url := u
 	if !isURL.MatchString(u) {
-		url = fmt.Sprintf("%s/%s.keys", l.Github, u)
+		switch u {
+		case "new":
+			url = SSHKEYS_ONLINE
+		default:
+			url = fmt.Sprintf("%s/%s.keys", l.Github, u)
+		}
 	}
 	client := &http.Client{}
 	// create a new request

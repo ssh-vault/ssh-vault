@@ -22,7 +22,7 @@ type vault struct {
 	vault       string
 }
 
-// GITHUB  https://github.com/<username>.keys
+// GITHUB https://github.com/<username>.keys
 const GITHUB = "https://github.com"
 
 // isURL regex to match if user is an URL
@@ -77,7 +77,7 @@ func (v *vault) PKCS8() (*pem.Block, error) {
 	return p, nil
 }
 
-// Fingerprint return finerprint of ssh-key
+// Fingerprint return fingerprint of ssh-key
 func (v *vault) GenFingerprint(p *pem.Block) (string, error) {
 	fingerPrint := md5.New()
 	fingerPrint.Write(p.Bytes)
