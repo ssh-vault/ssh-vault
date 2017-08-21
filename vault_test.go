@@ -231,3 +231,27 @@ func TestVaultNewNoKey(t *testing.T) {
 		t.Error("Expecting error")
 	}
 }
+
+func TestVaultNoKey(t *testing.T) {
+	_, err := New("", "/dev/null/none", "", "", "")
+	if err == nil {
+		t.Error("Expecting error")
+	}
+}
+
+func TestExistingVault(t *testing.T) {
+	_, err := New("", "test_data/id_rsa.pub", "", "create", "LICENSE")
+	if err == nil {
+		t.Error("Expecting error")
+	}
+}
+
+func TestPKCS8(t *testing.T) {
+	v := &vault{
+		key: "/dev/null/non-existent",
+	}
+	_, err := v.PKCS8()
+	if err == nil {
+		t.Error("Expecting error")
+	}
+}
