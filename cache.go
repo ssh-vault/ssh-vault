@@ -83,6 +83,11 @@ func (c *cache) Get(s Schlosser, u, f string, k int) (string, error) {
 	return uKey, nil
 }
 
+// GetPrivate return rsa private key
+func (c *cache) GetPrivate(s Schlosser, k string) (string, error) {
+	return "", nil
+}
+
 // IsFile check if string is a file
 func (c *cache) IsFile(path string) bool {
 	f, err := os.Stat(path)

@@ -2,6 +2,7 @@ package sshvault
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
@@ -19,7 +20,7 @@ type Schlosser interface {
 
 // Locksmith implements Schlosser
 type Locksmith struct {
-	Github string
+	URL string
 }
 
 // GetKey fetches ssh-key from url
@@ -30,7 +31,7 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 		case "new":
 			url = SSHKEYS_ONLINE
 		default:
-			url = fmt.Sprintf("%s/%s.keys", l.Github, u)
+			url = fmt.Sprintf("%s/%s.keys", l.URL, u)
 		}
 	}
 	client := &http.Client{}
@@ -45,6 +46,8 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 	reader := bufio.NewReader(res.Body)
 	tp := textproto.NewReader(reader)
 	keys := []string{}
+	rsa := bytes.Buffer{}
+	is_rsa := false
 	for {
 		if line, err := tp.ReadLine(); err != nil {
 			if err == io.EOF {
@@ -56,6 +59,20 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 			return nil, err
 		} else if strings.HasPrefix(line, "ssh-rsa") {
 			keys = append(keys, line)
+		} else if strings.HasPrefix(line, "-----BEGIN RSA PRIVATE KEY-----") {
+			is_rsa = true
+			if _, err := rsa.WriteString(line + "\n"); err != nil {
+				return nil, err
+			}
+		} else if strings.HasPrefix(line, "-----END RSA PRIVATE KEY-----") {
+			if _, err := rsa.WriteString(line); err != nil {
+				return nil, err
+			}
+			return []string{rsa.String()}, nil
+		} else if is_rsa {
+			if _, err := rsa.WriteString(line + "\n"); err != nil {
+				return nil, err
+			}
 		}
 	}
 }
