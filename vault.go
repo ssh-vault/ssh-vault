@@ -50,12 +50,20 @@ func New(f, k, u, o, v string) (*vault, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else if !cache.IsFile(keyPath) {
+	} else if !cache.IsFile(keyPath) && !isURL.MatchString(k) {
 		return nil, fmt.Errorf("SSH key %q not found or unable to read", keyPath)
 	}
-	if o == "create" {
+	switch o {
+	case "create":
 		if v != "" && cache.IsFile(v) {
 			return nil, fmt.Errorf("File already exists: %q", v)
+		}
+	case "view":
+		if isURL.MatchString(k) {
+			keyPath, err = cache.Get(s, k, "", 0)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return &vault{
