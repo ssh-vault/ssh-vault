@@ -50,7 +50,7 @@ func (c *cache) Get(s Schlosser, u, f string, k int) (string, error) {
 	}
 
 	// if key not found, fetch it
-	if !c.IsFile(uKey) {
+	if !c.IsFile(uKey) || u == "new" {
 		keys, err := s.GetKey(u)
 		if err != nil {
 			return "", err
@@ -81,11 +81,6 @@ func (c *cache) Get(s Schlosser, u, f string, k int) (string, error) {
 	}
 
 	return uKey, nil
-}
-
-// GetPrivate return rsa private key
-func (c *cache) GetPrivate(s Schlosser, k string) (string, error) {
-	return "", nil
 }
 
 // IsFile check if string is a file
