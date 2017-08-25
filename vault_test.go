@@ -255,3 +255,14 @@ func TestPKCS8(t *testing.T) {
 		t.Error("Expecting error")
 	}
 }
+
+func TestKeyHTTPNotFound(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		expect(t, "ssh-vault", r.Header.Get("User-agent"))
+	}))
+	defer ts.Close()
+	_, err := New("", ts.URL, "", "view", "")
+	if err == nil {
+		t.Error("Expecting error")
+	}
+}
