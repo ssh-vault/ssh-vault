@@ -17,7 +17,7 @@ import (
 var version string
 
 func exit1(err error) {
-	fmt.Println(err)
+	fmt.Fprintf(os.Stderr, "%s", err)
 	os.Exit(1)
 }
 
