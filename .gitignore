@@ -4,3 +4,4 @@ coverage.*
 .goxc.local.json
 .goxc.json
 build
+vendor
