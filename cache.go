@@ -20,12 +20,21 @@ type cache struct {
 
 // Cache creates ~/.ssh/vault
 func Cache() *cache {
-	usr, _ := user.Current()
-	sv := filepath.Join(usr.HomeDir, ".ssh", "vault", "keys")
-	if _, err := os.Stat(sv); os.IsNotExist(err) {
-		os.MkdirAll(sv, os.ModePerm)
+	d := os.Getenv("SSH_VAULT_CACHE_DIR")
+	if d == "" {
+		home := os.Getenv("HOME")
+		if home == "" {
+			usr, _ := user.Current()
+			home = usr.HomeDir
+		}
+		d = filepath.Join(home, ".ssh", "vault", "keys")
 	}
-	return &cache{sv}
+	if _, err := os.Stat(d); os.IsNotExist(err) {
+		if err := os.MkdirAll(d, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+	}
+	return &cache{d}
 }
 
 // Get return ssh-key
@@ -42,6 +51,7 @@ func (c *cache) Get(s Schlosser, u, f string, k int) (string, error) {
 		uKey string
 		hash string
 	)
+
 	if !isURL.MatchString(u) {
 		uKey = fmt.Sprintf("%s/%s.%d", c.dir, u, k)
 	} else {
