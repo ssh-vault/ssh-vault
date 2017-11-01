@@ -47,7 +47,7 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 	tp := textproto.NewReader(reader)
 	keys := []string{}
 	rsa := bytes.Buffer{}
-	is_rsa := false
+	isRSA := false
 	for {
 		if line, err := tp.ReadLine(); err != nil {
 			if err == io.EOF {
@@ -60,7 +60,7 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 		} else if strings.HasPrefix(line, "ssh-rsa") {
 			keys = append(keys, line)
 		} else if strings.HasPrefix(line, "-----BEGIN RSA PRIVATE KEY-----") {
-			is_rsa = true
+			isRSA = true
 			if _, err := rsa.WriteString(line + "\n"); err != nil {
 				return nil, err
 			}
@@ -69,7 +69,7 @@ func (l Locksmith) GetKey(u string) ([]string, error) {
 				return nil, err
 			}
 			return []string{rsa.String()}, nil
-		} else if is_rsa {
+		} else if isRSA {
 			if _, err := rsa.WriteString(line + "\n"); err != nil {
 				return nil, err
 			}

@@ -38,8 +38,8 @@ func DeleteKeychainPassword(path string) error {
 }
 
 func TestKeychain(t *testing.T) {
-	key_pw := "argle-bargle"
-	key_bad_pw := "totally-bogus\n"
+	keyPw := "argle-bargle"
+	keyBadPw := "totally-bogus\n"
 
 	dir, err := ioutil.TempDir("", "vault")
 	if err != nil {
@@ -53,15 +53,15 @@ func TestKeychain(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	key_path, err := filepath.Abs(vault.key)
+	keyPath, err := filepath.Abs(vault.key)
 	if err != nil {
 		t.Errorf("Error finding private key: %s", err)
 	}
-	err = InjectKeychainPassword(key_path, key_pw)
+	err = InjectKeychainPassword(keyPath, keyPw)
 	if err != nil {
 		t.Errorf("Error setting up keychain for testing: %s", err)
 	}
-	defer DeleteKeychainPassword(key_path) // clean up
+	defer DeleteKeychainPassword(keyPath) // clean up
 
 	pty, tty, err := pty.Open()
 	if err != nil {
@@ -72,27 +72,27 @@ func TestKeychain(t *testing.T) {
 	// from stdin. For the test, we save stdin to a spare FD,
 	// point stdin at the file, run the system under test, and
 	// finally restore the original stdin
-	old_stdin, _ := syscall.Dup(int(syscall.Stdin))
-	old_stdout, _ := syscall.Dup(int(syscall.Stdout))
+	oldStdin, _ := syscall.Dup(int(syscall.Stdin))
+	oldStdout, _ := syscall.Dup(int(syscall.Stdout))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdin))
 	syscall.Dup2(int(tty.Fd()), int(syscall.Stdout))
 
-	go PtyWriteback(pty, key_bad_pw)
+	go PtyWriteback(pty, keyBadPw)
 
-	key_pw_test, err := vault.GetPassword()
+	keyPwTest, err := vault.GetPassword()
 
-	syscall.Dup2(old_stdin, int(syscall.Stdin))
-	syscall.Dup2(old_stdout, int(syscall.Stdout))
+	syscall.Dup2(oldStdin, int(syscall.Stdin))
+	syscall.Dup2(oldStdout, int(syscall.Stdout))
 
 	if err != nil {
 		t.Error(err)
 	}
-	if strings.Trim(string(key_pw_test), "\n") == strings.Trim(key_bad_pw, "\n") {
+	if strings.Trim(string(keyPwTest), "\n") == strings.Trim(keyBadPw, "\n") {
 		t.Errorf("PTY-based password prompt used, not keychain!")
 	}
 
-	if strings.Trim(string(key_pw_test), "\n") != strings.Trim(key_pw, "\n") {
-		t.Errorf("keychain error: %s expected %s, got %s\n", key_path, key_pw, key_pw_test)
+	if strings.Trim(string(keyPwTest), "\n") != strings.Trim(keyPw, "\n") {
+		t.Errorf("keychain error: %s expected %s, got %s\n", keyPath, keyPw, keyPwTest)
 	}
 
 }
