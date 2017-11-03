@@ -1,7 +1,7 @@
 # Contributing to ssh-vault
 
 First and foremost, thank you! We appreciate that you want to contribute to
-ssh-vault, your time is valuable, and your contributions mean a lot to us.
+**ssh-vault**, your time is valuable, and your contributions mean a lot to us.
 
 ## Important!
 
@@ -29,10 +29,10 @@ Please keep in mind that open source software is built by people like you, who
 spend their free time creating things the rest the community can use.
 
 Don't have time to contribute? No worries, here are some other ways to show your
-support for ssh-vault:
+support for **ssh-vault**:
 
 - star the [project](https://github.com/ssh-vault/ssh-vault)
-- tweet your support for ssh-vault
+- tweet your support for **ssh-vault**
 
 ## Issues
 
@@ -54,13 +54,13 @@ Try to follow these guidelines
 
 Please be as descriptive as possible when creating an issue. Give us the information we need to successfully answer your question or address your issue by answering the following in your issue:
 
-- **version**: please note the version of ssh-vault are you using
+- **version**: please note the version of **ssh-vault** are you using
 - **extensions, plugins, helpers, etc** (if applicable): please list any extensions you're using
 - **error messages**: please paste any error messages into the issue, or a [gist](https://gist.github.com/)
 
 ### Closing issues
 
-The original poster or the maintainer's of ssh-vault may close an issue at any time. Typically, but not exclusively, issues are closed when:
+The original poster or the maintainer's of **ssh-vault** may close an issue at any time. Typically, but not exclusively, issues are closed when:
 
 - The issue is resolved
 - The project's maintainers have determined the issue is out of scope
