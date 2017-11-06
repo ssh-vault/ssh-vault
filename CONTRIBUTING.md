@@ -31,7 +31,7 @@ spend their free time creating things the rest the community can use.
 Don't have time to contribute? No worries, here are some other ways to show your
 support for **ssh-vault**:
 
-- star the [project](https://github.com/ssh-vault/ssh-vault)
+- star :star: the [project](https://github.com/ssh-vault/ssh-vault)
 - tweet your support for **ssh-vault**
 
 ## Issues
