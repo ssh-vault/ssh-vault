@@ -4,20 +4,24 @@
 [[projects]]
   name = "github.com/kr/pty"
   packages = ["."]
-  revision = "2c10821df3c3cf905230d078702dfbe9404c9b23"
-  version = "v1.0.0"
+  revision = "282ce0e5322c82529687d609ee670fac7c7d917c"
+  version = "v1.1.1"
 
 [[projects]]
   branch = "master"
   name = "github.com/ssh-vault/crypto"
-  packages = [".","aead","oaep"]
+  packages = [
+    ".",
+    "aead",
+    "oaep"
+  ]
   revision = "ae180e0dba4c4b9516c202881bc333472c39c0d1"
 
 [[projects]]
   branch = "master"
   name = "github.com/ssh-vault/go-keychain"
   packages = ["."]
-  revision = "69c518e5bfff89ad62db81a185634d3aeac3c453"
+  revision = "e39a0e22a1cbdbbcdc24b8556df51019c30df068"
 
 [[projects]]
   branch = "master"
@@ -29,17 +33,20 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "7d9177d70076375b9a59c8fde23d52d9c4a7ecd5"
+  revision = "650f4a345ab4e5b245a3034b110ebc7299e68186"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix","windows"]
-  revision = "062cd7e4e68206d8bab9b18396626e855c992658"
+  packages = [
+    "unix",
+    "windows"
+  ]
+  revision = "37707fdb30a5b38865cfb95e5aab41707daec7fd"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1e29d3309f9cbd4862c8ac0d6dff10a356a80034555a4b7a1d0cd0ef6a056674"
+  inputs-digest = "60125a08d8ad8c8b08969185974452a116b509756dcf1a10ba205162cb8b1d74"
   solver-name = "gps-cdcl"
   solver-version = 1
