@@ -22,6 +22,12 @@ get:
 build: get
 	${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o ${BIN_NAME} cmd/ssh-vault/main.go;
 
+build-linux:
+	for arch in amd64 arm64; do \
+		mkdir -p build/$${arch}; \
+		GOOS=linux GOARCH=$${arch} ${GO} build -ldflags "-s -w -X main.version=${VERSION}" -o build/$${arch}/${BIN_NAME} cmd/ssh-vault/main.go; \
+	done
+
 clean:
 	@rm -rf ssh-vault-* ${BIN_NAME} ${BIN_NAME}.debug *.out build debian
 
@@ -58,3 +64,12 @@ goxc:
 
 bintray:
 	${GO_XC} bintray
+
+docker:
+	docker build -t ssh-vault --build-arg VERSION=${VERSION} .
+
+docker-no-cache:
+	docker build --no-cache -t ssh-vault --build-arg VERSION=${VERSION} .
+
+linux:
+	docker run --entrypoint "/bin/bash" -it --privileged ssh-vault
