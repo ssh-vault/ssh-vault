@@ -73,7 +73,7 @@ func TestGetKeyMultipleKeys(t *testing.T) {
 }
 
 func TestGetKeyRSA(t *testing.T) {
-	var privateKey string = `-----BEGIN RSA PRIVATE KEY-----
+	privateKey := `-----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQC7NrA42dae4ThIwCAx8IB0Cte09rQhdZ+r3T2uMZm0INdgJKhO
 pMg0Wv9VcPKDE+4Aw8N8dL4TqbDN4Lk3fWyGgoMLXahRDmoMKe6o/kFyqHVxlxWe
 7Uhe3BHO9XCyuQu51tGzLADNSnVxDb4hhxd4Xjpb4TT69h5djYOLldYelQIDAQAB
