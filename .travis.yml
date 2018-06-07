@@ -5,7 +5,8 @@ os:
   - osx
 
 go:
-  - 1.9
+  - "1.9"
+  - "1.10"
   - tip
 
 before_install:
