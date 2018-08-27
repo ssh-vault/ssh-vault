@@ -2,51 +2,71 @@
 
 
 [[projects]]
+  digest = "1:094e04c4742b596bce4455eb535d4e4365016b44016db76f8593211406d77299"
   name = "github.com/kr/pty"
   packages = ["."]
-  revision = "282ce0e5322c82529687d609ee670fac7c7d917c"
-  version = "v1.1.1"
+  pruneopts = "UT"
+  revision = "fa756f09eeb418bf1cc6268c66ceaad9bb98f598"
+  version = "v1.1.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:c2f311eb10350c39e5569e0bd9cc20e87be0ed79cf5f62d0d9da9b1e1aafedb5"
   name = "github.com/ssh-vault/crypto"
   packages = [
     ".",
     "aead",
-    "oaep"
+    "oaep",
   ]
+  pruneopts = "UT"
   revision = "ae180e0dba4c4b9516c202881bc333472c39c0d1"
 
 [[projects]]
   branch = "master"
+  digest = "1:623ecae39198545c820dfb09f7ab7f70c1ca4726ae97d387e9c8a7375622fde0"
   name = "github.com/ssh-vault/go-keychain"
   packages = ["."]
-  revision = "70b98e9c8d754db775c5bd3b2de3670cc76f1825"
+  pruneopts = "UT"
+  revision = "15d3657f24fc7e290714ab795239c5bb33b091ea"
 
 [[projects]]
   branch = "master"
+  digest = "1:dbdefc299f402f91292303a78caa108c404320458683e6bf98f34cbd1c5396f3"
   name = "github.com/ssh-vault/ssh2pem"
   packages = ["."]
+  pruneopts = "UT"
   revision = "c1edc64d10c522605f07c563da926f194426c755"
 
 [[projects]]
   branch = "master"
+  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b47b1587369238182299fe4dad77d05b8b461e06"
+  pruneopts = "UT"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
+  digest = "1:0dafafed83f125cdc945a014b2dec15e5b5d8cd2d77a2d1e3763120b08ab381b"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
-  revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
+  pruneopts = "UT"
+  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "60125a08d8ad8c8b08969185974452a116b509756dcf1a10ba205162cb8b1d74"
+  input-imports = [
+    "github.com/kr/pty",
+    "github.com/ssh-vault/crypto",
+    "github.com/ssh-vault/crypto/aead",
+    "github.com/ssh-vault/crypto/oaep",
+    "github.com/ssh-vault/go-keychain",
+    "github.com/ssh-vault/ssh2pem",
+    "golang.org/x/crypto/ssh/terminal",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
