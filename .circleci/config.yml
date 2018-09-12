@@ -8,6 +8,7 @@ workflows:
       - test-1.10
       - test-1.9
       - test-1.8
+      - test-1.7
 jobs:
   test-latest: &test-template
     docker:
@@ -34,3 +35,7 @@ jobs:
     <<: *test-template
     docker:
       - image: circleci/golang:1.8
+  test-1.7:
+    <<: *test-template
+    docker:
+      - image: circleci/golang:1.7
