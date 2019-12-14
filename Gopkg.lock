@@ -2,16 +2,24 @@
 
 
 [[projects]]
-  digest = "1:094e04c4742b596bce4455eb535d4e4365016b44016db76f8593211406d77299"
+  digest = "1:e29335d5a78621ed7a539ed75e10785c3705bb67d916e48b03b1cdf9b727508d"
+  name = "github.com/creack/pty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3a6a957789163cacdfe0e291617a1c8e80612c11"
+  version = "v1.1.9"
+
+[[projects]]
+  digest = "1:3e2fbf3f6d30c4c009be006f9d2a9eaefc804d8f6b991e88cb793b87318cc5bc"
   name = "github.com/kr/pty"
   packages = ["."]
   pruneopts = "UT"
-  revision = "fa756f09eeb418bf1cc6268c66ceaad9bb98f598"
-  version = "v1.1.2"
+  revision = "24b51915630e1d9d3c6adf15a3a96796bbc3cd43"
+  version = "v1.1.8"
 
 [[projects]]
   branch = "master"
-  digest = "1:c2f311eb10350c39e5569e0bd9cc20e87be0ed79cf5f62d0d9da9b1e1aafedb5"
+  digest = "1:4a81ef92d48ee6fadc0f392b881cf5cfc26d20b90cc85eade8118654d3eeab42"
   name = "github.com/ssh-vault/crypto"
   packages = [
     ".",
@@ -19,42 +27,42 @@
     "oaep",
   ]
   pruneopts = "UT"
-  revision = "ae180e0dba4c4b9516c202881bc333472c39c0d1"
+  revision = "3700ed0e38a3a37f0e8b8d78a6838af51313209c"
 
 [[projects]]
   branch = "master"
-  digest = "1:623ecae39198545c820dfb09f7ab7f70c1ca4726ae97d387e9c8a7375622fde0"
+  digest = "1:e0e7407760180ecbb8f9a005164e28e2fb2e3c43643937ce963fe70759c26262"
   name = "github.com/ssh-vault/go-keychain"
   packages = ["."]
   pruneopts = "UT"
-  revision = "15d3657f24fc7e290714ab795239c5bb33b091ea"
+  revision = "ccd67945d59e2e76561507e6d274dfe97905d40e"
 
 [[projects]]
   branch = "master"
-  digest = "1:dbdefc299f402f91292303a78caa108c404320458683e6bf98f34cbd1c5396f3"
+  digest = "1:2cb42a478cb8ca2e87dcee93f0f9a393c3f5c288099239e6ebfc84848acef55f"
   name = "github.com/ssh-vault/ssh2pem"
   packages = ["."]
   pruneopts = "UT"
-  revision = "c1edc64d10c522605f07c563da926f194426c755"
+  revision = "fdda4b3b6332f524efe55629cb61de451fe0b1d8"
 
 [[projects]]
   branch = "master"
-  digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
+  digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
+  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
 
 [[projects]]
   branch = "master"
-  digest = "1:0dafafed83f125cdc945a014b2dec15e5b5d8cd2d77a2d1e3763120b08ab381b"
+  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
+  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
 
 [solve-meta]
   analyzer-name = "dep"
