@@ -1,3 +1,6 @@
+## 0.12.5
+* Updated dependencies, thanks @iwittkau
+
 ## 0.12.4
 
 * Improved lint
