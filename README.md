@@ -33,19 +33,14 @@ For example using $HOME/go for your workspace
 
     $ export GOPATH=$HOME/go
 
-Create the directory:
+Get the code:
 
-    $ mkdir -p $HOME/go/src/github.com/ssh-vault
-
-Clone project into that directory:
-
-    $ git clone git@github.com:ssh-vault/ssh-vault.git $HOME/go/src/github.com/ssh-vault/ssh-vault
+    $ go get github.com/ssh-vault/ssh-vault
 
 Build by just typing make:
 
-    $ cd $HOME/go/src/github.com/ssh-vault/ssh-vault
+    $ cd $GOPATH/src/github.com/ssh-vault/ssh-vault/
     $ make
-
 
 ## Issues
 
