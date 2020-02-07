@@ -6,12 +6,11 @@
 
 encrypt/decrypt using ssh private keys
 
+### Documentation
+
 https://ssh-vault.com
 
-[ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
-
-
-Usage:
+### Usage
 
     $ ssh-vault -h
 
@@ -24,6 +23,18 @@ Example:
 
 ### Mac OS
     brew install ssh-vault
+
+### Binaries
+Binaries and packages for a variety of platforms are published to Bintray: 
+[ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
+
+To download specific version use URL like https://dl.bintray.com/nbari/ssh-vault/ssh-vault_0.12.4_amd64.deb
+
+To download the latest version:
+
+    PACKAGING=amd64.deb
+    LATEST_VERSION=$(curl -w "%{redirect_url}" -o /dev/null -s https://bintray.com/nbari/ssh-vault/ssh-vault/_latestVersion | sed 's|.*/||')
+    curl -L -O "https://dl.bintray.com/nbari/ssh-vault/ssh-vault_${LATEST_VERSION}_${PACKAGING}"
 
 ### Compile from source
 
