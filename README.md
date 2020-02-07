@@ -39,7 +39,7 @@ Get the code:
 
 Build by just typing make:
 
-    $ cd $GOPATH/src/github.com/ssh-vault/ssh-vault/
+    $ cd $GOPATH/src/github.com/ssh-vault/ssh-vault
     $ make
 
 ## Issues
