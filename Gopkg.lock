@@ -31,11 +31,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e0e7407760180ecbb8f9a005164e28e2fb2e3c43643937ce963fe70759c26262"
+  digest = "1:ee89c007cd77c942ef65d9d6541a6bdc55a33fe40e8935d659de469c57e3f4ee"
   name = "github.com/ssh-vault/go-keychain"
   packages = ["."]
   pruneopts = "UT"
-  revision = "ccd67945d59e2e76561507e6d274dfe97905d40e"
+  revision = "f65a47cbe0b120345b64ba52303ebced28b64112"
 
 [[projects]]
   branch = "master"
@@ -47,22 +47,34 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
+  digest = "1:fa45508cb3dd10a5f066fb203d7b99db0034549eee37d400ee719f56f2b4b095"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "blowfish",
+    "chacha20",
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/subtle",
+    "poly1305",
+    "ssh",
+    "ssh/internal/bcrypt_pbkdf",
+    "ssh/terminal",
+  ]
   pruneopts = "UT"
-  revision = "e9b2fee46413994441b28dfca259d911d963dfed"
+  revision = "a0c6ece9d31a0ebfbd3ddf2d290cfb1265ba47c7"
 
 [[projects]]
   branch = "master"
-  digest = "1:472d3f5adc36e1c0b9120bc3830d692a090134aa5461335f39caabd0fdb7feac"
+  digest = "1:82a36a77bd0e9b96345f621e6fe74a83261bb09f1ec3863328420ac5198e7510"
   name = "golang.org/x/sys"
   packages = [
+    "cpu",
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "ac6580df4449443a05718fd7858c1f91ad5f8d20"
+  revision = "d101bd2416d505c0448a6ce8a282482678040a89"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -74,6 +86,7 @@
     "github.com/ssh-vault/crypto/oaep",
     "github.com/ssh-vault/go-keychain",
     "github.com/ssh-vault/ssh2pem",
+    "golang.org/x/crypto/ssh",
     "golang.org/x/crypto/ssh/terminal",
   ]
   solver-name = "gps-cdcl"

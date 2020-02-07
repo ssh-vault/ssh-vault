@@ -3,6 +3,7 @@ package sshvault
 import (
 	"bufio"
 	"bytes"
+	"crypto/rsa"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/ssh-vault/crypto/aead"
 	"github.com/ssh-vault/crypto/oaep"
+	"golang.org/x/crypto/ssh"
 )
 
 // View decrypts data and print it to stdout
@@ -69,9 +71,11 @@ func (v *vault) View() ([]byte, error) {
 	}
 
 	block, _ := pem.Decode(keyFile)
-	if block == nil || block.Type != "RSA PRIVATE KEY" {
+	if block == nil || !strings.HasSuffix(block.Type, "PRIVATE KEY") {
 		return nil, fmt.Errorf("No valid PEM (private key) data found")
 	}
+
+	var privateKey interface{}
 
 	if x509.IsEncryptedPEMBlock(block) {
 		keyPassword, err := v.GetPassword()
@@ -79,15 +83,15 @@ func (v *vault) View() ([]byte, error) {
 			return nil, fmt.Errorf("unable to get private key password, Decryption failed")
 		}
 
-		block.Bytes, err = x509.DecryptPEMBlock(block, keyPassword)
+		privateKey, err = ssh.ParseRawPrivateKeyWithPassphrase(keyFile, keyPassword)
 		if err != nil {
-			return nil, fmt.Errorf("password incorrect, Decryption failed")
+			return nil, fmt.Errorf("could not parse private key: %v", err)
 		}
-	}
-
-	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
+	} else {
+		privateKey, err = ssh.ParseRawPrivateKey(keyFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not parse private key: %v", err)
+		}
 	}
 
 	ciphertext, err := base64.StdEncoding.DecodeString(payload[0])
@@ -95,7 +99,7 @@ func (v *vault) View() ([]byte, error) {
 		return nil, err
 	}
 
-	v.Password, err = oaep.Decrypt(privateKey, ciphertext, []byte(""))
+	v.Password, err = oaep.Decrypt(privateKey.(*rsa.PrivateKey), ciphertext, []byte(""))
 	if err != nil {
 		return nil, fmt.Errorf("Decryption failed, use private key with fingerprint: %s", header[2])
 	}
