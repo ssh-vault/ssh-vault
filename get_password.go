@@ -1,5 +1,3 @@
-// +build !darwin
-
 // For platforms without managed ssh private key passwords,
 // fallback to prompting the user.
 

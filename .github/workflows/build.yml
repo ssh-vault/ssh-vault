@@ -1,0 +1,38 @@
+name: build
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [freebsd, linux, darwin]
+        goarch: ["386", amd64, arm64]
+        exclude:
+          - goarch: "386"
+            goos: darwin
+    steps:
+    - uses: actions/checkout@v2
+    - name: set env
+      run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+    - name: Test
+      run: |
+          echo $RELEASE_VERSION
+          echo ${{ env.RELEASE_VERSION }}
+    #- name: get version
+      #run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
+
+    - uses: actions/checkout@v2
+    - uses: wangyoucao577/go-release-action@v1.17
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        goos: ${{ matrix.goos }}
+        goarch: ${{ matrix.goarch }}
+        project_path: ./cmd/ssh-vault
+        binary_name: ssh-vault
+        ldflags: -s -w -X main.version=${{ env.RELEASE_VERSION }}
