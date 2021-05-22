@@ -1,6 +1,7 @@
 # ssh-vault 🌰
 
-[![Build Status](https://travis-ci.org/ssh-vault/ssh-vault.svg?branch=develop)](https://travis-ci.org/ssh-vault/ssh-vault)
+[![build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
+[![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/ssh-vault/ssh-vault/badge.svg?branch=develop)](https://coveralls.io/github/ssh-vault/ssh-vault?branch=develop)
 [![Go Report Card](https://goreportcard.com/badge/github.com/ssh-vault/ssh-vault)](https://goreportcard.com/report/github.com/ssh-vault/ssh-vault)
 
@@ -25,7 +26,7 @@ Example:
     brew install ssh-vault
 
 ### Binaries
-Binaries and packages for a variety of platforms are published to Bintray: 
+Binaries and packages for a variety of platforms are published to Bintray:
 [ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
 
 To download specific version use URL like https://dl.bintray.com/nbari/ssh-vault/ssh-vault_0.12.4_amd64.deb
