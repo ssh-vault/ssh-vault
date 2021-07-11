@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"crypto/rsa"
-	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
@@ -77,7 +76,8 @@ func (v *vault) View() ([]byte, error) {
 
 	var privateKey interface{}
 
-	if x509.IsEncryptedPEMBlock(block) {
+	privateKey, err = ssh.ParseRawPrivateKey(keyFile)
+	if err, ok := err.(*ssh.PassphraseMissingError); ok {
 		keyPassword, err := v.GetPassword()
 		if err != nil {
 			return nil, fmt.Errorf("unable to get private key password, Decryption failed")
@@ -87,11 +87,8 @@ func (v *vault) View() ([]byte, error) {
 		if err != nil {
 			return nil, fmt.Errorf("could not parse private key: %v", err)
 		}
-	} else {
-		privateKey, err = ssh.ParseRawPrivateKey(keyFile)
-		if err != nil {
-			return nil, fmt.Errorf("could not parse private key: %v", err)
-		}
+	} else if err != nil {
+		return nil, fmt.Errorf("could not parse private key: %v", err)
 	}
 
 	ciphertext, err := base64.StdEncoding.DecodeString(payload[0])
