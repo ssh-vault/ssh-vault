@@ -1,3 +1,6 @@
+## 0.12.8
+* Support encrypted openssh private keys [#50](https://github.com/ssh-vault/ssh-vault/pull/50)
+
 ## 0.12.6
 * Using crypto/ssh to match OpenSSH private key format (openssh-key-v1)
 
