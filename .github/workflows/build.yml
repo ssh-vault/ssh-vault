@@ -28,7 +28,7 @@ jobs:
       #run: echo "GIT_TAG=`echo $(git describe --tags --abbrev=0)`" >> $GITHUB_ENV
 
     - uses: actions/checkout@v2
-    - uses: wangyoucao577/go-release-action@v1.17
+    - uses: wangyoucao577/go-release-action@v1.30
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         goos: ${{ matrix.goos }}
