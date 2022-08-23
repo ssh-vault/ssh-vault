@@ -29,7 +29,7 @@ Example:
 Binaries and packages for a variety of platforms are published to Bintray:
 [ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
 
-To download specific version use URL like https://dl.bintray.com/nbari/ssh-vault/ssh-vault_0.12.4_amd64.deb
+To download a specific version, use URL like https://dl.bintray.com/nbari/ssh-vault/ssh-vault_0.12.4_amd64.deb
 
 To download the latest version:
 
@@ -41,7 +41,7 @@ To download the latest version:
 
 Setup go environment https://golang.org/doc/install
 
-For example using $HOME/go for your workspace
+For example, using $HOME/go for your workspace
 
     $ export GOPATH=$HOME/go
 
