@@ -2,8 +2,6 @@
 
 [![build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
 [![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/ssh-vault/ssh-vault/badge.svg?branch=develop)](https://coveralls.io/github/ssh-vault/ssh-vault?branch=develop)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ssh-vault/ssh-vault)](https://goreportcard.com/report/github.com/ssh-vault/ssh-vault)
 
 encrypt/decrypt using ssh private keys
 
@@ -15,9 +13,46 @@ https://ssh-vault.com
 
     $ ssh-vault -h
 
-Example:
 
-    $ echo "secret" | ssh-vault -u <github.com/user> create
+```txt
+encrypt/decrypt using ssh keys
+
+Usage: ssh-vault [COMMAND]
+
+Commands:
+  create       Create a new vault [aliases: c]
+  edit         Edit an existing vault [aliases: e]
+  fingerprint  Print the fingerprint of a public ssh key [aliases: f]
+  view         View an existing vault [aliases: v]
+  help         Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+
+```
+
+Examples:
+
+
+Create a vault:
+
+
+```sh
+$ echo "secret" | ssh-vault create -u <github.com/user>
+```
+
+View a vault:
+
+```sh
+echo "SSH-VAULT..."| ssh-vault view
+```
+
+Share a secret:
+
+```sh
+$ echo "secret" | ssh-vault create -u new
+```
 
 
 ## Installation
@@ -25,34 +60,9 @@ Example:
 ### Mac OS
     brew install ssh-vault
 
-### Binaries
-Binaries and packages for a variety of platforms are published to Bintray:
-[ ![Download](https://api.bintray.com/packages/nbari/ssh-vault/ssh-vault/images/download.svg) ](https://dl.bintray.com/nbari/ssh-vault/)
+### Using Cargo
 
-To download a specific version, use URL like https://dl.bintray.com/nbari/ssh-vault/ssh-vault_0.12.4_amd64.deb
-
-To download the latest version:
-
-    PACKAGING=amd64.deb
-    LATEST_VERSION=$(curl -w "%{redirect_url}" -o /dev/null -s https://bintray.com/nbari/ssh-vault/ssh-vault/_latestVersion | sed 's|.*/||')
-    curl -L -O "https://dl.bintray.com/nbari/ssh-vault/ssh-vault_${LATEST_VERSION}_${PACKAGING}"
-
-### Compile from source
-
-Setup go environment https://golang.org/doc/install
-
-For example, using $HOME/go for your workspace
-
-    $ export GOPATH=$HOME/go
-
-Get the code:
-
-    $ go get github.com/ssh-vault/ssh-vault
-
-Build by just typing make:
-
-    $ cd $GOPATH/src/github.com/ssh-vault/ssh-vault
-    $ make
+    $ cargo install ssh-vault
 
 ## Issues
 

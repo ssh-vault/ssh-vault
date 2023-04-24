@@ -1,7 +1,3 @@
-ssh-vault
-!*ssh-vault/
-coverage.*
-.goxc.local.json
-.goxc.json
-build
-vendor
+vault.gpg
+/target/
+**/*.rs.bk
