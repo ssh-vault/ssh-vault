@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup | Rust
         uses: ATiltedTree/setup-rust@v1
         with:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup | Rust
         uses: ATiltedTree/setup-rust@v1
         with:
@@ -60,7 +60,7 @@ jobs:
       - compile
     steps:
       - name: Setup | Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Setup | Rust
         uses: ATiltedTree/setup-rust@v1
         with:
