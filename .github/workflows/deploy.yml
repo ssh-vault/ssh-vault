@@ -49,6 +49,10 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Install OpenSSL development package
+        run: |
+          sudo apt -y install libssl-dev
+
       - name: Build
         uses: actions-rs/cargo@v1
         with:
