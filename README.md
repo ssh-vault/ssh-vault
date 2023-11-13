@@ -1,5 +1,6 @@
 # ssh-vault 🌰
 
+[![build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
 [![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
 
 encrypt/decrypt using ssh private keys
