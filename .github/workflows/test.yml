@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - '*'
+      - '!develop'
       - '!master'
       - '!main'
   pull_request:
@@ -18,33 +19,36 @@ on:
       - '*'
 
 jobs:
-  lint:
-    name: Lint
+  format:
+    name: Format
     runs-on: ubuntu-latest
     steps:
-      - name: Setup | Checkout
-        uses: actions/checkout@v4
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-          components: clippy
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Format
+        run: cargo fmt --all -- --check
+
+  lint:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
       - name: Clippy
         run: cargo clippy -- -D clippy::all -D clippy::nursery -D warnings
-      - name: fmt
-        run: cargo fmt --all -- --check
-  compile:
-    name: Compile
+
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
-      - name: Setup | Checkout
-        uses: actions/checkout@v4
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: stable
-      - name: Build | Compile
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Check
         run: cargo check
+
   test:
     name: Test
     strategy:
@@ -57,13 +61,12 @@ jobs:
           - stable
     runs-on: ${{ matrix.os }}
     needs:
-      - compile
+      - format
+      - lint
+      - check
     steps:
-      - name: Setup | Checkout
-        uses: actions/checkout@v4
-      - name: Setup | Rust
-        uses: ATiltedTree/setup-rust@v1
-        with:
-          rust-version: ${{ matrix.rust }}
-      - name: Build | Compile
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: test
         run: cargo test
