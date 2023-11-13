@@ -82,7 +82,7 @@ pub fn handle(action: Action) -> Result<()> {
             } else if helper.is_empty() {
                 println!("{out}");
             } else {
-                let line = "---".repeat(3);
+                let line = "-".repeat(3);
                 println!("Copy and paste this command to share the vault with others:\n\n{line}\n\necho \"{out}\" | ssh-vault view -k {helper}\n\n{line}\n");
             }
         }
