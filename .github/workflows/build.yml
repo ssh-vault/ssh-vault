@@ -1,5 +1,5 @@
 ---
-name: Deploy
+name: Build
 
 on:
   push:
@@ -16,8 +16,8 @@ jobs:
     with:
       branch: main
 
-  build-and-upload:
-    name: Build and upload
+  build:
+    name: Build and release
     runs-on: ${{ matrix.os }}
     needs: test
 

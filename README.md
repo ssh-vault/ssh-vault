@@ -1,6 +1,5 @@
 # ssh-vault 🌰
 
-[![build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
 [![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
 
 encrypt/decrypt using ssh private keys
@@ -8,6 +7,10 @@ encrypt/decrypt using ssh private keys
 ### Documentation
 
 https://ssh-vault.com
+
+> The legacy SSH RSA keys with header `-----BEGIN RSA PRIVATE KEY-----` are not any more supported, convert your key to new format with:
+
+    ssh-keygen -p -f <path/to/your/private.key>
 
 ### Usage
 
