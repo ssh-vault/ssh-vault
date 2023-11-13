@@ -51,9 +51,6 @@ jobs:
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
 
-      - name: ls
-        run: ls -al target/${{ matrix.target }}/release/*
-
       - name: Build archive
         shell: bash
         run: |
