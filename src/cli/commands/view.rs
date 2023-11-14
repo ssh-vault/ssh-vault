@@ -59,4 +59,97 @@ mod tests {
         assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
         assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
     }
+
+    #[test]
+    fn test_subcommand_view_default() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_view());
+
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "view"]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("view")
+            .unwrap()
+            .to_owned();
+
+        assert_eq!(m.get_one::<String>("key"), None);
+        assert_eq!(m.get_one::<String>("vault"), None);
+        assert_eq!(m.get_one::<String>("passphrase"), None);
+        assert_eq!(m.get_one::<String>("output"), None);
+    }
+
+    #[test]
+    fn test_subcommand_view_short() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_view());
+
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "v",
+            "-k",
+            "/path/to/id_rsa",
+            "-p",
+            "secret",
+            "/path/to/vault",
+        ]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("view")
+            .unwrap()
+            .to_owned();
+
+        assert_eq!(m.get_one::<String>("key").unwrap(), "/path/to/id_rsa");
+        assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
+        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
+        assert_eq!(m.get_one::<String>("output"), None);
+    }
+
+    #[test]
+    fn test_subcommand_view_short_default() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_view());
+
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "v"]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("view")
+            .unwrap()
+            .to_owned();
+
+        assert_eq!(m.get_one::<String>("key"), None);
+        assert_eq!(m.get_one::<String>("vault"), None);
+        assert_eq!(m.get_one::<String>("passphrase"), None);
+    }
+
+    #[test]
+    fn test_subcommand_view_output() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_view());
+
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "view",
+            "-k",
+            "/path/to/id_rsa",
+            "-p",
+            "secret",
+            "-o",
+            "/path/to/output",
+            "/path/to/vault",
+        ]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("view")
+            .unwrap()
+            .to_owned();
+
+        assert_eq!(m.get_one::<String>("key").unwrap(), "/path/to/id_rsa");
+        assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
+        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
+        assert_eq!(m.get_one::<String>("output").unwrap(), "/path/to/output");
+    }
 }

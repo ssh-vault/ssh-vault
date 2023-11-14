@@ -43,7 +43,7 @@ pub fn handle(action: Action) -> Result<()> {
 
                 let int_key: Option<u32> = key.as_ref().and_then(|s| s.parse::<u32>().ok());
 
-                // get keys fro GitHub or remote server
+                // get keys from GitHub or remote server
                 let keys = remote::get_keys(&user)?;
 
                 // search key using -k or -f options
@@ -132,4 +132,24 @@ fn print_or_safe(
 fn return_json(vault: String, private_key: Option<String>) -> Result<String> {
     let json = JsonVault { vault, private_key };
     Ok(serde_json::to_string(&json)?)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::actions::Action;
+
+    #[test]
+    // TODO mock stdin reader
+    fn test_create() {
+        let action = Action::Create {
+            fingerprint: None,
+            key: Some("test_data/ed25519.pub-TODO-mock-stdin-reader".to_string()),
+            user: None,
+            vault: None,
+            json: false,
+        };
+        let result = handle(action);
+        assert!(result.is_err());
+    }
 }

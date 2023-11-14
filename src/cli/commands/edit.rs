@@ -23,3 +23,56 @@ pub fn subcommand_edit() -> Command {
                 .help("Path of the vault to edit"),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_subcommand_edit() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_edit());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "edit", "-k", "test"]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn test_subcommand_edit_ok() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_edit());
+        let matches =
+            app.try_get_matches_from(vec!["ssh-vault", "edit", "-k", "test", "/tmp/vault"]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("edit")
+            .unwrap()
+            .to_owned();
+        assert_eq!(m.get_one::<String>("key").unwrap(), "test");
+        assert_eq!(m.get_one::<String>("passphrase").is_none(), true);
+        assert_eq!(m.get_one::<String>("vault").unwrap(), "/tmp/vault");
+    }
+
+    #[test]
+    fn test_subcommand_edit_with_passphrase() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_edit());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "edit",
+            "-k",
+            "test",
+            "-p",
+            "passphrase",
+            "/tmp/vault",
+        ]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("edit")
+            .unwrap()
+            .to_owned();
+        assert_eq!(m.get_one::<String>("key").unwrap(), "test");
+        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "passphrase");
+        assert_eq!(m.get_one::<String>("vault").unwrap(), "/tmp/vault");
+    }
+}

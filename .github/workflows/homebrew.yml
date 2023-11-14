@@ -1,8 +1,10 @@
 ---
+name: Homebrew
+
 on:
-  release:
-    types:
-      - created
+  push:
+    tags:
+      - '*'
   workflow_dispatch:
 
 jobs:

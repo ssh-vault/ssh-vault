@@ -113,4 +113,83 @@ mod tests {
             assert!(!(md5.is_match(test) || sha256.is_match(test)));
         }
     }
+
+    #[test]
+    fn test_subcommand_create_user_new_with_key_and_fingerprint() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "create",
+            "-u",
+            "new",
+            "-k",
+            "3",
+            "-f",
+            "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:13",
+        ]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn test_subcommand_create_with_fingerprint_1() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "create",
+            "-u",
+            "new",
+            "-f",
+            "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:13",
+        ]);
+        assert!(matches.is_ok());
+    }
+
+    #[test]
+    fn test_subcommand_create_with_fingerprint_2() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "create",
+            "-u",
+            "new",
+            "-f",
+            "SHA256:27OFYkCe+dQ2OGAhR8rLjKONUWxPXyu5sTUftcrFAH0",
+        ]);
+        assert!(matches.is_ok());
+    }
+
+    #[test]
+    fn test_subcommand_create_with_bad_fingerprint() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "create",
+            "-u",
+            "new",
+            "-f",
+            "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:1",
+        ]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn test_subcommand_create_new_and_bad_fingerprint() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec![
+            "ssh-vault",
+            "create",
+            "-u",
+            "new",
+            "-f",
+            "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:",
+        ]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn test_subcommand_create_with_key() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_create());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "create", "-u", "new", "-k", "0"]);
+        assert!(matches.is_ok());
+    }
 }

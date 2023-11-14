@@ -29,3 +29,46 @@ pub fn subcommand_fingerprint() -> Command {
                 .value_parser(validator_user()),
         )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validator_user() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_fingerprint());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "new"]);
+        assert!(matches.is_err());
+    }
+
+    #[test]
+    fn test_validator_user_ok() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_fingerprint());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test"]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("fingerprint")
+            .unwrap()
+            .to_owned();
+        assert_eq!(m.get_one::<String>("user").unwrap(), "test");
+        assert_eq!(m.get_one::<String>("key").is_none(), true);
+    }
+
+    #[test]
+    fn test_validator_user_with_key() {
+        let app = Command::new("ssh-vault").subcommand(subcommand_fingerprint());
+        let matches =
+            app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test", "-k", "3"]);
+        assert!(matches.is_ok());
+
+        let m = matches
+            .unwrap()
+            .subcommand_matches("fingerprint")
+            .unwrap()
+            .to_owned();
+        assert_eq!(m.get_one::<String>("user").unwrap(), "test");
+        assert_eq!(m.get_one::<String>("key").unwrap(), "3");
+    }
+}
