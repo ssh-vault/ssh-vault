@@ -3,10 +3,10 @@ use clap::{builder::ValueParser, Arg, Command};
 pub fn validator_user() -> ValueParser {
     ValueParser::from(move |s: &str| -> std::result::Result<String, String> {
         // Don't allow 'new' as a username
-        if s != "new" {
-            Ok(s.to_owned())
-        } else {
+        if s == "new" {
             Err("Invalid user".to_owned())
+        } else {
+            Ok(s.to_owned())
         }
     })
 }

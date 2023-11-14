@@ -1,4 +1,5 @@
 pub mod crypto;
+pub mod dio;
 pub mod find;
 pub mod fingerprint;
 pub mod online;

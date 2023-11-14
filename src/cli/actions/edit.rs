@@ -1,17 +1,8 @@
-use crate::cli::actions::Action;
-use crate::{
-    tools,
-    vault::{crypto, find, parse, ssh::decrypt_private_key, SshVault},
-};
+use crate::cli::actions::{process_input, Action};
+use crate::vault::{crypto, dio, find, parse, ssh::decrypt_private_key, SshVault};
 use anyhow::Result;
 use secrecy::Secret;
-use std::{
-    env, fs,
-    io::{Read, Write},
-    path::PathBuf,
-    process::Command,
-};
-use tempfile::Builder;
+use std::io::{Read, Write};
 
 /// Handle the edit action
 /// # Errors
@@ -23,15 +14,16 @@ pub fn handle(action: Action) -> Result<()> {
             vault,
             passphrase,
         } => {
-            let mut data = String::new();
+            let mut vault_data = String::new();
 
-            // read vault
-            let path = PathBuf::from(vault);
-            let mut file = fs::File::open(&path)?;
-            file.read_to_string(&mut data)?;
+            // set the R/W streams
+            let (mut input, mut output) = dio::setup_io(Some(vault.clone()), Some(vault))?;
 
-            // parse vault
-            let (key_type, fingerprint, password, data) = parse(&data)?;
+            // read the vault content
+            input.read_to_string(&mut vault_data)?;
+
+            // parse the vault
+            let (key_type, fingerprint, password, data) = parse(&vault_data)?;
 
             // find the private_key using the vault header AES256 or CHACHA20-POLY1305
             let mut private_key = find::private_key_type(key, key_type)?;
@@ -44,39 +36,27 @@ pub fn handle(action: Action) -> Result<()> {
             // RSA or ED25519
             let key_type = find::key_type(&private_key.algorithm())?;
 
-            // create vault
+            // initialize the vault
             let vault = SshVault::new(&key_type, None, Some(private_key))?;
 
-            // decrypt vault
-            let data = vault.view(&password, &data, &fingerprint)?;
+            // decrypt the vault
+            let secret = vault.view(&password, &data, &fingerprint)?;
 
-            // write to temp file
-            let file = Builder::new()
-                .prefix(".vault-")
-                .suffix(".ssh")
-                .tempfile_in(tools::get_home()?)?;
+            // store the new encrypted data
+            let mut new_secret = Vec::new();
 
-            // write data to the tempfile
-            file.as_file().write_all(data.as_bytes())?;
-
-            // open the file in the editor
-            let editor = env::var("EDITOR").unwrap_or_else(|_| String::from("vi"));
-
-            let status = Command::new(editor).arg(file.path()).status()?;
-            if !status.success() {
-                return Err(anyhow::anyhow!("Editor exited with non-zero status code",));
-            }
-
-            let data = fs::read(file.path())?;
-
-            let _ = file_shred::shred_file(file.path());
+            // use the EDITOR env var to edit the existing secret
+            process_input(&mut new_secret, Some(Secret::new(secret)))?;
 
             // generate password (32 rand chars)
             let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
-            let out = vault.create(password, &data)?;
-            let mut file = fs::File::create(path)?;
-            file.write_all(out.as_bytes())?;
+            // create vault
+            let out = vault.create(password, &new_secret)?;
+
+            // save the vault
+            output.truncate()?;
+            output.write_all(out.as_bytes())?;
         }
         _ => unreachable!(),
     }

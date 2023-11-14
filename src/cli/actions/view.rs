@@ -1,11 +1,7 @@
 use crate::cli::actions::Action;
-use crate::vault::{find, parse, ssh::decrypt_private_key, SshVault};
-use anyhow::{anyhow, Result};
-use std::{
-    fs::File,
-    io::{Read, Write},
-    path::PathBuf,
-};
+use crate::vault::{dio, find, parse, ssh::decrypt_private_key, SshVault};
+use anyhow::Result;
+use std::io::{Read, Write};
 
 pub fn handle(action: Action) -> Result<()> {
     match action {
@@ -17,18 +13,10 @@ pub fn handle(action: Action) -> Result<()> {
         } => {
             let mut data = String::new();
 
-            // isatty returns false if there's something in stdin.
-            let input_stdin = !atty::is(atty::Stream::Stdin);
+            // setup Reader(input) and Writer (output)
+            let (mut input, mut output) = dio::setup_io(vault, output)?;
 
-            if input_stdin {
-                std::io::stdin().read_to_string(&mut data)?;
-            } else if let Some(vault) = &vault {
-                let path = PathBuf::from(vault);
-                let mut file = File::open(path)?;
-                file.read_to_string(&mut data)?;
-            } else {
-                return Err(anyhow!("No vault provided"));
-            }
+            input.read_to_string(&mut data)?;
 
             // parse vault
             let (key_type, fingerprint, password, data) = parse(&data)?;
@@ -48,13 +36,7 @@ pub fn handle(action: Action) -> Result<()> {
 
             let data = vault.view(&password, &data, &fingerprint)?;
 
-            if let Some(output) = output {
-                let path = PathBuf::from(output);
-                let mut file = File::create(path)?;
-                file.write_all(data.as_bytes())?;
-            } else {
-                print!("{data}");
-            }
+            output.write_all(data.as_bytes())?;
         }
         _ => unreachable!(),
     }

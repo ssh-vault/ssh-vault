@@ -40,8 +40,7 @@ pub fn subcommand_create() -> Command {
             Arg::new("user")
                 .short('u')
                 .long("user")
-                .help("GitHub username or URL, optional [-k N] where N is the key index")
-                .required_if_eq("json", "true"),
+                .help("GitHub username or URL, optional [-k N] where N is the key index"),
         )
         .arg(
             Arg::new("json")
@@ -49,6 +48,13 @@ pub fn subcommand_create() -> Command {
                 .long("json")
                 .help("When using option -u and user 'new', output the vault in JSON format")
                 .number_of_values(0),
+        )
+        .arg(
+            Arg::new("input")
+                .short('i')
+                .long("input")
+                .help("Create a vault form an existing file")
+                .value_name("FILE"),
         )
         .arg(Arg::new("vault").help("file to store the vault or writes to stdout if not specified"))
 }

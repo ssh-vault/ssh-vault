@@ -22,11 +22,12 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
         Some("create") => {
             let sub_m = sub_m("create")?;
             Ok(Action::Create {
+                fingerprint: sub_m.get_one("fingerprint").map(|s: &String| s.to_string()),
+                input: sub_m.get_one("input").map(|s: &String| s.to_string()),
+                json: sub_m.get_one("json").copied().unwrap_or(false),
                 key: sub_m.get_one("key").map(|s: &String| s.to_string()),
                 user: sub_m.get_one("user").map(|s: &String| s.to_string()),
-                fingerprint: sub_m.get_one("fingerprint").map(|s: &String| s.to_string()),
                 vault: sub_m.get_one("vault").map(|s: &String| s.to_string()),
-                json: sub_m.get_one("json").copied().unwrap_or(false),
             })
         }
         Some("view") => {

@@ -1,22 +1,13 @@
-use crate::cli::actions::Action;
-use crate::{
-    tools,
-    vault::{crypto, find, online, remote, SshVault},
-};
+use crate::cli::actions::{process_input, Action};
+use crate::vault::{crypto, dio, find, online, remote, SshVault};
 use anyhow::{anyhow, Result};
 use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use ssh_key::PublicKey;
-use std::{
-    env, fs,
-    io::{Read, Write},
-    path::PathBuf,
-    process::Command,
-};
-use tempfile::Builder;
+use std::io::{Read, Write};
 
 #[derive(Serialize, Deserialize)]
-struct JsonVault {
+pub struct JsonVault {
     vault: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     private_key: Option<String>,
@@ -31,6 +22,7 @@ pub fn handle(action: Action) -> Result<()> {
             user,
             vault,
             json,
+            input,
         } => {
             // print the url from where to download the key
             let mut helper: Option<String> = None;
@@ -65,91 +57,62 @@ pub fn handle(action: Action) -> Result<()> {
 
             let v = SshVault::new(&key_type, Some(ssh_key), None)?;
 
-            let mut data = Vec::new();
+            let mut buffer = Vec::new();
 
-            // isatty returns false if there's something in stdin.
-            let input_stdin = !atty::is(atty::Stream::Stdin);
+            // check if we need to skip the editor filename == "-"
+            let skip_editor = input.as_ref().map_or(false, |stdin| stdin == "-");
 
-            // read from STDIN if there's something
-            if input_stdin {
-                std::io::stdin().read_to_end(&mut data)?;
-            } else {
-                let file = Builder::new()
-                    .prefix(".vault-")
-                    .suffix(".ssh")
-                    .tempfile_in(tools::get_home()?)?;
+            // setup Reader(input) and Writer (output)
+            let (mut input, output) = dio::setup_io(input, vault)?;
 
-                let editor = env::var("EDITOR").unwrap_or_else(|_| String::from("vi"));
-
-                let status = Command::new(editor).arg(file.path()).status()?;
-
-                if !status.success() {
-                    return Err(anyhow::anyhow!("Editor exited with non-zero status code",));
+            if input.is_terminal() {
+                if skip_editor {
+                    input.read_to_end(&mut buffer)?;
+                } else {
+                    // use editor to handle input
+                    process_input(&mut buffer, None)?;
                 }
-
-                data = fs::read(file.path())?;
-                let _ = file_shred::shred_file(file.path());
+            } else {
+                // read from stdin
+                input.read_to_end(&mut buffer)?;
             }
 
             // generate password (32 rand chars)
             let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
             // create vault
-            let out = v.create(password, &data)?;
+            let vault = v.create(password, &buffer)?;
 
-            print_or_safe(out, vault, json, helper)?;
+            // return JSON or plain text, the helper is used to decrypt the vault
+            format(output, vault, json, helper)?;
         }
         _ => unreachable!(),
     }
     Ok(())
 }
 
-/// Print or safe the vault
-fn print_or_safe(
+fn format<W: Write>(
+    mut output: W,
     vault: String,
-    path: Option<String>,
     json: bool,
     helper: Option<String>,
 ) -> Result<()> {
-    let format = if json {
-        return_json(vault, helper)?
-    } else if let Some(helper) = helper {
-        format!("echo \"{vault}\" | ssh-vault view -k {helper}")
-    } else {
-        vault
-    };
-
-    if let Some(path) = path {
-        let vault_path = PathBuf::from(path);
-        let mut file = fs::File::create(vault_path)?;
-        file.write_all(format.as_bytes())?;
-    } else {
-        println!("{format}");
-    }
-    Ok(())
-}
-
-fn return_json(vault: String, private_key: Option<String>) -> Result<String> {
-    let json = JsonVault { vault, private_key };
-    Ok(serde_json::to_string(&json)?)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::cli::actions::Action;
-
-    #[test]
-    // TODO mock stdin reader
-    fn test_create() {
-        let action = Action::Create {
-            fingerprint: None,
-            key: Some("test_data/ed25519.pub-TODO-mock-stdin-reader".to_string()),
-            user: None,
-            vault: None,
-            json: false,
+    // format the vault in json or plain text
+    if json {
+        let json_vault = JsonVault {
+            vault,
+            private_key: helper,
         };
-        let result = handle(action);
-        assert!(result.is_err());
+
+        let json = serde_json::to_string(&json_vault)?;
+
+        output.write_all(json.as_bytes())?;
+    } else if let Some(helper) = helper {
+        let format = format!("echo \"{vault}\" | ssh-vault view -k {helper}");
+        output.write_all(format.as_bytes())?;
+    } else {
+        output.write_all(vault.as_bytes())?;
     }
+
+    Ok(())
 }

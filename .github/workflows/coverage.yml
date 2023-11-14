@@ -1,0 +1,36 @@
+---
+name: Coverage
+
+on:
+  push:
+    branches:
+      - '!develop'
+      - '!main'
+      - '*'
+
+jobs:
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+
+      - name: Run tests
+        run: cargo test --verbose -- --nocapture
+        env:
+          RUST_BACKTRACE: full
+          CARGO_INCREMENTAL: '0'
+          RUSTFLAGS: -Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code
+            -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests
+          RUSTDOCFLAGS: -Zprofile -Ccodegen-units=1 -Cinline-threshold=0 -Clink-dead-code
+            -Coverflow-checks=off -Cpanic=abort -Zpanic_abort_tests
+
+      - name: rust-grcov
+        uses: actions-rs/grcov@v0.1
+
+      - name: Upload to codecov.io
+        uses: codecov/codecov-action@v3
+
+      - name: Coveralls GitHub Action
+        uses: coverallsapp/github-action@v2
