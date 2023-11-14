@@ -47,11 +47,7 @@ pub fn request(url: &str, cache: bool) -> Result<String> {
             }
             Ok(body)
         } else {
-            Err(anyhow!(
-                "Request failed with status {}: {}",
-                res.status(),
-                res.text()?
-            ))
+            Err(anyhow!("Request failed with status: {}", res.status()))
         }
     }
 }
