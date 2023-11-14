@@ -16,6 +16,7 @@ pub enum Action {
         key: Option<String>,
         user: Option<String>,
         vault: Option<String>,
+        json: bool,
     },
     View {
         key: Option<String>,

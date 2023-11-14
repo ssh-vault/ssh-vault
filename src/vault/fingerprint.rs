@@ -188,7 +188,7 @@ mod tests {
     }
 
     #[test]
-    fn test_md5_fingerprint() {
+    fn test_fingerprints() {
         let tests = [
             Test {
                 key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDjjM4JEyg1T8j5YICtqslLNp2UGg80CppTM3ZYu73pEmDhMwbLfdhuI56AQZgWViFsF/7QHDJPcRY2Piu38b4kizTSM0QHEOC7CTo+vnzxptlKLGT1y2mcY1P9VXzCBMSWQN9/vGasgl/sUp1zcTvVT0CjjA6k1dJM6/+aDVtCsFa851VkwbeIsWl5BAHLyL+ur5BX93/BxYnRcYl7ooheuEWWokyWJ0IwEFToPMHAthTbDn1P17wYF43oscTORsFBfkP1JLBKHPDPJCGcBgQButL/srLJf6o44fScAYL99s1dQ/Qqv31aygDmwLdKEDldNnWEaJZ+iidEiIlPtAnLYGnVVA4u+NA2p3egrUrLWmpPjMX6XSb2VRHllzCcY4vZ4F2ud2TFaYG6N+9+vRCdxB+LFcHhm7ottI4vnC5P1bbMagjmFne0+TSKrAfMCw59eiQd8yZVMoE2yPXjFOQt6EOBvB4OHv1AaVt2q0PGqSkv5vIhgsKJWx/6IUj0Kz24hDiMipFb0jL3xstvizAllpC6yF26Ju/nwF03eJJGGxJjrxYd4P5/rY6SWY3yakiUN7pUBgUK2Ok3K3/+BTy5Aag8OXcvOZJumr2X2Wn9DweQeCRjC8UqFDKALqA/3vopZ2S59V4WOg3sV94hEig/KHLISNge1Uatn+qosK2sPw== test",
@@ -198,13 +198,27 @@ mod tests {
                 key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXsxWj7gvLUHbkUDzB6g+DfTdJbIcjH5Ge8ZZcYrTFeZ3hFL/pEfsuDf0Ut87QR0QpTFwM8SHyjKAX1rnF10Y+9ezG3Z4btHFk7SVPW0qqBwoTHFYiRqjgOcQrfQoDAhn9p/h93RCHR6gQPwj5CmDMRmnUcPV9mzjiLyqaqecAjGZj6q6O99Z5/lY2It/fCUcNW0JXBc31SiquvkkYhNjQsQgJxI5KnBMUEdVhk3ItJp8XeDbk2Kq03w0L8XcAqS2BUl4nNF4a5eMgME/tCUjSVYMvqcFIpOUsZhYNE+rt0ElbsMuehdvdLCbb2EBt+n75JgfGOsZCd96JrZiPlq55e0r5uDPz0rVtqnAWQawTtmSwa/VY7GZCf/xB2FvuqoXozWpAgzM7pypVx3JTBZwHx0xe/a0m1RA6+laQ4cCKV6FZWPV8WwUcvvxPknbDsjCeXgVQAxlXMk3pYrcGl61IPv/GaOr1QNPtUFRUuQXfgWh0F5SaU5MeI6HSGvuzooM=",
                 fingerprint: "19:b9:77:30:3f:99:15:b7:53:98:0d:ef:d1:8f:33:58",
             },
+            Test {
+                key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKdb5/i8sIEZ84k+LpJCAxRwxUZsP2MHFWApeB2TSUux ssh-vault",
+                fingerprint: "SHA256:HcSHlMDnxnmeh6dsxdTrqOGUPp8Ei78VaF9t3ED21S8"
+            },
+            Test {
+                key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINixf2m2nj8TDeazbWuemUY8ZHNg7znA7hVPN8TJLr2W",
+                fingerprint: "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM"
+            }
+
         ];
 
         for test in tests.iter() {
+            let mut fingerprint = String::new();
             let public_key = PublicKey::from_openssh(test.key).unwrap();
-            let key_data = public_key.key_data().rsa().unwrap();
-            let rsa_public_key = RsaPublicKey::try_from(key_data).unwrap();
-            let fingerprint = md5_fingerprint(&rsa_public_key).unwrap();
+            if public_key.algorithm().as_str() == "ssh-rsa" {
+                let key_data = public_key.key_data().rsa().unwrap();
+                let rsa_public_key = RsaPublicKey::try_from(key_data).unwrap();
+                fingerprint = md5_fingerprint(&rsa_public_key).unwrap();
+            } else if public_key.algorithm().as_str() == "ssh-ed25519" {
+                fingerprint = public_key.fingerprint(HashAlg::Sha256).to_string();
+            }
             assert_eq!(fingerprint, test.fingerprint);
         }
     }

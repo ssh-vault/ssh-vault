@@ -26,6 +26,7 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
                 user: sub_m.get_one("user").map(|s: &String| s.to_string()),
                 fingerprint: sub_m.get_one("fingerprint").map(|s: &String| s.to_string()),
                 vault: sub_m.get_one("vault").map(|s: &String| s.to_string()),
+                json: sub_m.get_one("json").copied().unwrap_or(false),
             })
         }
         Some("view") => {

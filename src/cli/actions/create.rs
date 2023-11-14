@@ -5,6 +5,7 @@ use crate::{
 };
 use anyhow::Result;
 use secrecy::Secret;
+use serde::{Deserialize, Serialize};
 use ssh_key::PublicKey;
 use std::{
     env, fs,
@@ -14,6 +15,13 @@ use std::{
 };
 use tempfile::Builder;
 
+#[derive(Serialize, Deserialize)]
+struct JsonVault {
+    vault: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    private_key: Option<String>,
+}
+
 /// Handle the create action
 pub fn handle(action: Action) -> Result<()> {
     match action {
@@ -22,6 +30,7 @@ pub fn handle(action: Action) -> Result<()> {
             key,
             user,
             vault,
+            json,
         } => {
             // print the url from where to download the key
             let mut helper = String::new();
@@ -80,13 +89,24 @@ pub fn handle(action: Action) -> Result<()> {
                 let mut file = fs::File::create(path)?;
                 file.write_all(out.as_bytes())?;
             } else if helper.is_empty() {
-                println!("{out}");
+                if json {
+                    return_json(out, None)?;
+                } else {
+                    println!("{out}");
+                }
+            } else if json {
+                return_json(out, Some(helper))?;
             } else {
-                let line = "-".repeat(3);
-                println!("Copy and paste this command to share the vault with others:\n\n{line}\n\necho \"{out}\" | ssh-vault view -k {helper}\n\n{line}\n");
+                println!("echo \"{out}\" | ssh-vault view -k {helper}");
             }
         }
         _ => unreachable!(),
     }
+    Ok(())
+}
+
+fn return_json(vault: String, private_key: Option<String>) -> Result<()> {
+    let json = JsonVault { vault, private_key };
+    println!("{}", serde_json::to_string(&json)?);
     Ok(())
 }
