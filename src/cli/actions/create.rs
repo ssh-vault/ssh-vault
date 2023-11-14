@@ -33,7 +33,7 @@ pub fn handle(action: Action) -> Result<()> {
             json,
         } => {
             // print the url from where to download the key
-            let mut helper = String::new();
+            let mut helper: Option<String> = None;
 
             let ssh_key: PublicKey = if let Some(user) = user {
                 // if user equals "new" ignore the key and fingerprint
@@ -42,11 +42,19 @@ pub fn handle(action: Action) -> Result<()> {
                 }
 
                 let int_key: Option<u32> = key.as_ref().and_then(|s| s.parse::<u32>().ok());
+
+                // get keys fro GitHub or remote server
                 let keys = remote::get_keys(&user)?;
+
+                // search key using -k or -f options
                 let ssh_key = remote::get_user_key(&keys, int_key, fingerprint)?;
 
                 // if user equals "new" then we need to create a new key
-                helper = online::get_private_key_id(&ssh_key, &user)?;
+                if let Ok(key) = online::get_private_key_id(&ssh_key, &user) {
+                    if !key.is_empty() {
+                        helper = Some(key);
+                    }
+                }
 
                 ssh_key
             } else {
@@ -89,29 +97,39 @@ pub fn handle(action: Action) -> Result<()> {
             // create vault
             let out = v.create(password, &data)?;
 
-            if let Some(vault) = vault {
-                let path = PathBuf::from(vault);
-                let mut file = fs::File::create(path)?;
-                file.write_all(out.as_bytes())?;
-            } else if helper.is_empty() {
-                if json {
-                    return_json(out, None)?;
-                } else {
-                    println!("{out}");
-                }
-            } else if json {
-                return_json(out, Some(helper))?;
-            } else {
-                println!("echo \"{out}\" | ssh-vault view -k {helper}");
-            }
+            print_or_safe(out, vault, json, helper)?;
         }
         _ => unreachable!(),
     }
     Ok(())
 }
 
-fn return_json(vault: String, private_key: Option<String>) -> Result<()> {
-    let json = JsonVault { vault, private_key };
-    println!("{}", serde_json::to_string(&json)?);
+/// Print or safe the vault
+fn print_or_safe(
+    vault: String,
+    path: Option<String>,
+    json: bool,
+    helper: Option<String>,
+) -> Result<()> {
+    let format = if json {
+        return_json(vault, helper)?
+    } else if let Some(helper) = helper {
+        format!("echo \"{vault}\" | ssh-vault view -k {helper}")
+    } else {
+        vault
+    };
+
+    if let Some(path) = path {
+        let vault_path = PathBuf::from(path);
+        let mut file = fs::File::create(vault_path)?;
+        file.write_all(format.as_bytes())?;
+    } else {
+        println!("{format}");
+    }
     Ok(())
+}
+
+fn return_json(vault: String, private_key: Option<String>) -> Result<String> {
+    let json = JsonVault { vault, private_key };
+    Ok(serde_json::to_string(&json)?)
 }
