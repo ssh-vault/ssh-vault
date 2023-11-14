@@ -1,9 +1,13 @@
 use anyhow::Result;
 use ssh_vault::cli::{actions, actions::Action, start};
+use std::process;
 
+// Main function
 fn main() -> Result<()> {
+    // Start the program
     let action = start()?;
 
+    // Handle the action
     match action {
         Action::Fingerprint { .. } => {
             actions::fingerprint::handle(action)?;
@@ -21,7 +25,7 @@ fn main() -> Result<()> {
             eprintln!("No command or argument provided, try --help");
 
             // Exit the program with status code 1
-            std::process::exit(1);
+            process::exit(1);
         }
     }
 
