@@ -26,13 +26,15 @@ pub fn subcommand_create() -> Command {
                 .short('f')
                 .long("fingerprint")
                 .help("Create a vault using the key matching the specified fingerprint")
+                .conflicts_with("key")
                 .value_parser(validator_fingerprint()),
         )
         .arg(
             Arg::new("key")
                 .short('k')
                 .long("key")
-                .help("Path to public ssh key or index when using option -u"),
+                .help("Path to public ssh key or index when using option -u")
+                .conflicts_with("fingerprint"),
         )
         .arg(
             Arg::new("user")
@@ -71,6 +73,7 @@ mod tests {
             "SHA256:YbZjcewAY5V78qWv/2fVEgEKTM4jWmJXVU7gonpJtLk",
             "SHA256:rCpb2a1l1vGHvEjsM3HsKm/mIpWmQy/3g0qDTLanpVA",
             "SHA256:Nh0Me49Zh9fDw/VYUfq43IJmI1T+XrjiYONPND8GzaM",
+            "SHA256:O09r+CSX4Ub8S3klaRp86ahCLbBkxhbaXW7v8y/ANCI",
             "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:13",
         ];
         for test in tests.iter() {

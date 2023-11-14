@@ -3,7 +3,7 @@ use crate::{
     tools,
     vault::{crypto, find, online, remote, SshVault},
 };
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use ssh_key::PublicKey;
@@ -36,7 +36,12 @@ pub fn handle(action: Action) -> Result<()> {
             let mut helper = String::new();
 
             let ssh_key: PublicKey = if let Some(user) = user {
-                let int_key: Option<u32> = key.and_then(|s| s.parse::<u32>().ok());
+                // if user equals "new" ignore the key and fingerprint
+                if user == "new" && (key.is_some() || fingerprint.is_some()) {
+                    return Err(anyhow!("Options -k and -f not required when using -u new"));
+                }
+
+                let int_key: Option<u32> = key.as_ref().and_then(|s| s.parse::<u32>().ok());
                 let keys = remote::get_keys(&user)?;
                 let ssh_key = remote::get_user_key(&keys, int_key, fingerprint)?;
 
