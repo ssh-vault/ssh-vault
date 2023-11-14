@@ -2,8 +2,9 @@
 
 [![build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
 [![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/ssh-vault/ssh-vault/graph/badge.svg?token=cWvIQCym2l)](https://codecov.io/gh/ssh-vault/ssh-vault)
 
-encrypt/decrypt using ssh private keys
+encrypt/decrypt using ssh keys
 
 ### Documentation
 
