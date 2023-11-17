@@ -3,16 +3,35 @@ pub mod edit;
 pub mod fingerprint;
 pub mod view;
 
-use clap::Command;
+use clap::{
+    builder::styling::{AnsiColor, Effects, Styles},
+    ColorChoice, Command,
+};
+
 use std::env;
 
 pub fn new(after_help: &str) -> Command {
     let after_help_string = after_help.to_string();
 
+    let styles = Styles::styled()
+        .header(AnsiColor::Yellow.on_default() | Effects::BOLD)
+        .usage(AnsiColor::Green.on_default() | Effects::BOLD)
+        .literal(AnsiColor::Blue.on_default() | Effects::BOLD)
+        .placeholder(AnsiColor::Green.on_default());
+
     Command::new("ssh-vault")
         .about("encrypt/decrypt using ssh keys")
         .version(env!("CARGO_PKG_VERSION"))
+        .help_template(
+            "\
+{before-help}{name} ({version}) - {about-with-newline}
+{usage-heading} {usage}
+
+{all-args}{after-help}",
+        )
         .after_help(after_help_string)
+        .color(ColorChoice::Auto)
+        .styles(styles)
         .subcommand(create::subcommand_create())
         .subcommand(edit::subcommand_edit())
         .subcommand(fingerprint::subcommand_fingerprint())

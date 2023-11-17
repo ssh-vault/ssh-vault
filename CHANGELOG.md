@@ -1,3 +1,7 @@
+## 1.0.5
+* help templates/examples
+* support for .config/ssh-vault/config.yml
+
 ## 1.0.4
 * Added option `--input` to create a vault from an existing file
 

@@ -1,7 +1,9 @@
-use crate::{cache, tools, vault::fingerprint};
+use crate::{cache, config, tools, vault::fingerprint};
 use anyhow::{anyhow, Result};
+use reqwest::header::HeaderMap;
 use rsa::RsaPublicKey;
 use ssh_key::{HashAlg, PublicKey};
+use std::collections::HashMap;
 use url::Url;
 
 const GITHUB_BASE_URL: &str = "https://github.com";
@@ -10,11 +12,20 @@ const SSHKEYS_ONLINE: &str = "https://ssh-keys.online/new";
 // Fetch the ssh keys from GitHub
 pub fn get_keys(user: &str) -> Result<String> {
     let mut cache = true;
+
     let url = if user.starts_with("http://") || user.starts_with("https://") {
         Url::parse(user)?
     } else if user == "new" {
         cache = false;
-        Url::parse(SSHKEYS_ONLINE)?
+
+        // get the config from ~/.config/ssh-vault/config.yml
+        let config = config::get()?;
+
+        Url::parse(
+            &config
+                .get_string("sshkeys_online")
+                .unwrap_or_else(|_| String::from(SSHKEYS_ONLINE)),
+        )?
     } else {
         Url::parse(&format!("{GITHUB_BASE_URL}/{user}.keys"))?
     };
@@ -31,8 +42,13 @@ pub fn request(url: &str, cache: bool) -> Result<String> {
     if let Ok(key) = cache::get(&cache_key) {
         Ok(key)
     } else {
+        // get the headers
+        let headers: HeaderMap = get_headers()?;
+
+        // Create a client
         let client = reqwest::blocking::Client::builder()
             .user_agent("ssh-vault")
+            .default_headers(headers)
             .build()?;
 
         // Make a GET request
@@ -52,6 +68,25 @@ pub fn request(url: &str, cache: bool) -> Result<String> {
     }
 }
 
+// Get the HTTP headers from the config
+fn get_headers() -> Result<HeaderMap> {
+    let mut config_headers: HashMap<String, String> = HashMap::new();
+
+    // get the config from ~/.config/ssh-vault/config.yml
+    let config = config::get()?;
+
+    if let Ok(http_headers) = config.get_table("http_headers") {
+        for (key, value) in &http_headers {
+            config_headers.insert(key.to_string(), value.to_string());
+        }
+    }
+
+    let headers: HeaderMap = (&config_headers).try_into().unwrap_or_default();
+
+    Ok(headers)
+}
+
+// Get the user key from the fetched keys
 pub fn get_user_key(
     keys: &str,
     key: Option<u32>,
