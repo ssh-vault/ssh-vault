@@ -1,3 +1,6 @@
+## 1.0.4
+* Added option `--input` to create a vault from an existing file
+
 ## 1.0.2
 * Added option `--json` when creating a vault
 * easy share using `echo "secret" | ssh-vault c -u new | pbcopy` copy & page to share the secret
