@@ -10,9 +10,7 @@ use clap::{
 
 use std::env;
 
-pub fn new(after_help: &str) -> Command {
-    let after_help_string = after_help.to_string();
-
+pub fn new() -> Command {
     let styles = Styles::styled()
         .header(AnsiColor::Yellow.on_default() | Effects::BOLD)
         .usage(AnsiColor::Green.on_default() | Effects::BOLD)
@@ -21,15 +19,8 @@ pub fn new(after_help: &str) -> Command {
 
     Command::new("ssh-vault")
         .about("encrypt/decrypt using ssh keys")
+        .arg_required_else_help(true)
         .version(env!("CARGO_PKG_VERSION"))
-        .help_template(
-            "\
-{before-help}{name} ({version}) - {about-with-newline}
-{usage-heading} {usage}
-
-{all-args}{after-help}",
-        )
-        .after_help(after_help_string)
         .color(ColorChoice::Auto)
         .styles(styles)
         .subcommand(create::subcommand_create())
@@ -44,8 +35,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        let after_help = "after help";
-        let command = new(after_help);
+        let command = new();
 
         assert_eq!(command.get_name(), "ssh-vault");
         assert_eq!(
@@ -56,6 +46,5 @@ mod tests {
             command.get_version().unwrap().to_string(),
             env!("CARGO_PKG_VERSION")
         );
-        assert_eq!(command.get_after_help().unwrap().to_string(), after_help);
     }
 }

@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.0.5"
+version = "1.0.6"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -37,6 +37,7 @@ serde_json = "1.0"
 sha2 = "0.10.8"
 shell-words = "1.1.0"
 ssh-key = { version = "0.6.2", features = ["ed25519", "rsa", "encryption"] }
+temp-env = "0.3.6"
 tempfile = "3.8.0"
 url = "2.4.1"
 x25519-dalek = { version = "2.0.0", features = ["getrandom", "static_secrets"] }

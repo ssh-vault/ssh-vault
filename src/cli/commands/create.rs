@@ -20,6 +20,23 @@ pub fn validator_fingerprint() -> ValueParser {
 pub fn subcommand_create() -> Command {
     Command::new("create")
         .about("Create a new vault")
+        .after_help(
+            r#"Examples:
+
+Share a secret:
+
+    echo "secret" | ssh-vault create -u new | pbcopy
+
+Share a secret with a known user in GitHub:
+
+    echo "secret" | ssh-vault create -u alice
+
+Share a secret with Alice using its second key:
+
+    echo "secret" | ssh-vault create -u alice -k 2
+
+"#,
+        )
         .visible_alias("c")
         .arg(
             Arg::new("fingerprint")

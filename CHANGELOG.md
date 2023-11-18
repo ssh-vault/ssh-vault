@@ -1,3 +1,8 @@
+## 1.0.6
+* display --help if no arguments are present
+* Check if the path to save the vault is empty (prevent overwriting existing files)
+* show examples only per command help not in main
+
 ## 1.0.5
 * help templates/examples
 * support for .config/ssh-vault/config.yml

@@ -3,6 +3,14 @@ use clap::{Arg, Command};
 pub fn subcommand_view() -> Command {
     Command::new("view")
         .about("View an existing vault")
+        .after_help(
+            r#"Examples:
+
+View a secret:
+
+    ssh-vault view < secret.txt.vault
+"#,
+        )
         .visible_alias("v")
         .arg(
             Arg::new("key")

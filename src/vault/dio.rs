@@ -58,6 +58,14 @@ impl OutputDestination {
             Self::Stdout => Ok(()), // Do nothing for stdout
         }
     }
+
+    // Check if the output is empty, preventing overwriting a non-empty file
+    pub fn is_empty(&self) -> io::Result<bool> {
+        match self {
+            Self::File(file) => Ok(file.metadata().map(|m| m.len() == 0).unwrap_or(false)),
+            Self::Stdout => Ok(true), // Do nothing for stdout
+        }
+    }
 }
 
 impl Write for OutputDestination {
@@ -174,5 +182,21 @@ mod tests {
         let mut buf = [0; 1024];
         let n = output_file.read(&mut buf).unwrap();
         assert_eq!(n, 0);
+    }
+
+    #[test]
+    fn test_output_destination_is_empty() {
+        let output_file = NamedTempFile::new().unwrap();
+        let mut output =
+            OutputDestination::new(Some(output_file.path().to_str().unwrap().to_string())).unwrap();
+        let n = output.write(b"test").unwrap();
+        assert_eq!(n, 4);
+
+        let is_empty = output.is_empty().unwrap();
+        assert!(!is_empty);
+
+        output.truncate().unwrap();
+        let is_empty = output.is_empty().unwrap();
+        assert!(is_empty);
     }
 }

@@ -5,17 +5,6 @@ pub fn get_home() -> Result<PathBuf> {
     home::home_dir().map_or_else(|| Err(anyhow!("Could not find home directory")), Ok)
 }
 
-pub fn get_config() -> Result<()> {
-    let home = get_home()?;
-    let config = home.join(".config").join("ssh-vault");
-
-    if !config.is_dir() {
-        std::fs::create_dir_all(&config)?;
-    }
-
-    Ok(())
-}
-
 pub fn filter_fetched_keys(response: &str) -> Result<String> {
     let mut filtered_keys = String::new();
 

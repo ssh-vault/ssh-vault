@@ -3,6 +3,14 @@ use clap::{Arg, Command};
 pub fn subcommand_edit() -> Command {
     Command::new("edit")
         .about("Edit an existing vault")
+        .after_help(
+            r#"Examples:
+
+Edit a secret:
+
+    ssh-vault edit secret.txt.vault
+"#,
+        )
         .visible_alias("e")
         .arg(
             Arg::new("key")

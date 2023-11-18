@@ -78,7 +78,7 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<Secret<String>>) -> Result<
 
 #[cfg(test)]
 mod tests {
-    use crate::cli::actions::{create, view, Action};
+    use crate::cli::actions::{create, edit, fingerprint, view, Action};
     use serde_json::Value;
     use std::io::Write;
     use tempfile::NamedTempFile;
@@ -91,7 +91,7 @@ mod tests {
     }
 
     #[test]
-    fn test_create_with_input() {
+    fn test_create_view_edit_with_input() {
         let tests =[
             Test {
                 input: "Machs na",
@@ -145,6 +145,47 @@ mod tests {
 
             let output = std::fs::read_to_string(output).unwrap();
             assert_eq!(input, output);
+
+            let edit = Action::Edit {
+                key: Some(test.private_key.to_string()),
+                passphrase: None,
+                vault: vault_file.path().to_str().unwrap().to_string(),
+            };
+
+            // set EDITOR to cat instead of vi
+            temp_env::with_vars([("EDITOR", Some("cat"))], || {
+                let vault_edit = edit::handle(edit);
+                assert!(vault_edit.is_ok());
+            });
+
+            let vault_contents_after_edit = std::fs::read_to_string(&vault_file).unwrap();
+            assert_ne!(vault_contents, vault_contents_after_edit);
+
+            // check if we can still view the vault
+            let output = NamedTempFile::new().unwrap();
+            let view = Action::View {
+                key: Some(test.private_key.to_string()),
+                output: Some(output.path().to_str().unwrap().to_string()),
+                passphrase: None,
+                vault: Some(vault_file.path().to_str().unwrap().to_string()),
+            };
+            let vault_view = view::handle(view);
+            assert!(vault_view.is_ok());
+
+            let output = std::fs::read_to_string(output).unwrap();
+            assert_eq!(input, output);
+
+            // try to create again with the same vault (should fail)
+            let create = Action::Create {
+                fingerprint: None,
+                key: Some(test.public_key.to_string()),
+                user: None,
+                vault: Some(vault_file.path().to_str().unwrap().to_string()),
+                json: false,
+                input: Some(temp_file.path().to_str().unwrap().to_string()),
+            };
+            let vault = create::handle(create);
+            assert!(vault.is_err());
         }
     }
 
@@ -202,5 +243,16 @@ mod tests {
             let output = std::fs::read_to_string(output).unwrap();
             assert_eq!(input, output);
         }
+    }
+
+    #[test]
+    fn test_fingerprint() {
+        let fingerprint = Action::Fingerprint {
+            key: Some("test_data/ed25519.pub".to_string()),
+            user: None,
+        };
+
+        let fingerprint = fingerprint::handle(fingerprint);
+        assert!(fingerprint.is_ok());
     }
 }

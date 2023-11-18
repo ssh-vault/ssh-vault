@@ -17,3 +17,16 @@ pub fn get() -> Result<Config> {
             .build()?),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_get() {
+        temp_env::with_vars([("SSH_VAULT_SSHKEYS_ONLINE", Some("localhost"))], || {
+            let config = get().unwrap();
+            assert_eq!(config.get_string("sshkeys_online").unwrap(), "localhost");
+        });
+    }
+}

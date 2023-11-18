@@ -65,6 +65,10 @@ pub fn handle(action: Action) -> Result<()> {
             // setup Reader(input) and Writer (output)
             let (mut input, output) = dio::setup_io(input, vault)?;
 
+            if !output.is_empty()? {
+                return Err(anyhow!("Vault file already exists"));
+            }
+
             if input.is_terminal() {
                 if skip_editor {
                     input.read_to_end(&mut buffer)?;
