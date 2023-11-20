@@ -8,7 +8,7 @@ pub fn subcommand_edit() -> Command {
 
 Edit a secret:
 
-    ssh-vault edit secret.txt.vault
+    ssh-vault edit /path/to/secret.vault
 ",
         )
         .visible_alias("e")

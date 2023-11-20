@@ -8,7 +8,7 @@ pub fn subcommand_view() -> Command {
 
 View a secret:
 
-    ssh-vault view < secret.txt.vault
+    ssh-vault view < /path/to/secret.vault
 ",
         )
         .visible_alias("v")

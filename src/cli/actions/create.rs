@@ -120,3 +120,56 @@ fn format<W: Write>(
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format() {
+        let mut output = Vec::new();
+        let vault = "vault".to_string();
+        let json = false;
+        let helper = None;
+
+        format(&mut output, vault, json, helper).unwrap();
+
+        assert_eq!(output, b"vault");
+    }
+
+    #[test]
+    fn test_format_helper() {
+        let mut output = Vec::new();
+        let vault = "vault".to_string();
+        let json = false;
+        let helper = Some("helper".to_string());
+
+        format(&mut output, vault, json, helper).unwrap();
+
+        assert_eq!(output, b"echo \"vault\" | ssh-vault view -k helper");
+    }
+
+    #[test]
+    fn test_format_json() {
+        let mut output = Vec::new();
+        let vault = "vault".to_string();
+        let json = true;
+        let helper = None;
+
+        format(&mut output, vault, json, helper).unwrap();
+
+        assert_eq!(output, b"{\"vault\":\"vault\"}");
+    }
+
+    #[test]
+    fn test_format_helper_json() {
+        let mut output = Vec::new();
+        let vault = "vault".to_string();
+        let json = true;
+        let helper = Some("helper".to_string());
+
+        format(&mut output, vault, json, helper).unwrap();
+
+        assert_eq!(output, b"{\"vault\":\"vault\",\"private_key\":\"helper\"}");
+    }
+}

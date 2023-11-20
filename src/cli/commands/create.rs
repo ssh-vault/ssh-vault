@@ -34,7 +34,6 @@ Share a secret with a known user in GitHub:
 Share a secret with Alice using its second key:
 
     echo "secret" | ssh-vault create -u alice -k 2
-
 "#,
         )
         .visible_alias("c")
