@@ -11,6 +11,7 @@ use ssh_key::{
     HashAlg, PrivateKey, PublicKey,
 };
 use x25519_dalek::{EphemeralSecret, PublicKey as X25519PublicKey, StaticSecret};
+use zeroize::Zeroize;
 
 pub struct Ed25519Vault {
     montgomery_key: X25519PublicKey,
@@ -58,7 +59,7 @@ impl Vault for Ed25519Vault {
         }
     }
 
-    fn create(&self, password: Secret<[u8; 32]>, data: &[u8]) -> Result<String> {
+    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
         let crypto = ChaCha20Poly1305Crypto::new(password.clone());
 
         // get the fingerprint of the public key
@@ -86,6 +87,9 @@ impl Vault for Ed25519Vault {
         let crypto = ChaCha20Poly1305Crypto::new(Secret::new(enc_key));
         let encrypted_password =
             crypto.encrypt(password.expose_secret(), fingerprint.as_bytes())?;
+
+        // zeroize data
+        data.zeroize();
 
         // create vault payload
         Ok(format!(

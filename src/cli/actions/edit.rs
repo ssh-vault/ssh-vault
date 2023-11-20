@@ -52,7 +52,7 @@ pub fn handle(action: Action) -> Result<()> {
             let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
             // create vault
-            let out = vault.create(password, &new_secret)?;
+            let out = vault.create(password, &mut new_secret)?;
 
             // save the vault
             output.truncate()?;

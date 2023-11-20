@@ -2,6 +2,7 @@ use crate::cli::actions::Action;
 use crate::vault::{dio, find, parse, ssh::decrypt_private_key, SshVault};
 use anyhow::Result;
 use std::io::{Read, Write};
+use zeroize::Zeroize;
 
 pub fn handle(action: Action) -> Result<()> {
     match action {
@@ -34,9 +35,12 @@ pub fn handle(action: Action) -> Result<()> {
 
             let vault = SshVault::new(&key_type, None, Some(private_key))?;
 
-            let data = vault.view(&password, &data, &fingerprint)?;
+            let mut data = vault.view(&password, &data, &fingerprint)?;
 
             output.write_all(data.as_bytes())?;
+
+            // zeroize the secret
+            data.zeroize();
         }
         _ => unreachable!(),
     }

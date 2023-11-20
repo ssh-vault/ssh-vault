@@ -8,6 +8,7 @@ use rsa::{Oaep, RsaPrivateKey, RsaPublicKey};
 use secrecy::{ExposeSecret, Secret};
 use sha2::Sha256;
 use ssh_key::{private::KeypairData, public::KeyData, PrivateKey, PublicKey};
+use zeroize::Zeroize;
 
 pub struct RsaVault {
     public_key: RsaPublicKey,
@@ -50,7 +51,7 @@ impl Vault for RsaVault {
         }
     }
 
-    fn create(&self, password: Secret<[u8; 32]>, data: &[u8]) -> Result<String> {
+    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
         let crypto = Aes256Crypto::new(password.clone());
 
         let fingerprint = md5_fingerprint(&self.public_key)?;
@@ -73,6 +74,9 @@ impl Vault for RsaVault {
         .map(|chunk| chunk.iter().collect::<String>())
         .collect::<Vec<_>>()
         .join("\n");
+
+        // zeroize data
+        data.zeroize();
 
         Ok(format!("SSH-VAULT;AES256;{fingerprint}\n{payload}"))
     }

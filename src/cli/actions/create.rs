@@ -85,7 +85,7 @@ pub fn handle(action: Action) -> Result<()> {
             let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
             // create vault
-            let vault = v.create(password, &buffer)?;
+            let vault = v.create(password, &mut buffer)?;
 
             // return JSON or plain text, the helper is used to decrypt the vault
             format(output, vault, json, helper)?;

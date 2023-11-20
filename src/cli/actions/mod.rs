@@ -70,8 +70,9 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<Secret<String>>) -> Result<
     // read the file
     tmpfile.read_to_end(buf)?;
 
-    // shred the file
-    let _ = file_shred::shred_file(tmpfile.path());
+    // Fill the file with zeros
+    let zeros = vec![0u8; buf.len()];
+    tmpfile.write_all(&zeros)?;
 
     Ok(buf.len())
 }

@@ -40,7 +40,7 @@ impl SshVault {
         Ok(Self { vault })
     }
 
-    pub fn create(&self, password: Secret<[u8; 32]>, data: &[u8]) -> Result<String> {
+    pub fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
         self.vault.create(password, data)
     }
 
@@ -53,7 +53,7 @@ pub trait Vault {
     fn new(public: Option<PublicKey>, private: Option<PrivateKey>) -> Result<Self>
     where
         Self: Sized;
-    fn create(&self, password: Secret<[u8; 32]>, data: &[u8]) -> Result<String>;
+    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String>;
     fn view(&self, password: &[u8], data: &[u8], fingerprint: &str) -> Result<String>;
 }
 
@@ -87,7 +87,15 @@ mod tests {
 
         let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
-        let vault = vault.create(password, SECRET.as_ref())?;
+        let mut secret = String::from(SECRET).into_bytes();
+
+        // not filled with zeros
+        assert!(secret.iter().all(|&byte| byte != 0));
+
+        let vault = vault.create(password, &mut secret)?;
+
+        // filled with zeros
+        assert!(secret.iter().all(|&byte| byte == 0));
 
         let (_key_type, fingerprint, password, data) = parse(&vault)?;
 
@@ -110,7 +118,15 @@ mod tests {
 
         let password: Secret<[u8; 32]> = crypto::gen_password()?;
 
-        let vault = vault.create(password, SECRET.as_ref())?;
+        let mut secret = String::from(SECRET).into_bytes();
+
+        // not filled with zeros
+        assert!(secret.iter().all(|&byte| byte != 0));
+
+        let vault = vault.create(password, &mut secret)?;
+
+        // filled with zeros
+        assert!(secret.iter().all(|&byte| byte == 0));
 
         let (_key_type, fingerprint, password, data) = parse(&vault)?;
 
@@ -156,7 +172,16 @@ mod tests {
             let key_type = find::key_type(&public_key.algorithm())?;
             let v = SshVault::new(&key_type, Some(public_key), None)?;
             let password: Secret<[u8; 32]> = crypto::gen_password()?;
-            let vault = v.create(password, SECRET.as_ref())?;
+
+            let mut secret = String::from(SECRET).into_bytes();
+
+            // not filled with zeros
+            assert!(secret.iter().all(|&byte| byte != 0));
+
+            let vault = v.create(password, &mut secret)?;
+
+            // filled with zeros
+            assert!(secret.iter().all(|&byte| byte == 0));
 
             // view
             let private_key = test.private_key.to_string();

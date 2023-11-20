@@ -320,4 +320,10 @@ Fin
     fn test_get_user_key_with_key_out_of_range() {
         assert!(get_user_key(KEYS, Some(10), None).is_err());
     }
+
+    #[test]
+    fn test_get_headers() {
+        let headers = get_headers().unwrap();
+        assert!(headers.is_empty());
+    }
 }

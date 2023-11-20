@@ -1,3 +1,7 @@
+## 1.0.7
+* removed atty in favor of [std::io::IsTerminal](https://github.com/ssh-vault/ssh-vault/security/dependabot/7)
+* using Zeroize
+
 ## 1.0.6
 * display --help if no arguments are present
 * Check if the path to save the vault is empty (prevent overwriting existing files)
