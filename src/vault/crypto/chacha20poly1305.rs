@@ -1,4 +1,3 @@
-// use crate::vault::crypto::Crypto;
 use anyhow::{anyhow, Result};
 use chacha20poly1305::{
     aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
