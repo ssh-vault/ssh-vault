@@ -68,6 +68,9 @@ impl Vault for Ed25519Vault {
         // encrypt the data with the password
         let encrypted_data = crypto.encrypt(data, fingerprint.as_bytes())?;
 
+        // zeroize data
+        data.zeroize();
+
         // generate an ephemeral key pair
         let e_secret = EphemeralSecret::random();
         let e_public: X25519PublicKey = (&e_secret).into();
@@ -87,9 +90,6 @@ impl Vault for Ed25519Vault {
         let crypto = ChaCha20Poly1305Crypto::new(Secret::new(enc_key));
         let encrypted_password =
             crypto.encrypt(password.expose_secret(), fingerprint.as_bytes())?;
-
-        // zeroize data
-        data.zeroize();
 
         // create vault payload
         Ok(format!(

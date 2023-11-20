@@ -58,6 +58,9 @@ impl Vault for RsaVault {
 
         let encrypted_data = crypto.encrypt(data, fingerprint.as_bytes())?;
 
+        // zeroize data
+        data.zeroize();
+
         let encrypted_password =
             self.public_key
                 .encrypt(&mut OsRng, Oaep::new::<Sha256>(), password.expose_secret())?;
@@ -74,9 +77,6 @@ impl Vault for RsaVault {
         .map(|chunk| chunk.iter().collect::<String>())
         .collect::<Vec<_>>()
         .join("\n");
-
-        // zeroize data
-        data.zeroize();
 
         Ok(format!("SSH-VAULT;AES256;{fingerprint}\n{payload}"))
     }
