@@ -88,8 +88,8 @@ pqwAZIHYhzss";
         let data = r"SSH-VAULT;AES256;SHA256:ZnlGYSmE8yBioOm+jhTxPAk4JagMu";
         assert!(parse(data).is_err());
     }
-    #[test]
 
+    #[test]
     fn test_parse_no_fingerprint() {
         let data = r"SSH-VAULT;AES256";
         assert!(parse(data).is_err());
