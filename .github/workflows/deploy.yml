@@ -94,3 +94,10 @@ jobs:
       - run: cargo publish --token ${CRATES_TOKEN}
         env:
           CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+
+  package:
+    name: PackageCloud
+    needs:
+      - build
+    uses: ./.github/workflows/packagecloud.yml
+    secrets: inherit

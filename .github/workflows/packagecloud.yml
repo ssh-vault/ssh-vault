@@ -2,21 +2,14 @@
 name: PackageCloud
 
 on:
-  push:
-    tags:
-      - '*'
-  workflow_dispatch:
+  workflow_call:
+    secrets:
+      PACKAGECLOUD_TOKEN:
+        required: true
 
 jobs:
-  test:
-    uses: ./.github/workflows/test.yml
-    with:
-      branch: main
-
   build:
-    name: Package
     runs-on: ubuntu-latest
-    needs: test
     env:
       PACKAGECLOUD_TOKEN: ${{ secrets.PACKAGECLOUD_TOKEN }}
 

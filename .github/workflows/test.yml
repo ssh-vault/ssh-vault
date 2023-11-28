@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Format
@@ -31,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Clippy
@@ -41,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Check
@@ -63,6 +69,8 @@ jobs:
       - check
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - uses: dtolnay/rust-toolchain@stable
 
       - name: test
@@ -71,10 +79,10 @@ jobs:
   coverage:
     name: Coverage
     runs-on: ubuntu-latest
-    needs:
-      - test
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
       - uses: dtolnay/rust-toolchain@nightly
 
       - name: Run tests
