@@ -17,11 +17,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install dependencies
+        run: sudo apt -y install musl-dev musl-tools
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-unknown-linux-musl
 
       - name: Build
-        run: cargo build --release --locked
+        run: cargo build --release --locked --target x86_64-unknown-linux-musl
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -47,11 +52,11 @@ jobs:
 
       - name: create deb
         run: fpm -s dir -t deb -n ssh-vault -v ${{ env.VERSION }} --description "${{ env.DESCRIPTION }}"  -a
-          amd64 -p dist -C target/release/ ./ssh-vault=/usr/local/bin/
+          amd64 -p dist -C target/x86_64-unknown-linux-musl/release/ ./ssh-vault=/usr/local/bin/
 
       - name: create rpm
         run: fpm -s dir -t rpm -n ssh-vault -v ${{ env.VERSION }} --description "${{ env.DESCRIPTION }}"
-          -a x86_64 -p dist -C target/release/ ./ssh-vault=/usr/local/bin/
+          -a x86_64 -p dist -C target/x86_64-unknown-linux-musl/release/ ./ssh-vault=/usr/local/bin/
 
       - name: run ls
         run: ls -al dist
