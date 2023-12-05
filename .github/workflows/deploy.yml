@@ -34,7 +34,7 @@ jobs:
 
           - build: windows
             os: windows-latest
-            target: x86_64-pc-windows-gnu
+            target: x86_64-pc-windows-msvc
 
     steps:
       - name: Checkout
@@ -51,11 +51,11 @@ jobs:
       - run: sudo apt -y install musl-dev musl-tools
         if: matrix.build == 'linux'
 
-      - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV
-          -Append
+      - run: choco install openssl
         if: matrix.build == 'windows'
 
-      - run: vcpkg install openssl:x64-windows-static-md
+      - run: echo 'OPENSSL_DIR=C:\Program Files\OpenSSL-Win64' | Out-File -FilePath
+          $env:GITHUB_ENV -Append
         if: matrix.build == 'windows'
 
       - name: Build
@@ -111,3 +111,17 @@ jobs:
       - build
     uses: ./.github/workflows/packagecloud.yml
     secrets: inherit
+
+  homebrew:
+    name: Bump Homebrew formula
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - name: bump-homebrew-formula
+        uses: mislav/bump-homebrew-formula-action@v3.1
+        with:
+          # A PR will be sent to github.com/Homebrew/homebrew-core to update this formula:
+          formula-name: ssh-vault
+        env:
+          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
