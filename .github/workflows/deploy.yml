@@ -32,7 +32,7 @@ jobs:
             os: macos-latest
             target: x86_64-apple-darwin
 
-          - build: windows-gnu
+          - build: windows
             os: windows-latest
             target: x86_64-pc-windows-gnu
 
@@ -48,9 +48,15 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install dependencies
+      - run: sudo apt -y install musl-dev musl-tools
         if: matrix.build == 'linux'
-        run: sudo apt -y install musl-dev musl-tools
+
+      - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV
+          -Append
+        if: matrix.build == 'windows'
+
+      - run: vcpkg install openssl:x64-windows-static-md
+        if: matrix.build == 'windows'
 
       - name: Build
         run: cargo build --release --locked --target ${{ matrix.target }}
