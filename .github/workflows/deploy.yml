@@ -13,8 +13,6 @@ permissions:
 jobs:
   test:
     uses: ./.github/workflows/test.yml
-    with:
-      branch: main
 
   build:
     name: Build and release
@@ -58,8 +56,15 @@ jobs:
           $env:GITHUB_ENV -Append
         if: matrix.build == 'windows'
 
+      - name: Build Linux
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }} --features "openssl/vendored"
+        if: matrix.build == 'linux'
+
       - name: Build
-        run: cargo build --release --locked --target ${{ matrix.target }}
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }}
+        if: matrix.build != 'linux'
 
       - name: Build archive
         shell: bash

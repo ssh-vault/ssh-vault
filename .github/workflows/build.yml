@@ -1,0 +1,70 @@
+---
+name: Test & Build
+
+on:
+  push:
+    branches:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yml
+
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    needs: test
+
+    strategy:
+      matrix:
+        include:
+          - build: linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+
+          - build: macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+
+          - build: windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Branch name
+        run: echo "${GITHUB_REF##*/}"
+
+      - name: Get the release version from the tag
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - run: sudo apt -y install musl-dev musl-tools
+        if: matrix.build == 'linux'
+
+      - run: choco install openssl
+        if: matrix.build == 'windows'
+
+      - run: echo 'OPENSSL_DIR=C:\Program Files\OpenSSL-Win64' | Out-File -FilePath
+          $env:GITHUB_ENV -Append
+        if: matrix.build == 'windows'
+
+      - name: Build Linux
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }} --features "openssl/vendored"
+        if: matrix.build == 'linux'
+
+      - name: Build
+        run: |
+          cargo build --release --locked --target ${{ matrix.target }}
+        if: matrix.build != 'linux'

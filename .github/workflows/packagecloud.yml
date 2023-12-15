@@ -26,7 +26,8 @@ jobs:
           targets: x86_64-unknown-linux-musl
 
       - name: Build
-        run: cargo build --release --locked --target x86_64-unknown-linux-musl
+        run: cargo build --release --locked --target x86_64-unknown-linux-musl --features
+          "openssl/vendored"
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
