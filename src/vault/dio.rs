@@ -39,6 +39,7 @@ pub enum OutputDestination {
 }
 
 impl OutputDestination {
+    #[allow(clippy::suspicious_open_options)]
     pub fn new(output: Option<String>) -> io::Result<Self> {
         if let Some(filename) = output {
             // Use a file if the filename is not "-" (stdout)
