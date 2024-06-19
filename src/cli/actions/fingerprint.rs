@@ -21,7 +21,7 @@ pub fn handle(action: Action) -> Result<()> {
                     .unwrap_or_default();
 
                 for fingerprint in &fingerprints {
-                    println!("{:width$}", fingerprint, width = max_key_length);
+                    println!("{fingerprint:max_key_length$}");
                 }
             }
             (Some(key), Some(user)) => {
@@ -39,7 +39,7 @@ pub fn handle(action: Action) -> Result<()> {
                             .unwrap_or_default();
 
                         for fingerprint in &fingerprints {
-                            println!("{:width$}", fingerprint, width = max_key_length);
+                            println!("{fingerprint:max_key_length$}");
                         }
                     }
                     Err(_) => {
@@ -57,7 +57,7 @@ pub fn handle(action: Action) -> Result<()> {
                     .unwrap_or_default();
 
                 for fingerprint in &fingerprints {
-                    println!("{:width$}", fingerprint, width = max_key_length);
+                    println!("{fingerprint:max_key_length$}");
                 }
             }
         },

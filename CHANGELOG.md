@@ -1,3 +1,6 @@
+## 1.0.13
+* bump versions, cargo update
+
 ## 1.0.7
 * removed atty in favor of [std::io::IsTerminal](https://github.com/ssh-vault/ssh-vault/security/dependabot/7)
 * using Zeroize

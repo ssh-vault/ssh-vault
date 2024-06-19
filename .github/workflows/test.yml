@@ -80,7 +80,7 @@ jobs:
         uses: actions-rs/grcov@v0.1
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
 
       - name: Coveralls GitHub Action
         uses: coverallsapp/github-action@v2
