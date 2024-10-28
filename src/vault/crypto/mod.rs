@@ -5,21 +5,21 @@ use anyhow::{anyhow, Result};
 use hkdf::Hkdf;
 use rand::{rngs::OsRng, RngCore};
 use rsa::sha2;
-use secrecy::Secret;
+use secrecy::SecretSlice;
 use sha2::Sha256;
 
 // Define a trait for cryptographic algorithms
 pub trait Crypto {
-    fn new(key: Secret<[u8; 32]>) -> Self;
+    fn new(key: SecretSlice<u8>) -> Self;
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>>;
     fn decrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>>;
 }
 
 // Generate a random password
-pub fn gen_password() -> Result<Secret<[u8; 32]>> {
+pub fn gen_password() -> Result<SecretSlice<u8>> {
     let mut password = [0_u8; 32];
     OsRng.fill_bytes(&mut password);
-    Ok(Secret::new(password))
+    Ok(SecretSlice::new(password.into()))
 }
 
 // HMAC key derivation function

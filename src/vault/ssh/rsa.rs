@@ -5,7 +5,7 @@ use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
 use rand::rngs::OsRng;
 use rsa::{Oaep, RsaPrivateKey, RsaPublicKey};
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretSlice};
 use sha2::Sha256;
 use ssh_key::{private::KeypairData, public::KeyData, PrivateKey, PublicKey};
 use zeroize::Zeroize;
@@ -51,7 +51,7 @@ impl Vault for RsaVault {
         }
     }
 
-    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
+    fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String> {
         let crypto = Aes256Crypto::new(password.clone());
 
         let fingerprint = md5_fingerprint(&self.public_key)?;
@@ -90,12 +90,8 @@ impl Vault for RsaVault {
 
         match &self.private_key {
             Some(private_key) => {
-                let password: Secret<[u8; 32]> = Secret::new(
-                    private_key
-                        .decrypt(Oaep::new::<Sha256>(), password)?
-                        .try_into()
-                        .map_err(|_| anyhow::Error::msg("Invalid password"))?,
-                );
+                let password: SecretSlice<u8> =
+                    SecretSlice::new(private_key.decrypt(Oaep::new::<Sha256>(), password)?.into());
 
                 let crypto = Aes256Crypto::new(password);
 

@@ -3,14 +3,14 @@ use aes_gcm::{
     Aes256Gcm,
 };
 use anyhow::{anyhow, Result};
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretSlice};
 
 pub struct Aes256Crypto {
-    key: Secret<[u8; 32]>,
+    key: SecretSlice<u8>,
 }
 
 impl super::Crypto for Aes256Crypto {
-    fn new(key: Secret<[u8; 32]>) -> Self {
+    fn new(key: SecretSlice<u8>) -> Self {
         Self { key }
     }
 
@@ -65,7 +65,7 @@ mod tests {
     fn test_aes256() {
         let mut password = [0_u8; 32];
         OsRng.fill_bytes(&mut password);
-        let key = Secret::new(password);
+        let key = SecretSlice::new(password.into());
 
         let crypto = Aes256Crypto::new(key);
 
@@ -83,7 +83,7 @@ mod tests {
     fn test_aes256_invalid_fingerprint() {
         let mut password = [0_u8; 32];
         OsRng.fill_bytes(&mut password);
-        let key = Secret::new(password);
+        let key = SecretSlice::new(password.into());
 
         let crypto = Aes256Crypto::new(key);
 
@@ -112,7 +112,7 @@ mod tests {
                 assert!(false, "Duplicate key found")
             }
 
-            let key = Secret::new(key_bytes);
+            let key = SecretSlice::new(key_bytes.into());
             let crypto = Aes256Crypto::new(key);
 
             // Generate random data

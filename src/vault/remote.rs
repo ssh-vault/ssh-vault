@@ -90,7 +90,7 @@ fn get_headers() -> Result<HeaderMap> {
 pub fn get_user_key(
     keys: &str,
     key: Option<u32>,
-    fingerprint: Option<String>,
+    fingerprint: &Option<String>,
 ) -> Result<PublicKey> {
     // Get only SSH keys from the fetched keys
     let keys = tools::filter_fetched_keys(keys)?;
@@ -234,7 +234,7 @@ Fin
 
     #[test]
     fn test_get_user_key() {
-        let key = get_user_key(KEYS, Some(1), None).unwrap();
+        let key = get_user_key(KEYS, Some(1), &None).unwrap();
         assert_eq!(
             key.fingerprint(HashAlg::Sha256).to_string(),
             "SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()
@@ -243,7 +243,7 @@ Fin
 
     #[test]
     fn test_get_user_key_3() {
-        let key = get_user_key(KEYS, Some(3), None).unwrap();
+        let key = get_user_key(KEYS, Some(3), &None).unwrap();
         assert_eq!(
             key.fingerprint(HashAlg::Sha256).to_string(),
             "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM".to_string()
@@ -253,17 +253,17 @@ Fin
     #[test]
     fn test_get_user_key_0_1() {
         // key 0 and 1 should be the same
-        let key = get_user_key(KEYS, None, None).unwrap();
+        let key = get_user_key(KEYS, None, &None).unwrap();
         assert_eq!(
             key.fingerprint(HashAlg::Sha256).to_string(),
             "SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()
         );
-        let key = get_user_key(KEYS, Some(0), None).unwrap();
+        let key = get_user_key(KEYS, Some(0), &None).unwrap();
         assert_eq!(
             key.fingerprint(HashAlg::Sha256).to_string(),
             "SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()
         );
-        let key = get_user_key(KEYS, Some(1), None).unwrap();
+        let key = get_user_key(KEYS, Some(1), &None).unwrap();
         assert_eq!(
             key.fingerprint(HashAlg::Sha256).to_string(),
             "SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()
@@ -275,7 +275,7 @@ Fin
         let key = get_user_key(
             KEYS,
             None,
-            Some("SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()),
+            &Some("SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string()),
         )
         .unwrap();
         assert_eq!(
@@ -289,7 +289,7 @@ Fin
         let key = get_user_key(
             KEYS,
             None,
-            Some("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15".to_string()),
+            &Some("55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15".to_string()),
         )
         .unwrap();
         assert_eq!(
@@ -300,7 +300,7 @@ Fin
         let key = get_user_key(
             KEYS,
             None,
-            Some("19:b9:77:30:3f:99:15:b7:53:98:0d:ef:d1:8f:33:58".to_string()),
+            &Some("19:b9:77:30:3f:99:15:b7:53:98:0d:ef:d1:8f:33:58".to_string()),
         )
         .unwrap();
         assert_eq!(
@@ -311,14 +311,14 @@ Fin
 
     #[test]
     fn test_get_user_key_with_empty_keys() {
-        assert!(get_user_key("", Some(10), None).is_err());
-        assert!(get_user_key("", None, None).is_err());
-        assert!(get_user_key("", Some(1), None).is_err());
+        assert!(get_user_key("", Some(10), &None).is_err());
+        assert!(get_user_key("", None, &None).is_err());
+        assert!(get_user_key("", Some(1), &None).is_err());
     }
 
     #[test]
     fn test_get_user_key_with_key_out_of_range() {
-        assert!(get_user_key(KEYS, Some(10), None).is_err());
+        assert!(get_user_key(KEYS, Some(10), &None).is_err());
     }
 
     #[test]

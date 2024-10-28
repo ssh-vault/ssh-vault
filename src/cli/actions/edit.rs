@@ -1,7 +1,7 @@
 use crate::cli::actions::{process_input, Action};
 use crate::vault::{crypto, dio, find, parse, ssh::decrypt_private_key, SshVault};
 use anyhow::Result;
-use secrecy::Secret;
+use secrecy::{SecretSlice, SecretString};
 use std::io::{Read, Write};
 
 /// Handle the edit action
@@ -46,10 +46,10 @@ pub fn handle(action: Action) -> Result<()> {
             let mut new_secret = Vec::new();
 
             // use the EDITOR env var to edit the existing secret
-            process_input(&mut new_secret, Some(Secret::new(secret)))?;
+            process_input(&mut new_secret, Some(SecretString::from(secret)))?;
 
             // generate password (32 rand chars)
-            let password: Secret<[u8; 32]> = crypto::gen_password()?;
+            let password: SecretSlice<u8> = crypto::gen_password()?;
 
             // create vault
             let out = vault.create(password, &mut new_secret)?;

@@ -18,6 +18,7 @@ impl InputSource {
         Ok(Self::Stdin)
     }
 
+    #[must_use]
     pub fn is_terminal(&self) -> bool {
         matches!(self, Self::Stdin) && io::stdin().is_terminal()
     }

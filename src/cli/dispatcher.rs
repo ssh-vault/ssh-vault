@@ -1,7 +1,7 @@
 use crate::cli::actions::Action;
 
 use anyhow::{Context, Result};
-use secrecy::Secret;
+use secrecy::SecretString;
 
 pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
     // Closure to return subcommand matches
@@ -38,7 +38,7 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
                 output: sub_m.get_one("output").map(|s: &String| s.to_string()),
                 passphrase: sub_m
                     .get_one("passphrase")
-                    .map(|s: &String| Secret::new(s.to_string())),
+                    .map(|s: &String| SecretString::from(s.clone())),
             })
         }
         Some("edit") => {
@@ -47,7 +47,7 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
                 key: sub_m.get_one("key").map(|s: &String| s.to_string()),
                 passphrase: sub_m
                     .get_one("passphrase")
-                    .map(|s: &String| Secret::new(s.to_string())),
+                    .map(|s: &String| SecretString::from(s.clone())),
                 vault: sub_m
                     .get_one("vault")
                     .map(|s: &String| s.to_string())

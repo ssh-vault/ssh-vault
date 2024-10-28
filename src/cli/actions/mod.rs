@@ -5,7 +5,7 @@ pub mod view;
 
 use crate::tools;
 use anyhow::{anyhow, Result};
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretString};
 use std::{
     env,
     io::{Read, Seek, SeekFrom, Write},
@@ -30,18 +30,18 @@ pub enum Action {
     View {
         key: Option<String>,
         output: Option<String>,
-        passphrase: Option<Secret<String>>,
+        passphrase: Option<SecretString>,
         vault: Option<String>,
     },
     Edit {
         key: Option<String>,
-        passphrase: Option<Secret<String>>,
+        passphrase: Option<SecretString>,
         vault: String,
     },
     Help,
 }
 
-pub fn process_input(buf: &mut Vec<u8>, data: Option<Secret<String>>) -> Result<usize> {
+pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<usize> {
     let mut tmpfile = Builder::new()
         .prefix(".vault-")
         .suffix(".ssh")

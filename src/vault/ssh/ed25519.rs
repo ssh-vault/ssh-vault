@@ -3,7 +3,7 @@ use crate::vault::{
 };
 use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
-use secrecy::{ExposeSecret, Secret};
+use secrecy::{ExposeSecret, SecretSlice};
 use sha2::{Digest, Sha512};
 use ssh_key::{
     private::{Ed25519PrivateKey, KeypairData},
@@ -59,7 +59,7 @@ impl Vault for Ed25519Vault {
         }
     }
 
-    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
+    fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String> {
         let crypto = ChaCha20Poly1305Crypto::new(password.clone());
 
         // get the fingerprint of the public key
@@ -87,7 +87,7 @@ impl Vault for Ed25519Vault {
         let enc_key = crypto::hkdf(&salt, fingerprint.as_bytes(), shared_secret.as_bytes())?;
 
         // encrypt the password with the derived key
-        let crypto = ChaCha20Poly1305Crypto::new(Secret::new(enc_key));
+        let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
         let encrypted_password =
             crypto.encrypt(password.expose_secret(), fingerprint.as_bytes())?;
 
@@ -145,14 +145,14 @@ impl Vault for Ed25519Vault {
                     crypto::hkdf(&salt, get_fingerprint.as_bytes(), shared_secret.as_bytes())?;
 
                 // use the enc_key to decrypt the password
-                let crypto = ChaCha20Poly1305Crypto::new(Secret::new(enc_key));
+                let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
 
                 let mut p: [u8; 32] = [0; 32];
                 let password = crypto.decrypt(encrypted_password, get_fingerprint.as_bytes())?;
                 p.copy_from_slice(&password[0..32]);
 
                 // decrypt the data with the derived key
-                let crypto = ChaCha20Poly1305Crypto::new(Secret::new(p));
+                let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(p.into()));
 
                 let out = crypto.decrypt(data, get_fingerprint.as_bytes())?;
                 Ok(String::from_utf8(out)?)

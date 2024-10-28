@@ -10,7 +10,7 @@ pub mod parse;
 pub use self::parse::parse;
 
 use anyhow::Result;
-use secrecy::Secret;
+use secrecy::SecretSlice;
 use ssh_key::{PrivateKey, PublicKey};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -40,7 +40,7 @@ impl SshVault {
         Ok(Self { vault })
     }
 
-    pub fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String> {
+    pub fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String> {
         self.vault.create(password, data)
     }
 
@@ -53,7 +53,7 @@ pub trait Vault {
     fn new(public: Option<PublicKey>, private: Option<PrivateKey>) -> Result<Self>
     where
         Self: Sized;
-    fn create(&self, password: Secret<[u8; 32]>, data: &mut [u8]) -> Result<String>;
+    fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String>;
     fn view(&self, password: &[u8], data: &[u8], fingerprint: &str) -> Result<String>;
 }
 
@@ -64,7 +64,7 @@ mod tests {
         crypto, parse, ssh::decrypt_private_key, ssh::ed25519::Ed25519Vault, ssh::rsa::RsaVault,
         Vault,
     };
-    use secrecy::Secret;
+    use secrecy::{SecretSlice, SecretString};
     use ssh_key::PublicKey;
     use std::path::Path;
 
@@ -85,7 +85,7 @@ mod tests {
 
         let vault = RsaVault::new(Some(public_key), None)?;
 
-        let password: Secret<[u8; 32]> = crypto::gen_password()?;
+        let password: SecretSlice<u8> = crypto::gen_password()?;
 
         let mut secret = String::from(SECRET).into_bytes();
 
@@ -116,7 +116,7 @@ mod tests {
 
         let vault = Ed25519Vault::new(Some(public_key), None)?;
 
-        let password: Secret<[u8; 32]> = crypto::gen_password()?;
+        let password: SecretSlice<u8> = crypto::gen_password()?;
 
         let mut secret = String::from(SECRET).into_bytes();
 
@@ -171,7 +171,7 @@ mod tests {
             let public_key = find::public_key(Some(public_key))?;
             let key_type = find::key_type(&public_key.algorithm())?;
             let v = SshVault::new(&key_type, Some(public_key), None)?;
-            let password: Secret<[u8; 32]> = crypto::gen_password()?;
+            let password: SecretSlice<u8> = crypto::gen_password()?;
 
             let mut secret = String::from(SECRET).into_bytes();
 
@@ -189,10 +189,8 @@ mod tests {
             let mut private_key = find::private_key_type(Some(private_key), key_type)?;
 
             if private_key.is_encrypted() {
-                private_key = decrypt_private_key(
-                    &private_key,
-                    Some(Secret::new(test.passphrase.to_string())),
-                )?;
+                private_key =
+                    decrypt_private_key(&private_key, Some(SecretString::from(test.passphrase)))?;
             }
             let key_type = find::key_type(&private_key.algorithm())?;
 

@@ -1,7 +1,7 @@
 use crate::cli::actions::{process_input, Action};
 use crate::vault::{crypto, dio, find, online, remote, SshVault};
 use anyhow::{anyhow, Result};
-use secrecy::Secret;
+use secrecy::SecretSlice;
 use serde::{Deserialize, Serialize};
 use ssh_key::PublicKey;
 use std::io::{Read, Write};
@@ -39,7 +39,7 @@ pub fn handle(action: Action) -> Result<()> {
                 let keys = remote::get_keys(&user)?;
 
                 // search key using -k or -f options
-                let ssh_key = remote::get_user_key(&keys, int_key, fingerprint)?;
+                let ssh_key = remote::get_user_key(&keys, int_key, &fingerprint)?;
 
                 // if user equals "new" then we need to create a new key
                 if let Ok(key) = online::get_private_key_id(&ssh_key, &user) {
@@ -82,7 +82,7 @@ pub fn handle(action: Action) -> Result<()> {
             }
 
             // generate password (32 rand chars)
-            let password: Secret<[u8; 32]> = crypto::gen_password()?;
+            let password: SecretSlice<u8> = crypto::gen_password()?;
 
             // create vault
             let vault = v.create(password, &mut buffer)?;
