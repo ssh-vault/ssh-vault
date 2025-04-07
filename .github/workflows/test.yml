@@ -59,7 +59,3 @@ jobs:
 
       - name: test
         run: cargo test
-
-  coverage:
-    users: ./.github/workflows/coverage.yml
-    secrets: inherit

@@ -14,6 +14,10 @@ jobs:
   test:
     uses: ./.github/workflows/test.yml
 
+  coverage:
+    uses: ./.github/workflows/coverage.yml
+    secrets: inherit
+
   build:
     name: Build
     runs-on: ${{ matrix.os }}

@@ -2,10 +2,10 @@
 name: Coverage
 
 on:
-  push:
-    branches-ignore:
-      - develop
-      - main
+  workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: true
 
 jobs:
   coverage:
