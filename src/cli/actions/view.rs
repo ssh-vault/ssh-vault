@@ -1,5 +1,5 @@
 use crate::cli::actions::Action;
-use crate::vault::{dio, find, parse, ssh::decrypt_private_key, SshVault};
+use crate::vault::{SshVault, dio, find, parse, ssh::decrypt_private_key};
 use anyhow::Result;
 use std::io::{Read, Write};
 use zeroize::Zeroize;

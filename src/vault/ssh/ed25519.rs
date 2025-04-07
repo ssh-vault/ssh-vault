@@ -1,14 +1,14 @@
 use crate::vault::{
-    crypto, crypto::chacha20poly1305::ChaCha20Poly1305Crypto, crypto::Crypto, Vault,
+    Vault, crypto, crypto::Crypto, crypto::chacha20poly1305::ChaCha20Poly1305Crypto,
 };
 use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
 use secrecy::{ExposeSecret, SecretSlice};
 use sha2::{Digest, Sha512};
 use ssh_key::{
+    HashAlg, PrivateKey, PublicKey,
     private::{Ed25519PrivateKey, KeypairData},
     public::KeyData,
-    HashAlg, PrivateKey, PublicKey,
 };
 use x25519_dalek::{EphemeralSecret, PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::Zeroize;

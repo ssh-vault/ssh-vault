@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use base64ct::{Base64, Encoding};
 
 // check if it's a valid SSH-VAULT file and return the data

@@ -1,6 +1,6 @@
 use crate::tools;
 use anyhow::{Context, Result};
-use rsa::{pkcs8::EncodePublicKey, RsaPublicKey};
+use rsa::{RsaPublicKey, pkcs8::EncodePublicKey};
 use ssh_key::{HashAlg, PublicKey};
 use std::{fmt, fs, path::Path};
 
@@ -200,13 +200,12 @@ mod tests {
             },
             Test {
                 key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKdb5/i8sIEZ84k+LpJCAxRwxUZsP2MHFWApeB2TSUux ssh-vault",
-                fingerprint: "SHA256:HcSHlMDnxnmeh6dsxdTrqOGUPp8Ei78VaF9t3ED21S8"
+                fingerprint: "SHA256:HcSHlMDnxnmeh6dsxdTrqOGUPp8Ei78VaF9t3ED21S8",
             },
             Test {
                 key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINixf2m2nj8TDeazbWuemUY8ZHNg7znA7hVPN8TJLr2W",
-                fingerprint: "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM"
-            }
-
+                fingerprint: "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM",
+            },
         ];
 
         for test in tests.iter() {

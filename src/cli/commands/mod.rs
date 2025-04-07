@@ -4,8 +4,8 @@ pub mod fingerprint;
 pub mod view;
 
 use clap::{
-    builder::styling::{AnsiColor, Effects, Styles},
     ColorChoice, Command,
+    builder::styling::{AnsiColor, Effects, Styles},
 };
 
 use std::env;

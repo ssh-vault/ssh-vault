@@ -61,8 +61,8 @@ pub trait Vault {
 mod tests {
     use super::*;
     use crate::vault::{
-        crypto, parse, ssh::decrypt_private_key, ssh::ed25519::Ed25519Vault, ssh::rsa::RsaVault,
-        Vault,
+        Vault, crypto, parse, ssh::decrypt_private_key, ssh::ed25519::Ed25519Vault,
+        ssh::rsa::RsaVault,
     };
     use secrecy::{SecretSlice, SecretString};
     use ssh_key::PublicKey;
@@ -192,9 +192,11 @@ mod tests {
                 private_key =
                     decrypt_private_key(&private_key, Some(SecretString::from(test.passphrase)))?;
             }
+
             let key_type = find::key_type(&private_key.algorithm())?;
 
             let v = SshVault::new(&key_type, None, Some(private_key))?;
+
             let vault = v.view(&password, &data, &fingerprint)?;
 
             assert_eq!(vault, SECRET);

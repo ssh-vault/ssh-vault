@@ -1,8 +1,8 @@
 use aes_gcm::{
-    aead::{generic_array::GenericArray, Aead, AeadCore, KeyInit, OsRng, Payload},
     Aes256Gcm,
+    aead::{Aead, AeadCore, KeyInit, OsRng, Payload, generic_array::GenericArray},
 };
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use secrecy::{ExposeSecret, SecretSlice};
 
 pub struct Aes256Crypto {
@@ -55,7 +55,7 @@ impl super::Crypto for Aes256Crypto {
 mod tests {
     use super::*;
     use crate::vault::crypto::Crypto;
-    use rand::{rngs::OsRng, RngCore};
+    use rand::{RngCore, rngs::OsRng};
     use std::collections::HashSet;
 
     const TEST_DATA: &str = "The quick brown fox jumps over the lazy dog";

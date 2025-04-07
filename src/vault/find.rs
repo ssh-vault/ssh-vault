@@ -1,8 +1,8 @@
 use crate::{
     tools,
-    vault::{remote, SshKeyType},
+    vault::{SshKeyType, remote},
 };
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use ssh_key::{Algorithm, PrivateKey, PublicKey};
 use std::{
     fs::File,
@@ -80,7 +80,9 @@ pub fn private_key(key: Option<String>, ssh_type: &SshKeyType) -> Result<Private
 
     // check if it's a legacy rsa key
     if private_key.starts_with("-----BEGIN RSA PRIVATE KEY-----") {
-        return Err(anyhow!("Legacy RSA key not supported, use ssh-keygen -p -f <key> to convert it to openssh format"));
+        return Err(anyhow!(
+            "Legacy RSA key not supported, use ssh-keygen -p -f <key> to convert it to openssh format"
+        ));
     }
 
     // read openssh key and return it as a PrivateKey

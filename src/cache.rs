@@ -1,5 +1,5 @@
 use crate::tools::get_home;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use std::{
     fs,
     path::{Path, PathBuf},

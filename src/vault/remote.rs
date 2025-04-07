@@ -1,5 +1,5 @@
 use crate::{cache, config, tools, vault::fingerprint};
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use reqwest::header::HeaderMap;
 use rsa::RsaPublicKey;
 use ssh_key::{HashAlg, PublicKey};
@@ -135,8 +135,8 @@ pub fn get_user_key(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::vault::fingerprint::get_remote_fingerprints;
     use crate::vault::fingerprint::Fingerprint;
+    use crate::vault::fingerprint::get_remote_fingerprints;
 
     const KEYS: &str = "
 # random comment
@@ -176,13 +176,17 @@ Fin
             },
             Fingerprint {
                 key: "ID: 3".to_string(),
-                fingerprints: vec!["SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM".to_string()],
+                fingerprints: vec![
+                    "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM".to_string(),
+                ],
                 comment: "".to_string(),
                 algorithm: "ssh-ed25519".to_string(),
             },
             Fingerprint {
                 key: "ID: 4".to_string(),
-                fingerprints: vec!["SHA256:HcSHlMDnxnmeh6dsxdTrqOGUPp8Ei78VaF9t3ED21S8".to_string()],
+                fingerprints: vec![
+                    "SHA256:HcSHlMDnxnmeh6dsxdTrqOGUPp8Ei78VaF9t3ED21S8".to_string(),
+                ],
                 comment: "ssh-vault".to_string(),
                 algorithm: "ssh-ed25519".to_string(),
             },

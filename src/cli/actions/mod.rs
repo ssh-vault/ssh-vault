@@ -4,7 +4,7 @@ pub mod fingerprint;
 pub mod view;
 
 use crate::tools;
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use secrecy::{ExposeSecret, SecretString};
 use std::{
     env,
@@ -79,7 +79,7 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<us
 
 #[cfg(test)]
 mod tests {
-    use crate::cli::actions::{create, edit, fingerprint, view, Action};
+    use crate::cli::actions::{Action, create, edit, fingerprint, view};
     use serde_json::Value;
     use std::io::Write;
     use tempfile::NamedTempFile;
@@ -93,24 +93,24 @@ mod tests {
 
     #[test]
     fn test_create_view_edit_with_input() {
-        let tests =[
+        let tests = [
             Test {
                 input: "Machs na",
                 public_key: "test_data/ed25519.pub",
                 private_key: "test_data/ed25519",
-                header: "SSH-VAULT;CHACHA20-POLY1305"
+                header: "SSH-VAULT;CHACHA20-POLY1305",
             },
             Test {
                 input: "Machs na",
                 public_key: "test_data/id_rsa.pub",
                 private_key: "test_data/id_rsa",
-                header: "SSH-VAULT;AES256"
+                header: "SSH-VAULT;AES256",
             },
             Test {
                 input: "Arrachera is a Mexican dish made from marinated and grilled skirt steak. The steak is seasoned with a mixture of spices and marinades, giving it a rich and savory flavor. Commonly served in tacos or fajitas, arrachera is known for its tenderness and versatility in Mexican cuisine",
                 public_key: "test_data/ed25519.pub",
                 private_key: "test_data/ed25519",
-                header: "SSH-VAULT;CHACHA20-POLY1305"
+                header: "SSH-VAULT;CHACHA20-POLY1305",
             },
         ];
 

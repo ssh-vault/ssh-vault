@@ -1,7 +1,7 @@
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use chacha20poly1305::{
-    aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
     ChaCha20Poly1305,
+    aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
 };
 use secrecy::{ExposeSecret, SecretSlice};
 
@@ -56,7 +56,7 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
 mod tests {
     use super::*;
     use crate::vault::crypto::Crypto;
-    use rand::{rngs::OsRng, RngCore};
+    use rand::{RngCore, rngs::OsRng};
     use std::collections::HashSet;
 
     const TEST_DATA: &str = "The quick brown fox jumps over the lazy dog";

@@ -1,4 +1,4 @@
-use clap::{builder::ValueParser, Arg, Command};
+use clap::{Arg, Command, builder::ValueParser};
 
 pub fn validator_user() -> ValueParser {
     ValueParser::from(move |s: &str| -> std::result::Result<String, String> {

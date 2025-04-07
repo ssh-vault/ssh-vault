@@ -1,3 +1,9 @@
+# Changelog
+
+## 1.1.0
+* using `rsa::RsaPrivatekey::from_components` to create the private key from `ssh_key::PrivateKey::read_openssh_file`
+* edition 2024
+
 ## 1.0.13
 * bump versions, cargo update
 

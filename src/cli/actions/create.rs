@@ -1,6 +1,6 @@
-use crate::cli::actions::{process_input, Action};
-use crate::vault::{crypto, dio, find, online, remote, SshVault};
-use anyhow::{anyhow, Result};
+use crate::cli::actions::{Action, process_input};
+use crate::vault::{SshVault, crypto, dio, find, online, remote};
+use anyhow::{Result, anyhow};
 use secrecy::SecretSlice;
 use serde::{Deserialize, Serialize};
 use ssh_key::PublicKey;
@@ -60,7 +60,7 @@ pub fn handle(action: Action) -> Result<()> {
             let mut buffer = Vec::new();
 
             // check if we need to skip the editor filename == "-"
-            let skip_editor = input.as_ref().map_or(false, |stdin| stdin == "-");
+            let skip_editor = input.as_ref().is_some_and(|stdin| stdin == "-");
 
             // setup Reader(input) and Writer (output)
             let (mut input, output) = dio::setup_io(input, vault)?;

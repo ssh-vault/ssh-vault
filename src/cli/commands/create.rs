@@ -1,4 +1,4 @@
-use clap::{builder::ValueParser, Arg, Command};
+use clap::{Arg, Command, builder::ValueParser};
 use regex::Regex;
 
 const REGEX_MD5_FINGERPRINT: &str = r"^([0-9a-f]{2}:){15}([0-9a-f]{2})$";

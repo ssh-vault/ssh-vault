@@ -1,5 +1,5 @@
-use crate::cli::actions::{process_input, Action};
-use crate::vault::{crypto, dio, find, parse, ssh::decrypt_private_key, SshVault};
+use crate::cli::actions::{Action, process_input};
+use crate::vault::{SshVault, crypto, dio, find, parse, ssh::decrypt_private_key};
 use anyhow::Result;
 use secrecy::{SecretSlice, SecretString};
 use std::io::{Read, Write};
