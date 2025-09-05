@@ -124,7 +124,7 @@ jobs:
       - build
     steps:
       - name: bump-homebrew-formula
-        uses: mislav/bump-homebrew-formula-action@v3.1
+        uses: mislav/bump-homebrew-formula-action@v3
         with:
           # A PR will be sent to github.com/Homebrew/homebrew-core to update this formula:
           formula-name: ssh-vault
