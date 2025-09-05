@@ -42,10 +42,10 @@ pub fn handle(action: Action) -> Result<()> {
                 let ssh_key = remote::get_user_key(&keys, int_key, &fingerprint)?;
 
                 // if user equals "new" then we need to create a new key
-                if let Ok(key) = online::get_private_key_id(&ssh_key, &user) {
-                    if !key.is_empty() {
-                        helper = Some(key);
-                    }
+                if let Ok(key) = online::get_private_key_id(&ssh_key, &user)
+                    && !key.is_empty()
+                {
+                    helper = Some(key);
                 }
 
                 ssh_key

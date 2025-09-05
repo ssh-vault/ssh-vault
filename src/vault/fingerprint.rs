@@ -47,35 +47,34 @@ pub fn fingerprints() -> Result<Vec<Fingerprint>> {
     if let Ok(entries) = fs::read_dir(ssh_home) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if let Some(ext) = path.extension() {
-                if ext == "pub" {
-                    if let Ok(key) = PublicKey::read_openssh_file(&path) {
-                        // Create a Fingerprint instance
-                        let mut fingerprint = Fingerprint {
-                            key: path
-                                .file_name()
-                                .unwrap_or_default()
-                                .to_string_lossy()
-                                .to_string(),
-                            comment: key.comment().to_string(),
-                            algorithm: key.algorithm().to_string(),
-                            ..Default::default()
-                        };
+            if let Some(ext) = path.extension()
+                && ext == "pub"
+                && let Ok(key) = PublicKey::read_openssh_file(&path)
+            {
+                // Create a Fingerprint instance
+                let mut fingerprint = Fingerprint {
+                    key: path
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
+                        .to_string(),
+                    comment: key.comment().to_string(),
+                    algorithm: key.algorithm().to_string(),
+                    ..Default::default()
+                };
 
-                        fingerprint
-                            .fingerprints
-                            .push(key.fingerprint(HashAlg::Sha256).to_string());
+                fingerprint
+                    .fingerprints
+                    .push(key.fingerprint(HashAlg::Sha256).to_string());
 
-                        if let Some(key_data) = key.key_data().rsa() {
-                            let rsa_public_key = RsaPublicKey::try_from(key_data)?;
-                            fingerprint
-                                .fingerprints
-                                .push(format!("MD5 {}", md5_fingerprint(&rsa_public_key)?));
-                        }
-
-                        fingerprints.push(fingerprint);
-                    }
+                if let Some(key_data) = key.key_data().rsa() {
+                    let rsa_public_key = RsaPublicKey::try_from(key_data)?;
+                    fingerprint
+                        .fingerprints
+                        .push(format!("MD5 {}", md5_fingerprint(&rsa_public_key)?));
                 }
+
+                fingerprints.push(fingerprint);
             }
         }
     }
