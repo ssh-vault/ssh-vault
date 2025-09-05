@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -19,14 +19,13 @@ base58 = "0.2.0"
 base64ct = { version = "1.7.3", features = ["alloc"] }
 chacha20poly1305 = "0.10.1"
 clap = { version = "4.5", features = ["env", "color"] }
-config = { version = "0.14", default-features = false, features = ["yaml"] }
+config = { version = "0.15", default-features = false, features = ["yaml"] }
 ed25519-dalek = { version = "2.1.1", features = ["pkcs8"] }
 hex-literal = "1.0.0"
 hkdf = "0.12.4"
 home = "0.5.11"
-md5 = "0.7.0"
+md5 = "0.8.0"
 openssl = { version = "0.10", optional = true, features = ["vendored"] }
-rand = "0.8.5"
 regex = "1.11"
 reqwest = { version = "0.12", features = ["blocking"] }
 rpassword = "7.3"
@@ -36,7 +35,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.8"
 shell-words = "1.1.0"
-ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption"] }
+ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption", "rand"] }
 temp-env = "0.3.6"
 tempfile = "3.19"
 url = "2.5"
