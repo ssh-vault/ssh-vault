@@ -26,6 +26,7 @@ hkdf = "0.12.4"
 home = "0.5.11"
 md5 = "0.8.0"
 openssl = { version = "0.10", optional = true, features = ["vendored"] }
+rand = "0.8"
 regex = "1.11"
 reqwest = { version = "0.12", features = ["blocking"] }
 rpassword = "7.3"
@@ -35,7 +36,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 sha2 = "0.10.8"
 shell-words = "1.1.0"
-ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption", "rand"] }
+ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption"] }
 temp-env = "0.3.6"
 tempfile = "3.19"
 url = "2.5"
