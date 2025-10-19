@@ -1,0 +1,34 @@
+---
+version: 2
+updates:
+  # Maintain dependencies for Cargo
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      # Group all patch updates together
+      patch:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+      # Group cryptographic dependencies
+      crypto:
+        patterns:
+          - "aes-*"
+          - "chacha20*"
+          - "ed25519-*"
+          - "x25519-*"
+          - "rsa"
+          - "hkdf"
+          - "sha2"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

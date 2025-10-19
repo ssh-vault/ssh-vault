@@ -8,21 +8,78 @@ use rsa::sha2;
 use secrecy::SecretSlice;
 use sha2::Sha256;
 
-// Define a trait for cryptographic algorithms
+/// Trait defining cryptographic operations for vault encryption
+///
+/// This trait provides a common interface for different authenticated encryption
+/// algorithms used in ssh-vault (AES-256-GCM and ChaCha20-Poly1305).
 pub trait Crypto {
+    /// Creates a new crypto instance with the given key
     fn new(key: SecretSlice<u8>) -> Self;
+
+    /// Encrypts data using authenticated encryption with associated data (AEAD)
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The plaintext data to encrypt
+    /// * `fingerprint` - Additional authenticated data (key fingerprint)
+    ///
+    /// # Returns
+    ///
+    /// Returns the encrypted data including nonce/IV prepended to the ciphertext
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>>;
+
+    /// Decrypts data using authenticated encryption with associated data (AEAD)
+    ///
+    /// # Arguments
+    ///
+    /// * `data` - The encrypted data including nonce/IV
+    /// * `fingerprint` - Additional authenticated data for verification
+    ///
+    /// # Returns
+    ///
+    /// Returns the decrypted plaintext data
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if authentication fails or decryption is unsuccessful
     fn decrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>>;
 }
 
-// Generate a random password
+/// Generates a cryptographically secure random password
+///
+/// Creates a 32-byte (256-bit) random password suitable for vault encryption.
+///
+/// # Returns
+///
+/// Returns a secret slice containing the random password
+///
+/// # Security
+///
+/// Uses the operating system's cryptographically secure random number generator
 pub fn gen_password() -> Result<SecretSlice<u8>> {
     let mut password = [0_u8; 32];
     OsRng.fill_bytes(&mut password);
     Ok(SecretSlice::new(password.into()))
 }
 
-// HMAC key derivation function
+/// HMAC-based Key Derivation Function (HKDF) using SHA-256
+///
+/// Derives a 256-bit key from input keying material using HKDF-SHA256.
+///
+/// # Arguments
+///
+/// * `salt` - Salt value for the KDF (should be 64 bytes for ed25519 vaults)
+/// * `info` - Context and application specific information (fingerprint)
+/// * `ikm` - Input keying material (shared secret from key exchange)
+///
+/// # Returns
+///
+/// Returns a 32-byte derived key
+///
+/// # Security
+///
+/// HKDF provides cryptographic strength key derivation from potentially weak
+/// shared secrets. The salt should be unique per encryption operation.
 pub fn hkdf(salt: &[u8], info: &[u8], ikm: &[u8]) -> Result<[u8; 32], anyhow::Error> {
     let mut output_key_material = [0; 32];
 

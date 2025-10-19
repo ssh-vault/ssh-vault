@@ -6,7 +6,7 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-// Load the response from a cache file ~/.ssh/vault/keys/<key>
+// Load the response from a cache file ~/.ssh/vault/keys/`<key>`
 /// # Errors
 /// Return an error if the cache is older than 30 days
 pub fn get(key: &str) -> Result<String> {
@@ -34,7 +34,7 @@ pub fn get(key: &str) -> Result<String> {
     }
 }
 
-/// Save the response to a cache file ~/.ssh/vault/keys/<key>
+/// Save the response to a cache file ~/.ssh/vault/keys/`<key>`
 /// # Errors
 /// Return an error if the cache file can't be created
 pub fn put(key: &str, response: &str) -> Result<()> {
@@ -46,7 +46,7 @@ pub fn put(key: &str, response: &str) -> Result<()> {
     Ok(fs::write(cache, response)?)
 }
 
-/// Get the path to the cache file ~/.ssh/vault/keys/<key>
+/// Get the path to the cache file ~/.ssh/vault/keys/`<key>`
 /// # Errors
 /// Return an error if we can't get the path to the cache file
 fn get_cache_path(key: &str) -> Result<PathBuf> {

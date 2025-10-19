@@ -13,17 +13,53 @@ use anyhow::Result;
 use secrecy::SecretSlice;
 use ssh_key::{PrivateKey, PublicKey};
 
+/// SSH key types supported by ssh-vault
 #[derive(Debug, PartialEq, Eq)]
 pub enum SshKeyType {
+    /// Ed25519 keys using X25519 Diffie-Hellman and ChaCha20-Poly1305
     Ed25519,
+    /// RSA keys using RSA-OAEP and AES-256-GCM
     Rsa,
 }
 
+/// Main vault interface for encrypting and decrypting data using SSH keys
+///
+/// `SshVault` provides a unified interface for working with both Ed25519 and RSA
+/// encryption schemes. It handles key type detection and delegates operations to
+/// the appropriate underlying implementation.
 pub struct SshVault {
     vault: Box<dyn Vault>,
 }
 
 impl SshVault {
+    /// Creates a new vault instance with the specified key type
+    ///
+    /// # Arguments
+    ///
+    /// * `key_type` - The SSH key type (Ed25519 or RSA)
+    /// * `public` - Optional public key for encryption operations
+    /// * `private` - Optional private key for decryption operations
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The key type doesn't match the provided keys
+    /// - Both public and private keys are provided (only one should be provided)
+    /// - The keys are invalid or encrypted without proper decryption
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use ssh_vault::vault::{SshVault, SshKeyType};
+    /// use ssh_key::PublicKey;
+    /// use std::path::Path;
+    ///
+    /// # fn main() -> anyhow::Result<()> {
+    /// let public_key = PublicKey::read_openssh_file(Path::new("id_ed25519.pub"))?;
+    /// let vault = SshVault::new(&SshKeyType::Ed25519, Some(public_key), None)?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn new(
         key_type: &SshKeyType,
         public: Option<PublicKey>,
@@ -40,20 +76,60 @@ impl SshVault {
         Ok(Self { vault })
     }
 
+    /// Encrypts data and creates a vault
+    ///
+    /// # Arguments
+    ///
+    /// * `password` - Secret password for encrypting the data
+    /// * `data` - Mutable byte slice to encrypt (will be zeroed after encryption)
+    ///
+    /// # Returns
+    ///
+    /// Returns the vault as a formatted string that can be stored or transmitted.
+    /// The format includes the algorithm, fingerprint, and encrypted payload.
+    ///
+    /// # Security
+    ///
+    /// The input `data` is zeroed after encryption to prevent sensitive data
+    /// from remaining in memory.
     pub fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String> {
         self.vault.create(password, data)
     }
 
+    /// Decrypts and views vault contents
+    ///
+    /// # Arguments
+    ///
+    /// * `password` - Encrypted password bytes from the vault
+    /// * `data` - Encrypted data bytes from the vault
+    /// * `fingerprint` - Expected key fingerprint for verification
+    ///
+    /// # Returns
+    ///
+    /// Returns the decrypted data as a UTF-8 string.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The fingerprint doesn't match the private key
+    /// - Decryption fails (wrong key or corrupted data)
+    /// - The decrypted data is not valid UTF-8
     pub fn view(&self, password: &[u8], data: &[u8], fingerprint: &str) -> Result<String> {
         self.vault.view(password, data, fingerprint)
     }
 }
 
+/// Trait defining the vault operations for different key types
 pub trait Vault {
+    /// Creates a new vault instance with the given keys
     fn new(public: Option<PublicKey>, private: Option<PrivateKey>) -> Result<Self>
     where
         Self: Sized;
+
+    /// Encrypts data and creates a vault string
     fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String>;
+
+    /// Decrypts vault contents
     fn view(&self, password: &[u8], data: &[u8], fingerprint: &str) -> Result<String>;
 }
 

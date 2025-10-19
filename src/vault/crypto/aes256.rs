@@ -1,6 +1,6 @@
 use aes_gcm::{
     Aes256Gcm,
-    aead::{Aead, AeadCore, KeyInit, OsRng, Payload, generic_array::GenericArray},
+    aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
 };
 use anyhow::{Result, anyhow};
 use secrecy::{ExposeSecret, SecretSlice};
@@ -16,7 +16,7 @@ impl super::Crypto for Aes256Crypto {
 
     // Encrypts data with a key and a fingerprint
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>> {
-        let key = GenericArray::from_slice(self.key.expose_secret());
+        let key = self.key.expose_secret().into();
         let cipher = Aes256Gcm::new(key);
         let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
         let payload = Payload {
@@ -36,9 +36,9 @@ impl super::Crypto for Aes256Crypto {
 
     // Decrypts data with a key and a fingerprint
     fn decrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>> {
-        let key = GenericArray::from_slice(self.key.expose_secret());
+        let key = self.key.expose_secret().into();
         let cipher = Aes256Gcm::new(key);
-        let nonce = GenericArray::from_slice(&data[..12]);
+        let nonce = (&data[..12]).into();
         let ciphertext = &data[12..];
         let payload = Payload {
             msg: ciphertext,

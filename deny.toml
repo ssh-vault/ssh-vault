@@ -1,0 +1,78 @@
+# cargo-deny configuration for ssh-vault
+# https://embarkstudios.github.io/cargo-deny/
+
+# Note that all fields that take a lint level have these possible values:
+# * deny - An error will be produced and the check will fail
+# * warn - A warning will be produced, but the check will not fail
+# * allow - No warning or error will be produced, though in some cases a note will be
+
+[graph]
+# Focus on Unix-like platforms (Linux and macOS)
+targets = [
+    "x86_64-unknown-linux-gnu",
+    "x86_64-unknown-linux-musl",
+    "aarch64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+]
+
+[advisories]
+# The path where the advisory databases are cloned/fetched into
+db-path = "~/.cargo/advisory-dbs"
+# The url(s) of the advisory databases to use
+db-urls = ["https://github.com/rustsec/advisory-db"]
+# A list of advisory IDs to ignore. Note that ignored advisories will still
+# output a note when they are encountered.
+ignore = [
+    # RUSTSEC-2023-0071: Marvin Attack on RSA
+    # This is a known timing side-channel vulnerability in RSA decryption.
+    # We acknowledge this risk. The vulnerability requires:
+    # 1. Network-observable timing attacks
+    # 2. Many decryption attempts to recover the key
+    # For ssh-vault's use case (local decryption, single attempt), the risk is acceptable.
+    # We're tracking upstream fix: https://github.com/RustCrypto/RSA/issues/19
+    { id = "RUSTSEC-2023-0071", reason = "Timing attack requires network observation and many attempts. Acceptable risk for local single-attempt decryption." },
+]
+
+[licenses]
+# List of explicitly allowed licenses
+# See https://spdx.org/licenses/ for list of possible licenses
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-3-Clause",
+    "BSD-2-Clause",
+    "Unicode-3.0",      # Unicode License - used by ICU (internationalization)
+    "Zlib",             # Zlib License - permissive, OSI approved
+]
+# The confidence threshold for detecting a license from license text.
+confidence-threshold = 0.8
+# Allow 1 or more licenses on a per-crate basis
+exceptions = []
+
+[bans]
+# Lint level for when multiple versions of the same crate are detected
+# Set to 'allow' to suppress warnings about duplicate versions
+multiple-versions = "allow"
+# Lint level for when a crate version requirement is `*`
+wildcards = "allow"
+# The graph highlighting used when creating dotgraphs for crates
+# with multiple versions
+highlight = "all"
+# List of crates that are allowed to have multiple versions
+skip = [
+    # These duplicates are expected and not a concern
+    { crate = "getrandom", reason = "Different dependency chains use different versions" },
+]
+
+[sources]
+# Lint level for what to happen when a crate from a git repository that is not
+# in the allow list is encountered
+unknown-git = "warn"
+# Lint level for what to happen when a crate from a crate registry that is not
+# in the allow list is encountered
+unknown-registry = "warn"
+# List of URLs for allowed crate registries. Defaults to the crates.io index
+# if not specified. If it is specified but empty, no registries are allowed.
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
