@@ -1,9 +1,9 @@
 # ssh-vault 🌰
 
-[![Deploy](https://github.com/ssh-vault/ssh-vault/actions/workflows/deploy.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/deploy.yml)
-[![test](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/test.yml)
+[![Test & Build](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml/badge.svg)](https://github.com/ssh-vault/ssh-vault/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/ssh-vault/ssh-vault/graph/badge.svg?token=cWvIQCym2l)](https://codecov.io/gh/ssh-vault/ssh-vault)
 [![crates.io](https://img.shields.io/crates/v/ssh-vault.svg)](https://crates.io/crates/ssh-vault)
+[![Security Policy](https://img.shields.io/badge/security-policy-blue.svg)](SECURITY.md)
 
 encrypt/decrypt using ssh keys
 
