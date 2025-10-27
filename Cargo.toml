@@ -23,7 +23,7 @@ config = { version = "0.15", default-features = false, features = ["yaml"] }
 ed25519-dalek = { version = "2.1.1", features = ["pkcs8"] }
 hex-literal = "1.0.0"
 hkdf = "0.12.4"
-home = "0.5.11"
+home = "0.5.12"
 md5 = "0.8.0"
 openssl = { version = "0.10", optional = true, features = ["vendored"] }
 rand = "0.8"
