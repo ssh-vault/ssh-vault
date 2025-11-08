@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.1.4
+* cargo update: bump home to 0.5.12, hex-literal to 1.1.0
+
 ## 1.1.0
 * using `rsa::RsaPrivatekey::from_components` to create the private key from `ssh_key::PrivateKey::read_openssh_file`
 * edition 2024

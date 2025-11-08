@@ -116,6 +116,14 @@ impl Vault for Ed25519Vault {
 
         match &self.private_key {
             Some(private_key) => {
+                // Validate password length before slicing
+                if password.len() < 32 {
+                    return Err(anyhow::anyhow!(
+                        "Invalid password data: too short (expected at least 32 bytes, got {})",
+                        password.len()
+                    ));
+                }
+
                 // extract the ephemeral public key
                 let mut epk: [u8; 32] = [0; 32];
                 epk.copy_from_slice(&password[0..32]);
@@ -147,8 +155,17 @@ impl Vault for Ed25519Vault {
                 // use the enc_key to decrypt the password
                 let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
 
-                let mut p: [u8; 32] = [0; 32];
                 let password = crypto.decrypt(encrypted_password, get_fingerprint.as_bytes())?;
+
+                // Validate decrypted password length before slicing
+                if password.len() < 32 {
+                    return Err(anyhow::anyhow!(
+                        "Invalid decrypted password: too short (expected at least 32 bytes, got {})",
+                        password.len()
+                    ));
+                }
+
+                let mut p: [u8; 32] = [0; 32];
                 p.copy_from_slice(&password[0..32]);
 
                 // decrypt the data with the derived key
@@ -158,6 +175,68 @@ impl Vault for Ed25519Vault {
                 Ok(String::from_utf8(out)?)
             }
             None => Err(anyhow::anyhow!("Private key is required to view vault")),
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const TEST_ED25519_PUBLIC_KEY: &str =
+        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILr6U238r+PD4rSvZAu/RNJfaNgzglzSvdLKA28h4kB1";
+
+    #[test]
+    fn test_ed25519_view_short_password_data() {
+        // Create an Ed25519 vault with a public key
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
+        let vault = Ed25519Vault::new(Some(public_key), None).unwrap();
+
+        // Test with password data shorter than 32 bytes
+        for len in 0..32 {
+            let short_password = vec![0u8; len];
+            let data = vec![0u8; 50];
+            let fingerprint = "SHA256:test";
+
+            let result = vault.view(&short_password, &data, fingerprint);
+            assert!(result.is_err(), "Should fail with {} bytes", len);
+            let err_msg = result.unwrap_err().to_string();
+            assert!(
+                err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"),
+                "Error should mention 'too short' or fingerprint mismatch, got: {}",
+                err_msg
+            );
+        }
+    }
+
+    #[test]
+    fn test_ed25519_view_empty_password() {
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
+        let vault = Ed25519Vault::new(Some(public_key), None).unwrap();
+
+        let result = vault.view(&[], &[0u8; 50], "SHA256:test");
+        assert!(result.is_err());
+        let err_msg = result.unwrap_err().to_string();
+        assert!(
+            err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"),
+            "Error should mention issue, got: {}",
+            err_msg
+        );
+    }
+
+    #[test]
+    fn test_ed25519_new_with_valid_public_key() {
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
+        let result = Ed25519Vault::new(Some(public_key), None);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_ed25519_new_without_keys() {
+        let result = Ed25519Vault::new(None, None);
+        assert!(result.is_err());
+        if let Err(e) = result {
+            assert!(e.to_string().contains("Missing public and private key"));
         }
     }
 }

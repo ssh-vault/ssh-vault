@@ -5,6 +5,11 @@ use base64ct::{Base64, Encoding};
 pub fn parse(data: &str) -> Result<(&str, String, Vec<u8>, Vec<u8>)> {
     let tokens: Vec<_> = data.split(';').collect();
 
+    // Validate tokens length before accessing indices
+    if tokens.len() < 2 {
+        return Err(anyhow!("Not a valid SSH-VAULT file"));
+    }
+
     if tokens[0] != "SSH-VAULT" || (tokens[1] != "AES256" && tokens[1] != "CHACHA20-POLY1305") {
         return Err(anyhow!("Not a valid SSH-VAULT file"));
     }
@@ -99,5 +104,58 @@ pqwAZIHYhzss";
     fn test_parse_no_payload() {
         let data = r"SSH-VAULT;AES256;;0";
         assert!(parse(data).is_err());
+    }
+
+    #[test]
+    fn test_parse_empty_string() {
+        let data = "";
+        let result = parse(data);
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Not a valid SSH-VAULT file")
+        );
+    }
+
+    #[test]
+    fn test_parse_single_token() {
+        let data = "SSH-VAULT";
+        let result = parse(data);
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Not a valid SSH-VAULT file")
+        );
+    }
+
+    #[test]
+    fn test_parse_no_tokens() {
+        let data = ";";
+        let result = parse(data);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_malformed_header() {
+        let data = "INVALID";
+        let result = parse(data);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_wrong_crypto_type() {
+        let data = "SSH-VAULT;INVALID_CRYPTO";
+        let result = parse(data);
+        assert!(result.is_err());
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("Not a valid SSH-VAULT file")
+        );
     }
 }

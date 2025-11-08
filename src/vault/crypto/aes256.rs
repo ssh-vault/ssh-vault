@@ -36,6 +36,14 @@ impl super::Crypto for Aes256Crypto {
 
     // Decrypts data with a key and a fingerprint
     fn decrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>> {
+        // Validate data length before slicing
+        if data.len() < 12 {
+            return Err(anyhow!(
+                "Invalid encrypted data: too short (expected at least 12 bytes, got {})",
+                data.len()
+            ));
+        }
+
         let key = self.key.expose_secret().into();
         let cipher = Aes256Gcm::new(key);
         let nonce = (&data[..12]).into();
@@ -127,5 +135,57 @@ mod tests {
             let decrypted_data = crypto.decrypt(&encrypted_data, &fingerprint).unwrap();
             assert_eq!(data, decrypted_data);
         }
+    }
+
+    #[test]
+    fn test_aes256_decrypt_empty_data() {
+        let mut password = [0_u8; 32];
+        OsRng.fill_bytes(&mut password);
+        let key = SecretSlice::new(password.into());
+        let crypto = Aes256Crypto::new(key);
+
+        let result = crypto.decrypt(&[], FINGERPRINT.as_bytes());
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("too short"));
+    }
+
+    #[test]
+    fn test_aes256_decrypt_short_data() {
+        let mut password = [0_u8; 32];
+        OsRng.fill_bytes(&mut password);
+        let key = SecretSlice::new(password.into());
+        let crypto = Aes256Crypto::new(key);
+
+        // Test with various short lengths
+        for len in 1..12 {
+            let short_data = vec![0u8; len];
+            let result = crypto.decrypt(&short_data, FINGERPRINT.as_bytes());
+            assert!(result.is_err(), "Should fail with {} bytes", len);
+            let err_msg = result.unwrap_err().to_string();
+            assert!(
+                err_msg.contains("too short"),
+                "Error message should mention 'too short', got: {}",
+                err_msg
+            );
+            assert!(
+                err_msg.contains(&len.to_string()),
+                "Error message should mention length {}",
+                len
+            );
+        }
+    }
+
+    #[test]
+    fn test_aes256_decrypt_exact_minimum() {
+        let mut password = [0_u8; 32];
+        OsRng.fill_bytes(&mut password);
+        let key = SecretSlice::new(password.into());
+        let crypto = Aes256Crypto::new(key);
+
+        // 12 bytes is minimum (nonce only, no ciphertext)
+        let data = vec![0u8; 12];
+        let result = crypto.decrypt(&data, FINGERPRINT.as_bytes());
+        // Should not panic, but will fail authentication
+        assert!(result.is_err());
     }
 }
