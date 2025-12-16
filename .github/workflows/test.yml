@@ -26,7 +26,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Clippy
-        run: cargo clippy -- -D clippy::all -D clippy::nursery -D warnings
+        run: cargo clippy --all-targets --all-features
 
   check:
     name: Check

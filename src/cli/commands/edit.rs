@@ -44,24 +44,26 @@ mod tests {
     }
 
     #[test]
-    fn test_subcommand_edit_ok() {
+    fn test_subcommand_edit_ok() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_edit());
         let matches =
-            app.try_get_matches_from(vec!["ssh-vault", "edit", "-k", "test", "/tmp/vault"]);
-        assert!(matches.is_ok());
+            app.try_get_matches_from(vec!["ssh-vault", "edit", "-k", "test", "/tmp/vault"])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("edit")
-            .unwrap()
+            .ok_or("No edit subcommand")?
             .to_owned();
-        assert_eq!(m.get_one::<String>("key").unwrap(), "test");
-        assert_eq!(m.get_one::<String>("passphrase").is_none(), true);
-        assert_eq!(m.get_one::<String>("vault").unwrap(), "/tmp/vault");
+        assert_eq!(m.get_one::<String>("key").ok_or("No key")?, "test");
+        assert!(m.get_one::<String>("passphrase").is_none());
+        assert_eq!(
+            m.get_one::<String>("vault").ok_or("No vault")?,
+            "/tmp/vault"
+        );
+        Ok(())
     }
 
     #[test]
-    fn test_subcommand_edit_with_passphrase() {
+    fn test_subcommand_edit_with_passphrase() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_edit());
         let matches = app.try_get_matches_from(vec![
             "ssh-vault",
@@ -71,16 +73,21 @@ mod tests {
             "-p",
             "passphrase",
             "/tmp/vault",
-        ]);
-        assert!(matches.is_ok());
+        ])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("edit")
-            .unwrap()
+            .ok_or("No edit subcommand")?
             .to_owned();
-        assert_eq!(m.get_one::<String>("key").unwrap(), "test");
-        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "passphrase");
-        assert_eq!(m.get_one::<String>("vault").unwrap(), "/tmp/vault");
+        assert_eq!(m.get_one::<String>("key").ok_or("No key")?, "test");
+        assert_eq!(
+            m.get_one::<String>("passphrase").ok_or("No passphrase")?,
+            "passphrase"
+        );
+        assert_eq!(
+            m.get_one::<String>("vault").ok_or("No vault")?,
+            "/tmp/vault"
+        );
+        Ok(())
     }
 }

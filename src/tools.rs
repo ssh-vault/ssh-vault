@@ -1,10 +1,20 @@
 use anyhow::{Result, anyhow};
 use std::path::PathBuf;
 
+/// Return the user's home directory.
+///
+/// # Errors
+///
+/// Returns an error if the home directory cannot be determined.
 pub fn get_home() -> Result<PathBuf> {
     home::home_dir().map_or_else(|| Err(anyhow!("Could not find home directory")), Ok)
 }
 
+/// Filter fetched text to only include supported SSH public keys.
+///
+/// # Errors
+///
+/// Returns an error if no supported keys are found.
 pub fn filter_fetched_keys(response: &str) -> Result<String> {
     let mut filtered_keys = String::new();
 
@@ -23,12 +33,14 @@ pub fn filter_fetched_keys(response: &str) -> Result<String> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_get_home() {
-        let home = get_home().unwrap();
-        assert_eq!(home.is_dir(), true);
+    fn test_get_home() -> Result<(), Box<dyn std::error::Error>> {
+        let home = get_home()?;
+        assert!(home.is_dir());
+        Ok(())
     }
 }

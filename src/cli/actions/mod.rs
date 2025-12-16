@@ -41,6 +41,12 @@ pub enum Action {
     Help,
 }
 
+/// Opens an editor and returns the edited content.
+///
+/// # Errors
+///
+/// Returns an error if the temporary file cannot be created, if the editor
+/// command is empty or fails, or if reading/writing the temporary file fails.
 pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<usize> {
     let mut tmpfile = Builder::new()
         .prefix(".vault-")
@@ -54,9 +60,12 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<us
     let editor = env::var("EDITOR").unwrap_or_else(|_| String::from("vi"));
 
     let editor_parts = shell_words::split(&editor)?;
+    let command = editor_parts
+        .first()
+        .ok_or_else(|| anyhow!("EDITOR command is empty"))?;
 
-    let status = Command::new(&editor_parts[0])
-        .args(&editor_parts[1..])
+    let status = Command::new(command)
+        .args(editor_parts.get(1..).unwrap_or(&[]))
         .arg(tmpfile.path())
         .status()?;
 
@@ -78,6 +87,7 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<us
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use crate::cli::actions::{Action, create, edit, fingerprint, view};
     use serde_json::Value;
@@ -114,7 +124,7 @@ mod tests {
             },
         ];
 
-        for test in tests.iter() {
+        for test in &tests {
             let input = test.input;
             let mut temp_file = NamedTempFile::new().unwrap();
             temp_file.write_all(input.as_bytes()).unwrap();
@@ -191,7 +201,7 @@ mod tests {
     }
 
     #[test]
-    fn test_create_with_json() {
+    fn test_create_with_json() -> Result<(), Box<dyn std::error::Error>> {
         let tests = [
             Test {
                 input: "Three may keep a secret, if two of them are dead",
@@ -207,7 +217,7 @@ mod tests {
             },
         ];
 
-        for test in tests.iter() {
+        for test in &tests {
             let input = test.input;
             let mut temp_file = NamedTempFile::new().unwrap();
             temp_file.write_all(input.as_bytes()).unwrap();
@@ -226,10 +236,13 @@ mod tests {
 
             let vault_contents = std::fs::read_to_string(&vault_json).unwrap();
             let json: Value = serde_json::from_str(&vault_contents).unwrap();
-            let vault = json["vault"].as_str().unwrap();
+            let vault_str = json
+                .get("vault")
+                .and_then(|v| v.as_str())
+                .ok_or("Failed to get vault from JSON")?;
 
             let mut vault_file = NamedTempFile::new().unwrap();
-            vault_file.write_all(vault.as_bytes()).unwrap();
+            vault_file.write_all(vault_str.as_bytes()).unwrap();
             let output = NamedTempFile::new().unwrap();
 
             let view = Action::View {
@@ -244,6 +257,7 @@ mod tests {
             let output = std::fs::read_to_string(output).unwrap();
             assert_eq!(input, output);
         }
+        Ok(())
     }
 
     #[test]

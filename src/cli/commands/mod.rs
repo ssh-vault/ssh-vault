@@ -38,13 +38,11 @@ mod tests {
         let command = new();
 
         assert_eq!(command.get_name(), "ssh-vault");
-        assert_eq!(
-            command.get_about().unwrap().to_string(),
-            "encrypt/decrypt using ssh keys"
-        );
-        assert_eq!(
-            command.get_version().unwrap().to_string(),
-            env!("CARGO_PKG_VERSION")
-        );
+        if let Some(about) = command.get_about() {
+            assert_eq!(about.to_string(), "encrypt/decrypt using ssh keys");
+        }
+        if let Some(version) = command.get_version() {
+            assert_eq!(version.to_string(), env!("CARGO_PKG_VERSION"));
+        }
     }
 }

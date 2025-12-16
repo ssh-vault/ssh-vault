@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0
+* replaced OpenSSL with rustls for TLS
+* clippy improvements
+
 ## 1.1.4
 * cargo update: bump home to 0.5.12, hex-literal to 1.1.0
 

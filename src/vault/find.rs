@@ -10,7 +10,11 @@ use std::{
     path::{Path, PathBuf},
 };
 
-// find key type RSA or ED25519
+/// Find key type RSA or ED25519.
+///
+/// # Errors
+///
+/// Returns an error if the algorithm is unsupported.
 pub fn key_type(key: &Algorithm) -> Result<SshKeyType> {
     match key {
         Algorithm::Rsa { .. } => Ok(SshKeyType::Rsa),
@@ -19,7 +23,11 @@ pub fn key_type(key: &Algorithm) -> Result<SshKeyType> {
     }
 }
 
-// find public key type RSA or ED25519
+/// Find private key type RSA or ED25519 based on vault header.
+///
+/// # Errors
+///
+/// Returns an error if the key type is not supported.
 pub fn private_key_type(key: Option<String>, key_type: &str) -> Result<PrivateKey> {
     match key_type {
         "AES256" => private_key(key, &SshKeyType::Rsa),
@@ -28,7 +36,11 @@ pub fn private_key_type(key: Option<String>, key_type: &str) -> Result<PrivateKe
     }
 }
 
-// find public key
+/// Load a public key from disk.
+///
+/// # Errors
+///
+/// Returns an error if no key is found or the key cannot be parsed.
 pub fn public_key(key: Option<String>) -> Result<PublicKey> {
     let key: PathBuf = if let Some(key) = key {
         Path::new(&key).to_path_buf()
@@ -48,7 +60,12 @@ pub fn public_key(key: Option<String>) -> Result<PublicKey> {
     PublicKey::read_openssh_file(&key).context("Ensure you are passing a valid openssh public key")
 }
 
-// find private key legacy or openssh
+/// Load a private key from disk or URL.
+///
+/// # Errors
+///
+/// Returns an error if the key is missing, cannot be read, or is in an
+/// unsupported format.
 pub fn private_key(key: Option<String>, ssh_type: &SshKeyType) -> Result<PrivateKey> {
     let private_key = if let Some(key) = key {
         if key.starts_with("http://") || key.starts_with("https://") {
@@ -91,6 +108,7 @@ pub fn private_key(key: Option<String>, ssh_type: &SshKeyType) -> Result<Private
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use crate::vault::SshKeyType;

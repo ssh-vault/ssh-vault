@@ -26,6 +26,10 @@ pub trait Crypto {
     /// # Returns
     ///
     /// Returns the encrypted data including nonce/IV prepended to the ciphertext
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if encryption fails.
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>>;
 
     /// Decrypts data using authenticated encryption with associated data (AEAD)
@@ -56,6 +60,10 @@ pub trait Crypto {
 /// # Security
 ///
 /// Uses the operating system's cryptographically secure random number generator
+///
+/// # Errors
+///
+/// Returns an error if secure random bytes cannot be generated.
 pub fn gen_password() -> Result<SecretSlice<u8>> {
     let mut password = [0_u8; 32];
     OsRng.fill_bytes(&mut password);
@@ -80,18 +88,23 @@ pub fn gen_password() -> Result<SecretSlice<u8>> {
 ///
 /// HKDF provides cryptographic strength key derivation from potentially weak
 /// shared secrets. The salt should be unique per encryption operation.
+///
+/// # Errors
+///
+/// Returns an error if key expansion fails.
 pub fn hkdf(salt: &[u8], info: &[u8], ikm: &[u8]) -> Result<[u8; 32], anyhow::Error> {
     let mut output_key_material = [0; 32];
 
     // Expand the input keying material into an output keying material of 32 bytes
     Hkdf::<Sha256>::new(Some(salt), ikm)
         .expand(info, &mut output_key_material)
-        .map_err(|err| anyhow!("Error during HKDF expansion: {}", err))?;
+        .map_err(|err| anyhow!("Error during HKDF expansion: {err}"))?;
 
     Ok(output_key_material)
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use hex_literal::hex;
@@ -116,6 +129,6 @@ mod tests {
             "
         );
         let okm = hkdf(&salt, &info, &ikm).unwrap();
-        assert_eq!(okm[..], expected[..32])
+        assert_eq!(okm[..], expected[..32]);
     }
 }

@@ -68,58 +68,60 @@ mod tests {
     use std::fs;
 
     #[test]
-    fn test_get_cache_path() {
-        let cache = get_cache_path("test").unwrap();
-        assert_eq!(cache.is_dir(), false);
+    fn test_get_cache_path() -> Result<(), Box<dyn std::error::Error>> {
+        let cache = get_cache_path("test")?;
+        assert!(!cache.is_dir());
         assert_eq!(
             cache.to_str(),
-            get_home()
-                .unwrap()
+            get_home()?
                 .join(".ssh")
                 .join("vault")
                 .join("keys")
                 .join("test")
                 .to_str()
         );
+        Ok(())
     }
 
     #[test]
-    fn test_get_ssh_vault_path() {
-        let ssh_vault = get_ssh_vault_path().unwrap();
-        assert_eq!(ssh_vault.is_file(), false);
+    fn test_get_ssh_vault_path() -> Result<(), Box<dyn std::error::Error>> {
+        let ssh_vault = get_ssh_vault_path()?;
+        assert!(!ssh_vault.is_file());
         assert_eq!(
             ssh_vault.to_str(),
-            get_home().unwrap().join(".ssh").join("vault").to_str()
+            get_home()?.join(".ssh").join("vault").to_str()
         );
+        Ok(())
     }
 
     #[test]
-    fn test_put() {
-        let cache = get_cache_path("test-2").unwrap();
-        put("test-2", "test").unwrap();
+    fn test_put() -> Result<(), Box<dyn std::error::Error>> {
+        let cache = get_cache_path("test-2")?;
+        put("test-2", "test")?;
 
-        assert_eq!(cache.is_file(), true);
-        assert_eq!(cache.is_dir(), false);
-        assert_eq!(cache.exists(), true);
+        assert!(cache.is_file());
+        assert!(!cache.is_dir());
+        assert!(cache.exists());
         assert_eq!(
             cache.to_str(),
-            get_home()
-                .unwrap()
+            get_home()?
                 .join(".ssh")
                 .join("vault")
                 .join("keys")
                 .join("test-2")
                 .to_str()
         );
-        fs::remove_file(cache).unwrap();
+        fs::remove_file(cache)?;
+        Ok(())
     }
 
     #[test]
-    fn test_get() {
-        let cache = get_cache_path("test-3").unwrap();
-        put("test-3", "test").unwrap();
-        let response = get("test-3").unwrap();
+    fn test_get() -> Result<(), Box<dyn std::error::Error>> {
+        let cache = get_cache_path("test-3")?;
+        put("test-3", "test")?;
+        let response = get("test-3")?;
         assert_eq!(response, "test");
-        fs::remove_file(cache).unwrap();
+        fs::remove_file(cache)?;
+        Ok(())
     }
 }

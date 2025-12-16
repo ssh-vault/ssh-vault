@@ -6,8 +6,8 @@ const REGEX_SHA256_FINERPRINT: &str = r"^SHA256:[0-9a-zA-Z+/=]{43}$";
 
 pub fn validator_fingerprint() -> ValueParser {
     ValueParser::from(move |s: &str| -> std::result::Result<String, String> {
-        let md5 = Regex::new(REGEX_MD5_FINGERPRINT).unwrap();
-        let sha256 = Regex::new(REGEX_SHA256_FINERPRINT).unwrap();
+        let md5 = Regex::new(REGEX_MD5_FINGERPRINT).map_err(|err| err.to_string())?;
+        let sha256 = Regex::new(REGEX_SHA256_FINERPRINT).map_err(|err| err.to_string())?;
 
         if md5.is_match(s) || sha256.is_match(s) {
             Ok(s.to_owned())
@@ -76,6 +76,7 @@ Share a secret with Alice using its second key:
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -98,7 +99,7 @@ mod tests {
             "SHA256:O09r+CSX4Ub8S3klaRp86ahCLbBkxhbaXW7v8y/ANCI",
             "55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:13",
         ];
-        for test in tests.iter() {
+        for test in &tests {
             assert!(md5.is_match(test) || sha256.is_match(test));
         }
     }
@@ -131,7 +132,7 @@ mod tests {
             "55-cd-f2-7e-4c-0b-e5-a7-6e-6c-fc-6b-8e-58-9d::13",
             "55-cd-f2-7e-4c-0b-e5-a7-6e-6c-fc-6b-8e-58-9d-13",
         ];
-        for test in tests.iter() {
+        for test in &tests {
             assert!(!(md5.is_match(test) || sha256.is_match(test)));
         }
     }

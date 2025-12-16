@@ -13,6 +13,7 @@ use ssh_key::{
 use x25519_dalek::{EphemeralSecret, PublicKey as X25519PublicKey, StaticSecret};
 use zeroize::Zeroize;
 
+#[allow(clippy::struct_field_names)]
 pub struct Ed25519Vault {
     montgomery_key: X25519PublicKey,
     private_key: Option<Ed25519PrivateKey>,
@@ -125,19 +126,23 @@ impl Vault for Ed25519Vault {
                 }
 
                 // extract the ephemeral public key
+                let (ephemeral_bytes, encrypted_password) = password.split_at(32);
                 let mut epk: [u8; 32] = [0; 32];
-                epk.copy_from_slice(&password[0..32]);
-
-                // extract the encrypted password
-                let encrypted_password = &password[32..];
+                epk.copy_from_slice(ephemeral_bytes);
 
                 // decode the ephemeral public key
                 let epk = X25519PublicKey::from(epk);
 
                 // generate the static secret and public key
                 let sk: StaticSecret = {
+                    let digest = Sha512::digest(private_key.as_ref());
                     let mut sk = [0u8; 32];
-                    sk.copy_from_slice(&Sha512::digest(private_key.as_ref())[0..32]);
+                    sk.copy_from_slice(
+                        digest
+                            .as_slice()
+                            .get(..32)
+                            .ok_or_else(|| anyhow::anyhow!("digest too short"))?,
+                    );
                     sk.into()
                 };
                 let pk = X25519PublicKey::from(&sk);
@@ -166,7 +171,11 @@ impl Vault for Ed25519Vault {
                 }
 
                 let mut p: [u8; 32] = [0; 32];
-                p.copy_from_slice(&password[0..32]);
+                p.copy_from_slice(
+                    password
+                        .get(..32)
+                        .ok_or_else(|| anyhow::anyhow!("password too short"))?,
+                );
 
                 // decrypt the data with the derived key
                 let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(p.into()));
@@ -182,15 +191,16 @@ impl Vault for Ed25519Vault {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::Result;
 
     const TEST_ED25519_PUBLIC_KEY: &str =
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILr6U238r+PD4rSvZAu/RNJfaNgzglzSvdLKA28h4kB1";
 
     #[test]
-    fn test_ed25519_view_short_password_data() {
+    fn test_ed25519_view_short_password_data() -> Result<()> {
         // Create an Ed25519 vault with a public key
-        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
-        let vault = Ed25519Vault::new(Some(public_key), None).unwrap();
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
+        let vault = Ed25519Vault::new(Some(public_key), None)?;
 
         // Test with password data shorter than 32 bytes
         for len in 0..32 {
@@ -199,36 +209,35 @@ mod tests {
             let fingerprint = "SHA256:test";
 
             let result = vault.view(&short_password, &data, fingerprint);
-            assert!(result.is_err(), "Should fail with {} bytes", len);
-            let err_msg = result.unwrap_err().to_string();
-            assert!(
-                err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"),
-                "Error should mention 'too short' or fingerprint mismatch, got: {}",
-                err_msg
-            );
+            assert!(result.is_err(), "Should fail with {len} bytes");
+            if let Err(err) = result {
+                let err_msg = err.to_string();
+                assert!(err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"));
+            }
         }
+        Ok(())
     }
 
     #[test]
-    fn test_ed25519_view_empty_password() {
-        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
-        let vault = Ed25519Vault::new(Some(public_key), None).unwrap();
+    fn test_ed25519_view_empty_password() -> Result<()> {
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
+        let vault = Ed25519Vault::new(Some(public_key), None)?;
 
         let result = vault.view(&[], &[0u8; 50], "SHA256:test");
         assert!(result.is_err());
-        let err_msg = result.unwrap_err().to_string();
-        assert!(
-            err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"),
-            "Error should mention issue, got: {}",
-            err_msg
-        );
+        if let Err(err) = result {
+            let err_msg = err.to_string();
+            assert!(err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"));
+        }
+        Ok(())
     }
 
     #[test]
-    fn test_ed25519_new_with_valid_public_key() {
-        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>().unwrap();
+    fn test_ed25519_new_with_valid_public_key() -> Result<()> {
+        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
         let result = Ed25519Vault::new(Some(public_key), None);
         assert!(result.is_ok());
+        Ok(())
     }
 
     #[test]

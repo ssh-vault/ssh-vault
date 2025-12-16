@@ -4,6 +4,12 @@ use anyhow::Result;
 use std::io::{Read, Write};
 use zeroize::Zeroize;
 
+/// Handle viewing a vault.
+///
+/// # Errors
+///
+/// Returns an error if reading the vault fails, the key cannot be loaded or
+/// decrypted, or decryption of the vault content fails.
 pub fn handle(action: Action) -> Result<()> {
     match action {
         Action::View {

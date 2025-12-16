@@ -92,6 +92,10 @@ impl SshVault {
     ///
     /// The input `data` is zeroed after encryption to prevent sensitive data
     /// from remaining in memory.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if encryption fails.
     pub fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String> {
         self.vault.create(password, data)
     }
@@ -122,14 +126,26 @@ impl SshVault {
 /// Trait defining the vault operations for different key types
 pub trait Vault {
     /// Creates a new vault instance with the given keys
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the provided keys are invalid or mismatched.
     fn new(public: Option<PublicKey>, private: Option<PrivateKey>) -> Result<Self>
     where
         Self: Sized;
 
     /// Encrypts data and creates a vault string
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if encryption fails.
     fn create(&self, password: SecretSlice<u8>, data: &mut [u8]) -> Result<String>;
 
     /// Decrypts vault contents
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if decryption fails or the fingerprint is invalid.
     fn view(&self, password: &[u8], data: &[u8], fingerprint: &str) -> Result<String>;
 }
 
@@ -156,8 +172,8 @@ mod tests {
     fn test_rsa_vault() -> Result<()> {
         let public_key_file = Path::new("test_data/id_rsa.pub");
         let private_key_file = Path::new("test_data/id_rsa");
-        let public_key = PublicKey::read_openssh_file(&public_key_file)?;
-        let private_key = PrivateKey::read_openssh_file(&private_key_file)?;
+        let public_key = PublicKey::read_openssh_file(public_key_file)?;
+        let private_key = PrivateKey::read_openssh_file(private_key_file)?;
 
         let vault = RsaVault::new(Some(public_key), None)?;
 
@@ -187,8 +203,8 @@ mod tests {
     fn test_ed25519_vault() -> Result<()> {
         let public_key_file = Path::new("test_data/ed25519.pub");
         let private_key_file = Path::new("test_data/ed25519");
-        let public_key = PublicKey::read_openssh_file(&public_key_file)?;
-        let private_key = PrivateKey::read_openssh_file(&private_key_file)?;
+        let public_key = PublicKey::read_openssh_file(public_key_file)?;
+        let private_key = PrivateKey::read_openssh_file(private_key_file)?;
 
         let vault = Ed25519Vault::new(Some(public_key), None)?;
 
@@ -241,7 +257,7 @@ mod tests {
             },
         ];
 
-        for test in tests.iter() {
+        for test in &tests {
             // create
             let public_key = test.public_key.to_string();
             let public_key = find::public_key(Some(public_key))?;

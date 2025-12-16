@@ -49,11 +49,11 @@ impl Vault for RsaVault {
                     //     pub p: Mpint,
                     //     pub q: Mpint,
                     // }
-                    let n = BigUint::from_bytes_be(rsa_keypair.public.n.as_ref());
-                    let e = BigUint::from_bytes_be(rsa_keypair.public.e.as_ref());
-                    let d = BigUint::from_bytes_be(rsa_keypair.private.d.as_ref());
-                    let p = BigUint::from_bytes_be(rsa_keypair.private.p.as_ref());
-                    let q = BigUint::from_bytes_be(rsa_keypair.private.q.as_ref());
+                    let modulus = BigUint::from_bytes_be(rsa_keypair.public.n.as_ref());
+                    let public_exponent = BigUint::from_bytes_be(rsa_keypair.public.e.as_ref());
+                    let private_exponent = BigUint::from_bytes_be(rsa_keypair.private.d.as_ref());
+                    let prime_p = BigUint::from_bytes_be(rsa_keypair.private.p.as_ref());
+                    let prime_q = BigUint::from_bytes_be(rsa_keypair.private.q.as_ref());
 
                     // Create the RSA private key
                     //
@@ -69,7 +69,12 @@ impl Vault for RsaVault {
                     // 800-56B Revision 2 Appendix C.2). This algorithm only works if there are
                     // just two prime factors p and q (as opposed to multiprime), and e is between
                     // 2^16 and 2^256.
-                    let private_key = RsaPrivateKey::from_components(n, e, d, vec![p, q])?;
+                    let private_key = RsaPrivateKey::from_components(
+                        modulus,
+                        public_exponent,
+                        private_exponent,
+                        vec![prime_p, prime_q],
+                    )?;
 
                     // let private_key = RsaPrivateKey::try_from(key_data)?;
 
@@ -155,12 +160,14 @@ mod tests {
     fn test_rsa_vault_using_both_keys() -> Result<()> {
         let public_key_file = Path::new("test_data/id_rsa.pub");
         let private_key_file = Path::new("test_data/id_rsa");
-        let public_key = PublicKey::read_openssh_file(&public_key_file)?;
-        let private_key = PrivateKey::read_openssh_file(&private_key_file)?;
+        let public_key = PublicKey::read_openssh_file(public_key_file)?;
+        let private_key = PrivateKey::read_openssh_file(private_key_file)?;
         let vault = RsaVault::new(Some(public_key), Some(private_key));
-        assert_eq!(vault.is_err(), true);
+        assert!(vault.is_err());
 
-        let err = vault.unwrap_err();
+        let Err(err) = vault else {
+            unreachable!("expected error when both keys provided")
+        };
 
         // Convert the error to a string and check the message
         assert_eq!(
@@ -174,18 +181,18 @@ mod tests {
     #[test]
     fn test_rsa_vault_using_public_key() -> Result<()> {
         let public_key_file = Path::new("test_data/id_rsa.pub");
-        let public_key = PublicKey::read_openssh_file(&public_key_file)?;
+        let public_key = PublicKey::read_openssh_file(public_key_file)?;
         let vault = RsaVault::new(Some(public_key), None);
-        assert_eq!(vault.is_ok(), true);
+        assert!(vault.is_ok());
         Ok(())
     }
 
     #[test]
     fn test_rsa_vault_using_private_key() -> Result<()> {
         let private_key_file = Path::new("test_data/id_rsa");
-        let private_key = PrivateKey::read_openssh_file(&private_key_file)?;
+        let private_key = PrivateKey::read_openssh_file(private_key_file)?;
         let vault = RsaVault::new(None, Some(private_key));
-        assert_eq!(vault.is_ok(), true);
+        assert!(vault.is_ok());
         Ok(())
     }
 }

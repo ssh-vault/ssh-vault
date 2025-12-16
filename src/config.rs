@@ -2,6 +2,11 @@ use crate::tools;
 use anyhow::Result;
 use config::Config;
 
+/// Load configuration from environment and config file.
+///
+/// # Errors
+///
+/// Returns an error if the configuration cannot be built or parsed.
 pub fn get() -> Result<Config> {
     let home = tools::get_home()?;
     let config_file = home.join(".config").join("ssh-vault").join("config.yml");
@@ -19,6 +24,7 @@ pub fn get() -> Result<Config> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 

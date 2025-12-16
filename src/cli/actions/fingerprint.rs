@@ -3,6 +3,10 @@ use crate::vault::{fingerprint, remote};
 use anyhow::Result;
 
 /// Handle the fingerprint action.
+///
+/// # Errors
+///
+/// Returns an error if local or remote key lookup fails.
 pub fn handle(action: Action) -> Result<()> {
     match action {
         Action::Fingerprint { key, user } => match (key, user) {

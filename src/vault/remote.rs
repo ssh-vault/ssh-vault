@@ -9,7 +9,11 @@ use url::Url;
 const GITHUB_BASE_URL: &str = "https://github.com";
 const SSHKEYS_ONLINE: &str = "https://ssh-keys.online/new";
 
-// Fetch the ssh keys from GitHub
+/// Fetch the ssh keys from GitHub or configured endpoint.
+///
+/// # Errors
+///
+/// Returns an error if the URL is invalid or the request fails.
 pub fn get_keys(user: &str) -> Result<String> {
     let mut cache = true;
 
@@ -33,6 +37,12 @@ pub fn get_keys(user: &str) -> Result<String> {
     request(url.as_str(), cache)
 }
 
+/// Perform a GET request and optionally cache the response.
+///
+/// # Errors
+///
+/// Returns an error if the URL is invalid, the request fails, or the response
+/// cannot be read.
 pub fn request(url: &str, cache: bool) -> Result<String> {
     let url = Url::parse(url)?;
 
@@ -77,7 +87,7 @@ fn get_headers() -> Result<HeaderMap> {
 
     if let Ok(http_headers) = config.get_table("http_headers") {
         for (key, value) in &http_headers {
-            config_headers.insert(key.to_string(), value.to_string());
+            config_headers.insert(key.clone(), value.to_string());
         }
     }
 
@@ -86,7 +96,11 @@ fn get_headers() -> Result<HeaderMap> {
     Ok(headers)
 }
 
-// Get the user key from the fetched keys
+/// Get the user key from fetched keys by index or fingerprint.
+///
+/// # Errors
+///
+/// Returns an error if the requested key is not found or cannot be parsed.
 pub fn get_user_key(
     keys: &str,
     key: Option<u32>,
@@ -133,6 +147,11 @@ pub fn get_user_key(
     Err(anyhow!("key not found"))
 }
 #[cfg(test)]
+#[allow(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    clippy::cast_possible_truncation
+)]
 mod tests {
     use super::*;
     use crate::vault::fingerprint::Fingerprint;
@@ -162,7 +181,7 @@ Fin
                     "SHA256:12mLJQInCFoL9JOPJwPGb/FUEe459PY1yZEZqNGVZtA".to_string(),
                     "MD5 55:cd:f2:7e:4c:0b:e5:a7:6e:6c:fc:6b:8e:58:9d:15".to_string(),
                 ],
-                comment: "".to_string(),
+                comment: String::new(),
                 algorithm: "ssh-rsa".to_string(),
             },
             Fingerprint {
@@ -179,7 +198,7 @@ Fin
                 fingerprints: vec![
                     "SHA256:hgIL5fEHz5zuOWY1CDlUuotdaUl4MvYG7vAgE4q4TzM".to_string(),
                 ],
-                comment: "".to_string(),
+                comment: String::new(),
                 algorithm: "ssh-ed25519".to_string(),
             },
             Fingerprint {
@@ -205,7 +224,7 @@ Fin
             assert_eq!(
                 get_expected()[i - 1],
                 get_remote_fingerprints(KEYS, Some(i as u32)).unwrap()[0]
-            )
+            );
         }
     }
 

@@ -15,27 +15,27 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
         Some("fingerprint") => {
             let sub_m = sub_m("fingerprint")?;
             Ok(Action::Fingerprint {
-                key: sub_m.get_one("key").map(|s: &String| s.to_string()),
-                user: sub_m.get_one("user").map(|s: &String| s.to_string()),
+                key: sub_m.get_one::<String>("key").cloned(),
+                user: sub_m.get_one::<String>("user").cloned(),
             })
         }
         Some("create") => {
             let sub_m = sub_m("create")?;
             Ok(Action::Create {
-                fingerprint: sub_m.get_one("fingerprint").map(|s: &String| s.to_string()),
-                input: sub_m.get_one("input").map(|s: &String| s.to_string()),
+                fingerprint: sub_m.get_one::<String>("fingerprint").cloned(),
+                input: sub_m.get_one::<String>("input").cloned(),
                 json: sub_m.get_one("json").copied().unwrap_or(false),
-                key: sub_m.get_one("key").map(|s: &String| s.to_string()),
-                user: sub_m.get_one("user").map(|s: &String| s.to_string()),
-                vault: sub_m.get_one("vault").map(|s: &String| s.to_string()),
+                key: sub_m.get_one::<String>("key").cloned(),
+                user: sub_m.get_one::<String>("user").cloned(),
+                vault: sub_m.get_one::<String>("vault").cloned(),
             })
         }
         Some("view") => {
             let sub_m = sub_m("view")?;
             Ok(Action::View {
-                key: sub_m.get_one("key").map(|s: &String| s.to_string()),
-                vault: sub_m.get_one("vault").map(|s: &String| s.to_string()),
-                output: sub_m.get_one("output").map(|s: &String| s.to_string()),
+                key: sub_m.get_one::<String>("key").cloned(),
+                vault: sub_m.get_one::<String>("vault").cloned(),
+                output: sub_m.get_one::<String>("output").cloned(),
                 passphrase: sub_m
                     .get_one("passphrase")
                     .map(|s: &String| SecretString::from(s.clone())),
@@ -44,13 +44,13 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
         Some("edit") => {
             let sub_m = sub_m("edit")?;
             Ok(Action::Edit {
-                key: sub_m.get_one("key").map(|s: &String| s.to_string()),
+                key: sub_m.get_one::<String>("key").cloned(),
                 passphrase: sub_m
                     .get_one("passphrase")
                     .map(|s: &String| SecretString::from(s.clone())),
                 vault: sub_m
-                    .get_one("vault")
-                    .map(|s: &String| s.to_string())
+                    .get_one::<String>("vault")
+                    .cloned()
                     .ok_or_else(|| anyhow::anyhow!("Vault path required"))?,
             })
         }
@@ -59,6 +59,7 @@ pub fn dispatch(matches: &clap::ArgMatches) -> Result<Action> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use crate::cli::{
@@ -80,7 +81,7 @@ mod tests {
                 assert_eq!(key, None);
                 assert_eq!(user, None);
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -97,7 +98,7 @@ mod tests {
                 assert_eq!(key, Some("test_data/id_rsa.pub".to_string()));
                 assert_eq!(user, None);
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -113,7 +114,7 @@ mod tests {
                 assert_eq!(key, None);
                 assert_eq!(user, Some("test".to_string()));
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -136,7 +137,7 @@ mod tests {
                 assert_eq!(key, Some("test_data/id_rsa.pub".to_string()));
                 assert_eq!(user, Some("test".to_string()));
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -158,12 +159,12 @@ mod tests {
             } => {
                 assert_eq!(fingerprint, None);
                 assert_eq!(input, None);
-                assert_eq!(json, false);
+                assert!(!json);
                 assert_eq!(key, None);
                 assert_eq!(user, None);
                 assert_eq!(vault, None);
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -185,12 +186,12 @@ mod tests {
             } => {
                 assert_eq!(fingerprint, None);
                 assert_eq!(input, None);
-                assert_eq!(json, true);
+                assert!(json);
                 assert_eq!(key, None);
                 assert_eq!(user, None);
                 assert_eq!(vault, None);
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -212,7 +213,7 @@ mod tests {
                 assert_eq!("secret", passphrase.unwrap().expose_secret());
                 assert_eq!(vault, String::from("test_data/id_rsa"));
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -242,7 +243,7 @@ mod tests {
                 assert_eq!(output, None);
                 assert_eq!("secret", passphrase.unwrap().expose_secret());
             }
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 
@@ -255,7 +256,7 @@ mod tests {
         let action = dispatch(&matches).unwrap();
         match action {
             Action::Help => {}
-            _ => panic!("Wrong action"),
+            _ => unreachable!("Wrong action"),
         }
     }
 }

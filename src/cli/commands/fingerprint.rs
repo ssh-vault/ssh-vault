@@ -42,33 +42,31 @@ mod tests {
     }
 
     #[test]
-    fn test_validator_user_ok() {
+    fn test_validator_user_ok() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_fingerprint());
-        let matches = app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test"]);
-        assert!(matches.is_ok());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test"])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("fingerprint")
-            .unwrap()
+            .ok_or("No fingerprint subcommand")?
             .to_owned();
-        assert_eq!(m.get_one::<String>("user").unwrap(), "test");
-        assert_eq!(m.get_one::<String>("key").is_none(), true);
+        assert_eq!(m.get_one::<String>("user").ok_or("No user")?, "test");
+        assert!(m.get_one::<String>("key").is_none());
+        Ok(())
     }
 
     #[test]
-    fn test_validator_user_with_key() {
+    fn test_validator_user_with_key() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_fingerprint());
         let matches =
-            app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test", "-k", "3"]);
-        assert!(matches.is_ok());
+            app.try_get_matches_from(vec!["ssh-vault", "fingerprint", "-u", "test", "-k", "3"])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("fingerprint")
-            .unwrap()
+            .ok_or("No fingerprint subcommand")?
             .to_owned();
-        assert_eq!(m.get_one::<String>("user").unwrap(), "test");
-        assert_eq!(m.get_one::<String>("key").unwrap(), "3");
+        assert_eq!(m.get_one::<String>("user").ok_or("No user")?, "test");
+        assert_eq!(m.get_one::<String>("key").ok_or("No key")?, "3");
+        Ok(())
     }
 }

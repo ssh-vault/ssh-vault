@@ -44,8 +44,7 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
         }
 
         let cipher = ChaCha20Poly1305::new(self.key.expose_secret().into());
-        let nonce = &data[..12];
-        let ciphertext = &data[12..];
+        let (nonce, ciphertext) = data.split_at(12);
         let decrypted_data = cipher
             .decrypt(
                 nonce.into(),
@@ -54,13 +53,14 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
                     aad: fingerprint,
                 },
             )
-            .map_err(|err| anyhow!("Error decrypting password: {}", err))?;
+            .map_err(|err| anyhow!("Error decrypting password: {err}"))?;
 
         Ok(decrypted_data)
     }
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used, clippy::unwrap_in_result)]
 mod tests {
     use super::*;
     use crate::vault::crypto::Crypto;
@@ -113,13 +113,8 @@ mod tests {
             let mut key_bytes = [0u8; 32];
             rng.fill_bytes(&mut key_bytes);
 
-            // Insert the key into the HashSet
-            let is_duplicate = !unique_keys.insert(key_bytes.clone());
-
-            // Check if it's a duplicate and assert
-            if is_duplicate {
-                assert!(false, "Duplicate key found")
-            }
+            // Insert the key into the HashSet and ensure it's unique
+            assert!(unique_keys.insert(key_bytes), "Duplicate key found");
 
             let key = SecretSlice::new(key_bytes.into());
             let crypto = ChaCha20Poly1305Crypto::new(key);
@@ -161,17 +156,15 @@ mod tests {
         for len in 1..12 {
             let short_data = vec![0u8; len];
             let result = crypto.decrypt(&short_data, FINGERPRINT.as_bytes());
-            assert!(result.is_err(), "Should fail with {} bytes", len);
+            assert!(result.is_err(), "Should fail with {len} bytes");
             let err_msg = result.unwrap_err().to_string();
             assert!(
                 err_msg.contains("too short"),
-                "Error message should mention 'too short', got: {}",
-                err_msg
+                "Error message should mention 'too short', got: {err_msg}",
             );
             assert!(
                 err_msg.contains(&len.to_string()),
-                "Error message should mention length {}",
-                len
+                "Error message should mention length {len}",
             );
         }
     }

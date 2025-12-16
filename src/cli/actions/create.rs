@@ -14,6 +14,11 @@ pub struct JsonVault {
 }
 
 /// Handle the create action
+///
+/// # Errors
+///
+/// Returns an error if arguments are invalid, the editor fails, I/O fails, or
+/// encryption cannot be completed.
 pub fn handle(action: Action) -> Result<()> {
     match action {
         Action::Create {
@@ -126,50 +131,54 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_format() {
+    fn test_format() -> Result<(), Box<dyn std::error::Error>> {
         let mut output = Vec::new();
         let vault = "vault".to_string();
         let json = false;
         let helper = None;
 
-        format(&mut output, vault, json, helper).unwrap();
+        format(&mut output, vault, json, helper)?;
 
         assert_eq!(output, b"vault");
+        Ok(())
     }
 
     #[test]
-    fn test_format_helper() {
+    fn test_format_helper() -> Result<(), Box<dyn std::error::Error>> {
         let mut output = Vec::new();
         let vault = "vault".to_string();
         let json = false;
         let helper = Some("helper".to_string());
 
-        format(&mut output, vault, json, helper).unwrap();
+        format(&mut output, vault, json, helper)?;
 
         assert_eq!(output, b"echo \"vault\" | ssh-vault view -k helper");
+        Ok(())
     }
 
     #[test]
-    fn test_format_json() {
+    fn test_format_json() -> Result<(), Box<dyn std::error::Error>> {
         let mut output = Vec::new();
         let vault = "vault".to_string();
         let json = true;
         let helper = None;
 
-        format(&mut output, vault, json, helper).unwrap();
+        format(&mut output, vault, json, helper)?;
 
         assert_eq!(output, b"{\"vault\":\"vault\"}");
+        Ok(())
     }
 
     #[test]
-    fn test_format_helper_json() {
+    fn test_format_helper_json() -> Result<(), Box<dyn std::error::Error>> {
         let mut output = Vec::new();
         let vault = "vault".to_string();
         let json = true;
         let helper = Some("helper".to_string());
 
-        format(&mut output, vault, json, helper).unwrap();
+        format(&mut output, vault, json, helper)?;
 
         assert_eq!(output, b"{\"vault\":\"vault\",\"private_key\":\"helper\"}");
+        Ok(())
     }
 }

@@ -3,6 +3,11 @@ use base58::ToBase58;
 use ssh_key::{HashAlg, PublicKey};
 use std::fmt::Write;
 
+/// Build the URL for retrieving a generated private key helper.
+///
+/// # Errors
+///
+/// Returns an error if the URL cannot be formatted.
 pub fn get_private_key_id(key: &PublicKey, user: &str) -> Result<String> {
     match user {
         "new" => {
@@ -16,6 +21,7 @@ pub fn get_private_key_id(key: &PublicKey, user: &str) -> Result<String> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use ssh_key::PublicKey;

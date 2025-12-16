@@ -2,6 +2,10 @@ use crate::cli::{actions::Action, commands, dispatcher};
 use anyhow::Result;
 
 /// Start the CLI
+///
+/// # Errors
+///
+/// Returns an error if argument parsing or dispatching fails.
 pub fn start() -> Result<Action> {
     let cmd = commands::new();
     let matches = cmd.get_matches();

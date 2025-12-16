@@ -43,7 +43,7 @@ mod tests {
     use clap::Command;
 
     #[test]
-    fn test_subcommand_view() {
+    fn test_subcommand_view() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_view());
 
         let matches = app.try_get_matches_from(vec![
@@ -54,41 +54,48 @@ mod tests {
             "-p",
             "secret",
             "/path/to/vault",
-        ]);
-        assert!(matches.is_ok());
+        ])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("view")
-            .unwrap()
+            .ok_or("No view subcommand")?
             .to_owned();
 
-        assert_eq!(m.get_one::<String>("key").unwrap(), "/path/to/id_rsa");
-        assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
-        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
+        assert_eq!(
+            m.get_one::<String>("key").ok_or("No key")?,
+            "/path/to/id_rsa"
+        );
+        assert_eq!(
+            m.get_one::<String>("vault").ok_or("No vault")?,
+            "/path/to/vault"
+        );
+        assert_eq!(
+            m.get_one::<String>("passphrase").ok_or("No passphrase")?,
+            "secret"
+        );
+        Ok(())
     }
 
     #[test]
-    fn test_subcommand_view_default() {
+    fn test_subcommand_view_default() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_view());
 
-        let matches = app.try_get_matches_from(vec!["ssh-vault", "view"]);
-        assert!(matches.is_ok());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "view"])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("view")
-            .unwrap()
+            .ok_or("No view subcommand")?
             .to_owned();
 
         assert_eq!(m.get_one::<String>("key"), None);
         assert_eq!(m.get_one::<String>("vault"), None);
         assert_eq!(m.get_one::<String>("passphrase"), None);
         assert_eq!(m.get_one::<String>("output"), None);
+        Ok(())
     }
 
     #[test]
-    fn test_subcommand_view_short() {
+    fn test_subcommand_view_short() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_view());
 
         let matches = app.try_get_matches_from(vec![
@@ -99,41 +106,48 @@ mod tests {
             "-p",
             "secret",
             "/path/to/vault",
-        ]);
-        assert!(matches.is_ok());
+        ])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("view")
-            .unwrap()
+            .ok_or("No view subcommand")?
             .to_owned();
 
-        assert_eq!(m.get_one::<String>("key").unwrap(), "/path/to/id_rsa");
-        assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
-        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
+        assert_eq!(
+            m.get_one::<String>("key").ok_or("No key")?,
+            "/path/to/id_rsa"
+        );
+        assert_eq!(
+            m.get_one::<String>("vault").ok_or("No vault")?,
+            "/path/to/vault"
+        );
+        assert_eq!(
+            m.get_one::<String>("passphrase").ok_or("No passphrase")?,
+            "secret"
+        );
         assert_eq!(m.get_one::<String>("output"), None);
+        Ok(())
     }
 
     #[test]
-    fn test_subcommand_view_short_default() {
+    fn test_subcommand_view_short_default() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_view());
 
-        let matches = app.try_get_matches_from(vec!["ssh-vault", "v"]);
-        assert!(matches.is_ok());
+        let matches = app.try_get_matches_from(vec!["ssh-vault", "v"])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("view")
-            .unwrap()
+            .ok_or("No view subcommand")?
             .to_owned();
 
         assert_eq!(m.get_one::<String>("key"), None);
         assert_eq!(m.get_one::<String>("vault"), None);
         assert_eq!(m.get_one::<String>("passphrase"), None);
+        Ok(())
     }
 
     #[test]
-    fn test_subcommand_view_output() {
+    fn test_subcommand_view_output() -> Result<(), Box<dyn std::error::Error>> {
         let app = Command::new("ssh-vault").subcommand(subcommand_view());
 
         let matches = app.try_get_matches_from(vec![
@@ -146,18 +160,29 @@ mod tests {
             "-o",
             "/path/to/output",
             "/path/to/vault",
-        ]);
-        assert!(matches.is_ok());
+        ])?;
 
         let m = matches
-            .unwrap()
             .subcommand_matches("view")
-            .unwrap()
+            .ok_or("No view subcommand")?
             .to_owned();
 
-        assert_eq!(m.get_one::<String>("key").unwrap(), "/path/to/id_rsa");
-        assert_eq!(m.get_one::<String>("vault").unwrap(), "/path/to/vault");
-        assert_eq!(m.get_one::<String>("passphrase").unwrap(), "secret");
-        assert_eq!(m.get_one::<String>("output").unwrap(), "/path/to/output");
+        assert_eq!(
+            m.get_one::<String>("key").ok_or("No key")?,
+            "/path/to/id_rsa"
+        );
+        assert_eq!(
+            m.get_one::<String>("vault").ok_or("No vault")?,
+            "/path/to/vault"
+        );
+        assert_eq!(
+            m.get_one::<String>("passphrase").ok_or("No passphrase")?,
+            "secret"
+        );
+        assert_eq!(
+            m.get_one::<String>("output").ok_or("No output")?,
+            "/path/to/output"
+        );
+        Ok(())
     }
 }

@@ -38,6 +38,11 @@ impl fmt::Display for Fingerprint {
     }
 }
 
+/// Collect fingerprints for all public keys in `~/.ssh`.
+///
+/// # Errors
+///
+/// Returns an error if any key cannot be read or parsed.
 pub fn fingerprints() -> Result<Vec<Fingerprint>> {
     // Create a vector to store Fingerprint structs
     let mut fingerprints: Vec<Fingerprint> = Vec::new();
@@ -81,6 +86,11 @@ pub fn fingerprints() -> Result<Vec<Fingerprint>> {
     Ok(fingerprints)
 }
 
+/// Compute fingerprints for a single public key.
+///
+/// # Errors
+///
+/// Returns an error if the key cannot be read or parsed.
 pub fn fingerprint(key: &str) -> Result<Fingerprint> {
     let path = Path::new(&key);
     let key = PublicKey::read_openssh_file(path)
@@ -110,7 +120,11 @@ pub fn fingerprint(key: &str) -> Result<Fingerprint> {
     Ok(fingerprint)
 }
 
-// Fetch the ssh keys from GitHub
+/// Fetch remote SSH keys and return their fingerprints.
+///
+/// # Errors
+///
+/// Returns an error if parsing or fingerprint generation fails.
 pub fn get_remote_fingerprints(keys: &str, key: Option<u32>) -> Result<Vec<Fingerprint>> {
     // Get only SSH keys from the fetched keys
     let keys = tools::filter_fetched_keys(keys)?;
@@ -162,8 +176,12 @@ pub fn get_remote_fingerprints(keys: &str, key: Option<u32>) -> Result<Vec<Finge
     Ok(fingerprints)
 }
 
-// Calculate the MD5 fingerprint of a RSA public key
-// and format it as a colon separated string
+/// Calculate the MD5 fingerprint of a RSA public key and format it as a colon
+/// separated string.
+///
+/// # Errors
+///
+/// Returns an error if the key cannot be encoded.
 pub fn md5_fingerprint(public_key: &RsaPublicKey) -> Result<String> {
     let public_key_der = public_key.to_public_key_der()?;
     let md5_fingerprint = md5::compute(public_key_der.as_bytes());
@@ -178,6 +196,7 @@ pub fn md5_fingerprint(public_key: &RsaPublicKey) -> Result<String> {
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
@@ -207,7 +226,7 @@ mod tests {
             },
         ];
 
-        for test in tests.iter() {
+        for test in &tests {
             let mut fingerprint = String::new();
             let public_key = PublicKey::from_openssh(test.key).unwrap();
             if public_key.algorithm().as_str() == "ssh-rsa" {

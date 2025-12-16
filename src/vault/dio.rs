@@ -7,6 +7,11 @@ pub enum InputSource {
 }
 
 impl InputSource {
+    /// Create a new input source from an optional file path.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the provided file cannot be opened.
     pub fn new(input: Option<String>) -> io::Result<Self> {
         if let Some(filename) = input {
             // Use a file if the filename is not "-" (stdin)
@@ -40,6 +45,11 @@ pub enum OutputDestination {
 }
 
 impl OutputDestination {
+    /// Create a new output destination from an optional file path.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the provided file cannot be created or opened.
     #[allow(clippy::suspicious_open_options)]
     pub fn new(output: Option<String>) -> io::Result<Self> {
         if let Some(filename) = output {
@@ -54,6 +64,11 @@ impl OutputDestination {
         Ok(Self::Stdout)
     }
 
+    /// Truncate the underlying file (if any).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if truncation fails.
     pub fn truncate(&self) -> io::Result<()> {
         match self {
             Self::File(file) => file.set_len(0),
@@ -62,6 +77,11 @@ impl OutputDestination {
     }
 
     // Check if the output is empty, preventing overwriting a non-empty file
+    /// Check whether the output destination is empty.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if file metadata cannot be read.
     pub fn is_empty(&self) -> io::Result<bool> {
         match self {
             Self::File(file) => Ok(file.metadata().map(|m| m.len() == 0).unwrap_or(false)),
@@ -86,6 +106,11 @@ impl Write for OutputDestination {
     }
 }
 
+/// Configure input and output sources for CLI commands.
+///
+/// # Errors
+///
+/// Returns an error if either the input or output file cannot be opened.
 pub fn setup_io(
     input: Option<String>,
     output: Option<String>,
@@ -97,6 +122,7 @@ pub fn setup_io(
 }
 
 #[cfg(test)]
+#[allow(clippy::unwrap_used)]
 mod tests {
     use super::*;
     use tempfile::NamedTempFile;
