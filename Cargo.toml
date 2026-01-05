@@ -45,7 +45,7 @@ large_stack_arrays = "deny"
 aes-gcm = "0.10.3"
 anyhow = "1"
 base58 = "0.2.0"
-base64ct = { version = "1.8.1", features = ["alloc"] }
+base64ct = { version = "1.8.2", features = ["alloc"] }
 chacha20poly1305 = "0.10.1"
 clap = { version = "4.5", features = ["env", "color"] }
 config = { version = "0.15", default-features = false, features = ["yaml"] }
