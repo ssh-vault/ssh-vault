@@ -46,7 +46,7 @@ allow = [
     "ISC",                  # ISC License - used by rustls, ring, webpki (OSI approved, permissive)
     "Unicode-3.0",          # Unicode License - used by ICU (internationalization)
     "Zlib",                 # Zlib License - permissive, OSI approved
-    "CDLA-Permissive-2.0",  # Community Data License Agreement - used by webpki-roots
+    "OpenSSL",              # OpenSSL License - used by aws-lc-sys (crypto backend for rustls)
 ]
 # The confidence threshold for detecting a license from license text.
 confidence-threshold = 0.8
