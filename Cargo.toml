@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.2.0"
+version = "1.2.1"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -56,7 +56,7 @@ home = "0.5.12"
 md5 = "0.8.0"
 rand = "0.8"
 regex = "1.11"
-reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+reqwest = { version = "0.13", features = ["blocking"] }
 rpassword = "7.3"
 rsa = { version = "0.9.9", features = ["sha2"] }
 secrecy = "0.10.3"
