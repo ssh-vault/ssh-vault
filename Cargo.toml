@@ -51,7 +51,7 @@ clap = { version = "4.6", features = ["env", "color"] }
 config = { version = "0.15", default-features = false, features = ["yaml"] }
 ed25519-dalek = { version = "2.2.0", features = ["pkcs8"] }
 hex-literal = "1.1.0"
-hkdf = "0.12.4"
+hkdf = "0.13.0"
 home = "0.5.12"
 md5 = "0.8.0"
 rand = "0.8"
