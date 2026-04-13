@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5
+* updated direct randomness usage to `rand 0.10` while keeping compatibility with current `rsa` / `ssh-key` releases
+* refreshed GitHub Actions dependencies to current major versions
+
 ## 1.2.0
 * replaced OpenSSL with rustls for TLS
 * clippy improvements

@@ -3,7 +3,7 @@ pub mod chacha20poly1305;
 
 use anyhow::{Result, anyhow};
 use hkdf::Hkdf;
-use rand::{RngCore, rngs::OsRng};
+use rand::{TryRng, rngs::SysRng};
 use secrecy::SecretSlice;
 use sha2::Sha256;
 
@@ -65,7 +65,12 @@ pub trait Crypto {
 /// Returns an error if secure random bytes cannot be generated.
 pub fn gen_password() -> Result<SecretSlice<u8>> {
     let mut password = [0_u8; 32];
-    OsRng.fill_bytes(&mut password);
+    // Prefer rand 0.10 across application code. The RSA path still uses
+    // rsa::rand_core::OsRng until upstream rsa/ssh-key releases move off the
+    // older rand_core stack.
+    SysRng
+        .try_fill_bytes(&mut password)
+        .map_err(|err| anyhow!("Error generating random password: {err}"))?;
     Ok(SecretSlice::new(password.into()))
 }
 

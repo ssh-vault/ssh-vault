@@ -64,7 +64,7 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
 mod tests {
     use super::*;
     use crate::vault::crypto::Crypto;
-    use rand::{RngCore, rngs::OsRng};
+    use rand::{TryRng, rngs::SysRng};
     use std::collections::HashSet;
 
     const TEST_DATA: &str = "The quick brown fox jumps over the lazy dog";
@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn test_chacha20poly1305() {
         let mut password = [0_u8; 32];
-        OsRng.fill_bytes(&mut password);
+        SysRng.try_fill_bytes(&mut password).unwrap();
         let key = SecretSlice::new(password.into());
 
         let crypto = ChaCha20Poly1305Crypto::new(key);
@@ -91,7 +91,7 @@ mod tests {
     #[test]
     fn test_chacha20poly1305_wrong_fingerprint() {
         let mut password = [0_u8; 32];
-        OsRng.fill_bytes(&mut password);
+        SysRng.try_fill_bytes(&mut password).unwrap();
         let key = SecretSlice::new(password.into());
 
         let crypto = ChaCha20Poly1305Crypto::new(key);
@@ -109,9 +109,9 @@ mod tests {
         let mut unique_keys = HashSet::new();
 
         for _ in 0..1000 {
-            let mut rng = OsRng;
+            let mut rng = SysRng;
             let mut key_bytes = [0u8; 32];
-            rng.fill_bytes(&mut key_bytes);
+            rng.try_fill_bytes(&mut key_bytes).unwrap();
 
             // Insert the key into the HashSet and ensure it's unique
             assert!(unique_keys.insert(key_bytes), "Duplicate key found");
@@ -121,11 +121,11 @@ mod tests {
 
             // Generate random data
             let mut data = vec![0u8; 300];
-            rng.fill_bytes(&mut data);
+            rng.try_fill_bytes(&mut data).unwrap();
 
             // Generate random fingerprint
             let mut fingerprint = vec![0u8; 100];
-            rng.fill_bytes(&mut fingerprint);
+            rng.try_fill_bytes(&mut fingerprint).unwrap();
 
             let encrypted_data = crypto.encrypt(&data, &fingerprint).unwrap();
             let decrypted_data = crypto.decrypt(&encrypted_data, &fingerprint).unwrap();
@@ -136,7 +136,7 @@ mod tests {
     #[test]
     fn test_chacha20poly1305_decrypt_empty_data() {
         let mut password = [0_u8; 32];
-        OsRng.fill_bytes(&mut password);
+        SysRng.try_fill_bytes(&mut password).unwrap();
         let key = SecretSlice::new(password.into());
         let crypto = ChaCha20Poly1305Crypto::new(key);
 
@@ -148,7 +148,7 @@ mod tests {
     #[test]
     fn test_chacha20poly1305_decrypt_short_data() {
         let mut password = [0_u8; 32];
-        OsRng.fill_bytes(&mut password);
+        SysRng.try_fill_bytes(&mut password).unwrap();
         let key = SecretSlice::new(password.into());
         let crypto = ChaCha20Poly1305Crypto::new(key);
 
@@ -172,7 +172,7 @@ mod tests {
     #[test]
     fn test_chacha20poly1305_decrypt_exact_minimum() {
         let mut password = [0_u8; 32];
-        OsRng.fill_bytes(&mut password);
+        SysRng.try_fill_bytes(&mut password).unwrap();
         let key = SecretSlice::new(password.into());
         let crypto = ChaCha20Poly1305Crypto::new(key);
 

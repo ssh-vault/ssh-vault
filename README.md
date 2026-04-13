@@ -71,6 +71,15 @@ $ echo "secret" | ssh-vault create -u new
 
     $ cargo install ssh-vault
 
+## Development Notes
+
+`ssh-vault` uses `rand 0.10` for application-owned randomness.
+
+The remaining older `rand` in the dependency graph is currently transitive via
+the released `rsa` / `ssh-key` stack. Keep new application code on `rand 0.10`
+APIs and only use the RSA-local compatibility path where `rsa` requires its own
+`rand_core` types. Revisit this when upstream releases remove that constraint.
+
 ## Issues
 
 Please feel free to raise any issue, feature requirement or a simple comment [here](https://github.com/ssh-vault/ssh-vault/issues).

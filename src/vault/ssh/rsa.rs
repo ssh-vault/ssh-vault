@@ -3,8 +3,7 @@ use crate::vault::{
 };
 use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
-use rand::rngs::OsRng;
-use rsa::{BigUint, Oaep, RsaPrivateKey, RsaPublicKey, sha2::Sha256};
+use rsa::{BigUint, Oaep, RsaPrivateKey, RsaPublicKey, rand_core::OsRng, sha2::Sha256};
 use secrecy::{ExposeSecret, SecretSlice};
 use ssh_key::{PrivateKey, PublicKey, private::KeypairData, public::KeyData};
 use zeroize::Zeroize;
@@ -105,6 +104,9 @@ impl Vault for RsaVault {
         // zeroize data
         data.zeroize();
 
+        // Keep the RSA boundary on rsa::rand_core::OsRng. The rest of the crate
+        // uses rand 0.10, but current rsa/ssh-key releases still depend on the
+        // older rand_core line. Revisit this when upstream removes that split.
         let encrypted_password =
             self.public_key
                 .encrypt(&mut OsRng, Oaep::new::<Sha256>(), password.expose_secret())?;

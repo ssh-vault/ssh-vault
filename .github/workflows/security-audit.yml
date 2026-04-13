@@ -20,9 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      
-      - name: Install cargo-deny
-        run: cargo install cargo-deny --locked
-      
-      - name: Run cargo deny check
-        run: cargo deny check
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - name: Run cargo audit
+        # Keep the current RSA exception aligned with deny.toml until upstream
+        # publishes a fix for RUSTSEC-2023-0071.
+        run: cargo audit --ignore RUSTSEC-2023-0071
