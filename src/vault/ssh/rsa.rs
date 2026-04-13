@@ -4,9 +4,8 @@ use crate::vault::{
 use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
 use rand::rngs::OsRng;
-use rsa::{BigUint, Oaep, RsaPrivateKey, RsaPublicKey};
+use rsa::{BigUint, Oaep, RsaPrivateKey, RsaPublicKey, sha2::Sha256};
 use secrecy::{ExposeSecret, SecretSlice};
-use sha2::Sha256;
 use ssh_key::{PrivateKey, PublicKey, private::KeypairData, public::KeyData};
 use zeroize::Zeroize;
 

@@ -129,15 +129,16 @@ mod tests {
 
     #[test]
     fn test_setup_io() {
-        if std::env::var("GITHUB_ACTIONS").is_ok() {
-            return;
-        }
+        let stdin_is_terminal = io::stdin().is_terminal();
+
         let (input, output) = setup_io(None, None).unwrap();
-        assert!(input.is_terminal());
+        assert!(matches!(input, InputSource::Stdin));
+        assert_eq!(input.is_terminal(), stdin_is_terminal);
         assert!(matches!(output, OutputDestination::Stdout));
 
         let (input, output) = setup_io(Some("-".to_string()), None).unwrap();
-        assert!(input.is_terminal());
+        assert!(matches!(input, InputSource::Stdin));
+        assert_eq!(input.is_terminal(), stdin_is_terminal);
         assert!(matches!(output, OutputDestination::Stdout));
 
         let rs = setup_io(Some("noneexistent".to_string()), None);
