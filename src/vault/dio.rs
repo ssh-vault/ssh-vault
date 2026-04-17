@@ -84,7 +84,7 @@ impl OutputDestination {
     /// Returns an error if file metadata cannot be read.
     pub fn is_empty(&self) -> io::Result<bool> {
         match self {
-            Self::File(file) => Ok(file.metadata().map(|m| m.len() == 0).unwrap_or(false)),
+            Self::File(file) => Ok(file.metadata().is_ok_and(|metadata| metadata.len() == 0)),
             Self::Stdout => Ok(true), // Do nothing for stdout
         }
     }

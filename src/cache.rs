@@ -24,7 +24,7 @@ pub fn get(key: &str) -> Result<String> {
             .unwrap_or(Duration::from_secs(0));
 
         // Return an error if the cache is older than 30 days
-        if duration_since_modified > Duration::from_secs(30 * 24 * 60 * 60) {
+        if duration_since_modified > Duration::from_hours(30 * 24) {
             Err(anyhow!("cache expired"))
         } else {
             Ok(fs::read_to_string(cache)?)

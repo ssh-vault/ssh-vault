@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.6
+* cargo update for the current Rust 1.95-compatible dependency set
+* clippy compatibility fixes in cache expiration and output metadata checks
+
 ## 1.2.5
 * updated direct randomness usage to `rand 0.10` while keeping compatibility with current `rsa` / `ssh-key` releases
 * refreshed GitHub Actions dependencies to current major versions
