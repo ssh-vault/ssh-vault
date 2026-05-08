@@ -2,6 +2,7 @@
 name: PackageCloud
 
 on:
+  workflow_dispatch:
   workflow_call:
     secrets:
       PACKAGECLOUD_TOKEN:
@@ -52,54 +53,81 @@ jobs:
 
       - name: push Debian
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.deb --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in squeeze wheezy jessie stretch buster bullseye bookworm trixie; do
-            package_cloud push nbari/ssh-vault/debian/$distro dist/*.deb --skip-errors
+            push_package nbari/ssh-vault/debian/$distro
           done
 
       - name: push Ubuntu
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.deb --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in bionic focal jammy noble questing resolute; do
-            package_cloud push nbari/ssh-vault/ubuntu/$distro dist/*.deb --skip-errors
+            push_package nbari/ssh-vault/ubuntu/$distro
           done
 
       - name: push Raspbian
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.deb --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in stretch buster bullseye bookworm trixie; do
-            package_cloud push nbari/ssh-vault/raspbian/$distro dist/*.deb --skip-errors
+            push_package nbari/ssh-vault/raspbian/$distro
           done
 
       - name: push Elementaryos
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.deb --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in odin jolnir horus circe; do
-            package_cloud push nbari/ssh-vault/elementaryos/$distro dist/*.deb --skip-errors
+            push_package nbari/ssh-vault/elementaryos/$distro
           done
 
       - name: push Linuxmint
         run: |-
-          for distro in vanessa vera victoria virginia wilma xia zara zena; do
-            package_cloud push nbari/ssh-vault/linuxmint/$distro dist/*.deb --skip-errors
+          push_package() {
+            package_cloud push "$1" dist/*.deb --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
+          for distro in vanessa vera victoria virginia wilma xia; do
+            push_package nbari/ssh-vault/linuxmint/$distro
           done
 
       - name: push Enterprise Linux
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.rpm --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in 7 8 9 10; do
-            package_cloud push nbari/ssh-vault/el/$distro dist/*.rpm --skip-errors
+            push_package nbari/ssh-vault/el/$distro
           done
 
       - name: push Fedora
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.rpm --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in 38 39 40 41 42 43 44; do
-            package_cloud push nbari/ssh-vault/fedora/$distro dist/*.rpm --skip-errors
+            push_package nbari/ssh-vault/fedora/$distro
           done
 
       - name: push Opensuse
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.rpm --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in 15.4 15.5 15.6 16.0; do
-            package_cloud push nbari/ssh-vault/opensuse/$distro dist/*.rpm --skip-errors
+            push_package nbari/ssh-vault/opensuse/$distro
           done
 
       - name: push Poky
         run: |-
+          push_package() {
+            package_cloud push "$1" dist/*.rpm --skip-errors || echo "::warning::PackageCloud push failed for $1"
+          }
           for distro in mickledore nanbield scarthgap styhead walnascar whinlatter wrynose; do
-            package_cloud push nbari/ssh-vault/poky/$distro dist/*.rpm --skip-errors
+            push_package nbari/ssh-vault/poky/$distro
           done
