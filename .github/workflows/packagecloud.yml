@@ -17,16 +17,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Install dependencies
-        run: sudo apt -y install musl-dev musl-tools
-
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: x86_64-unknown-linux-musl
 
-      - name: Build
-        run: cargo build --release --locked --target x86_64-unknown-linux-musl
+      - name: Install packaging tools
+        run: cargo install --locked cargo-deb cargo-generate-rpm
+
+      - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Build deb
+        run: cargo deb --no-build
+
+      - name: Build rpm
+        run: cargo generate-rpm
+
+      - name: Create dist dir
+        run: mkdir dist
+
+      - name: Collect packages
+        run: cp target/debian/*.deb target/generate-rpm/*.rpm dist/
 
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
@@ -34,83 +44,62 @@ jobs:
           ruby-version: 3
           bundler-cache: true
 
-      - name: Install fpm
-        run: gem install --quiet --no-document fpm
-
       - name: Install PackageCloud
         run: gem install --quiet --no-document package_cloud
-
-      - name: Get Version
-        run: echo "VERSION=$(grep -oP -m 1 'version = "\K[^"]+' Cargo.toml)" >> $GITHUB_ENV
-
-      - name: Get description
-        run: echo "DESCRIPTION=$(grep -oP -m 1 'description = "\K[^"]+' Cargo.toml)"
-          >> $GITHUB_ENV
-
-      - name: Create dist dir
-        run: mkdir dist
-
-      - name: create deb
-        run: fpm -s dir -t deb -n ssh-vault -v ${{ env.VERSION }} --description "${{ env.DESCRIPTION }}"  -a
-          amd64 -p dist -C target/x86_64-unknown-linux-musl/release/ ./ssh-vault=/usr/local/bin/
-
-      - name: create rpm
-        run: fpm -s dir -t rpm -n ssh-vault -v ${{ env.VERSION }} --description "${{ env.DESCRIPTION }}"
-          -a x86_64 -p dist -C target/x86_64-unknown-linux-musl/release/ ./ssh-vault=/usr/local/bin/
 
       - name: run ls
         run: ls -al dist
 
       - name: push Debian
         run: |-
-          for distro in squeeze wheezy jessie stretch buster bullseye bookworm; do
+          for distro in squeeze wheezy jessie stretch buster bullseye bookworm trixie; do
             package_cloud push nbari/ssh-vault/debian/$distro dist/*.deb --skip-errors
           done
 
       - name: push Ubuntu
         run: |-
-          for distro in bionic focal jammy; do
+          for distro in bionic focal jammy noble questing resolute; do
             package_cloud push nbari/ssh-vault/ubuntu/$distro dist/*.deb --skip-errors
           done
 
       - name: push Raspbian
         run: |-
-          for distro in stretch buster bullseye; do
+          for distro in stretch buster bullseye bookworm trixie; do
             package_cloud push nbari/ssh-vault/raspbian/$distro dist/*.deb --skip-errors
           done
 
       - name: push Elementaryos
         run: |-
-          for distro in odin jolnir horus; do
+          for distro in odin jolnir horus circe; do
             package_cloud push nbari/ssh-vault/elementaryos/$distro dist/*.deb --skip-errors
           done
 
       - name: push Linuxmint
         run: |-
-          for distro in vanessa vera victoria; do
+          for distro in vanessa vera victoria virginia wilma xia zara zena; do
             package_cloud push nbari/ssh-vault/linuxmint/$distro dist/*.deb --skip-errors
           done
 
       - name: push Enterprise Linux
         run: |-
-          for distro in 7 8 9; do
+          for distro in 7 8 9 10; do
             package_cloud push nbari/ssh-vault/el/$distro dist/*.rpm --skip-errors
           done
 
       - name: push Fedora
         run: |-
-          for distro in 38 39 40; do
+          for distro in 38 39 40 41 42 43 44; do
             package_cloud push nbari/ssh-vault/fedora/$distro dist/*.rpm --skip-errors
           done
 
       - name: push Opensuse
         run: |-
-          for distro in 15.4 15.5 15.6; do
+          for distro in 15.4 15.5 15.6 16.0; do
             package_cloud push nbari/ssh-vault/opensuse/$distro dist/*.rpm --skip-errors
           done
 
       - name: push Poky
         run: |-
-          for distro in mickledore nanbield; do
+          for distro in mickledore nanbield scarthgap styhead walnascar whinlatter wrynose; do
             package_cloud push nbari/ssh-vault/poky/$distro dist/*.rpm --skip-errors
           done

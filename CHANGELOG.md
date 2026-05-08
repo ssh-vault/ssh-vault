@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.8
+* add RPM and Debian package metadata
+* attach generated `.rpm` and `.deb` packages to GitHub releases
+* refresh PackageCloud distribution targets
+* bump `rpassword` to 7.5
+
 ## 1.2.6
 * cargo update for the current Rust 1.95-compatible dependency set
 * clippy compatibility fixes in cache expiration and output metadata checks

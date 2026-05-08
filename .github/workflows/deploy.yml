@@ -81,6 +81,38 @@ jobs:
           files: |-
             ${{ env.ASSET }}
 
+  package-release:
+    name: Build Linux packages
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install packaging tools
+        run: cargo install --locked cargo-deb cargo-generate-rpm
+
+      - name: Build release binary
+        run: cargo build --release --locked
+
+      - name: Build deb
+        run: cargo deb --no-build
+
+      - name: Build rpm
+        run: cargo generate-rpm
+
+      - name: Release packages
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: |-
+            target/debian/*.deb
+            target/generate-rpm/*.rpm
+
   publish:
     name: Publish
     runs-on: ubuntu-latest

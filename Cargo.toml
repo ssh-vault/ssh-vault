@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.2.7"
+version = "1.2.8"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -57,7 +57,7 @@ md5 = "0.8.0"
 rand = "0.10"
 regex = "1.12"
 reqwest = { version = "0.13", features = ["blocking"] }
-rpassword = "7.4"
+rpassword = "7.5"
 rsa = { version = "0.9.10", features = ["sha2"] }
 secrecy = "0.10.3"
 serde = { version = "1.0", features = ["derive"] }
@@ -70,3 +70,21 @@ tempfile = "3.27"
 url = "2.5"
 x25519-dalek = { version = "2.0.1", features = ["getrandom", "static_secrets"] }
 zeroize = "1.8.2"
+
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/ssh-vault", dest = "/usr/bin/ssh-vault", mode = "0755" },
+]
+
+[package.metadata.deb]
+assets = [
+  ["target/release/ssh-vault", "/usr/bin/ssh-vault", "755"],
+]
+depends = ""
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = true
+panic = "abort"
