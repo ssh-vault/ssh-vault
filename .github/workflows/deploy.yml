@@ -143,7 +143,8 @@ jobs:
       - build
     steps:
       - name: bump-homebrew-formula
-        uses: mislav/bump-homebrew-formula-action@v4
+        # pinned to fix for HTTP 303 redirect issue (PR #342), revert to @v4 once released
+        uses: mislav/bump-homebrew-formula-action@85a7c68f4aa8a5a8736a9e1efe604d61f176d269
         with:
           # A PR will be sent to github.com/Homebrew/homebrew-core to update this formula:
           formula-name: ssh-vault
