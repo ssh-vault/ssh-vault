@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.12
+* build `.deb` and `.rpm` packages for aarch64 (ARM64) on a native ARM runner, alongside the existing x86_64 packages
+* bump `codecov/codecov-action` to v7
+* cargo update for the current Rust-compatible dependency set
+
 ## 1.2.8
 * add RPM and Debian package metadata
 * attach generated `.rpm` and `.deb` packages to GitHub releases
