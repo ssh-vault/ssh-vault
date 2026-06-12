@@ -26,6 +26,10 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-musl
 
+          - build: linux-arm
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+
           - build: macos
             os: macos-latest
             target: x86_64-apple-darwin
@@ -47,7 +51,7 @@ jobs:
           targets: ${{ matrix.target }}
 
       - run: sudo apt -y install musl-dev musl-tools
-        if: matrix.build == 'linux'
+        if: startsWith(matrix.build, 'linux')
 
       - name: Build
         run: |

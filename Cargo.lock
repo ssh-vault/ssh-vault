@@ -2286,7 +2286,7 @@ dependencies = [
 
 [[package]]
 name = "ssh-vault"
-version = "1.2.12"
+version = "1.2.13"
 dependencies = [
  "aes-gcm",
  "anyhow",

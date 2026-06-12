@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.13
+* build and release the `aarch64-unknown-linux-musl` tarball alongside the existing release archives
+
 ## 1.2.12
 * build `.deb` and `.rpm` packages for aarch64 (ARM64) on a native ARM runner, alongside the existing x86_64 packages
 * bump `codecov/codecov-action` to v7
