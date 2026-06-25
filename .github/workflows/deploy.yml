@@ -28,6 +28,7 @@ jobs:
     name: Build and release
     runs-on: ${{ matrix.os }}
     needs: test
+    if: startsWith(github.ref, 'refs/tags/')
 
     strategy:
       matrix:
@@ -166,7 +167,7 @@ jobs:
     name: Bump Homebrew formula
     runs-on: macos-latest
     needs:
-      - build
+      - test
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
     steps:
       - name: Open Homebrew core formula PR
