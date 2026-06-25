@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.14
+* replace the Homebrew release action with `brew bump-formula-pr` for official Homebrew core PRs
+* cargo update to refresh dependencies and fix `RUSTSEC-2026-0185`
+
 ## 1.2.13
 * build and release the `aarch64-unknown-linux-musl` tarball alongside the existing release archives
 

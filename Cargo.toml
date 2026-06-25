@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.2.13"
+version = "1.2.14"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -69,7 +69,7 @@ temp-env = "0.3.6"
 tempfile = "3.27"
 url = "2.5"
 x25519-dalek = { version = "2.0.1", features = ["getrandom", "static_secrets"] }
-zeroize = "1.8.2"
+zeroize = "1.9.0"
 
 [package.metadata.generate-rpm]
 assets = [

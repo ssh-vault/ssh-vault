@@ -151,14 +151,30 @@ jobs:
 
   homebrew:
     name: Bump Homebrew formula
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     needs:
       - build
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
-      - name: bump-homebrew-formula
-        uses: mislav/bump-homebrew-formula-action@v4
-        with:
-          # A PR will be sent to github.com/Homebrew/homebrew-core to update this formula:
-          formula-name: ssh-vault
+      - name: Open Homebrew core formula PR
         env:
-          COMMITTER_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          TARBALL="https://github.com/ssh-vault/ssh-vault/archive/refs/tags/${TAG}.tar.gz"
+          SHA256=$(curl -fsSL "$TARBALL" | shasum -a 256 | cut -d' ' -f1)
+          echo "tarball=$TARBALL sha256=$SHA256"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          brew update
+          brew bump-formula-pr ssh-vault \
+            --version="$VERSION" \
+            --url="$TARBALL" \
+            --sha256="$SHA256" \
+            --message="Update ssh-vault to ${TAG}." \
+            --no-browse
