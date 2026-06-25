@@ -12,7 +12,7 @@ on:
         required: false
         type: string
       homebrew_dry_run:
-        description: Run brew bump-formula-pr without creating a PR
+        description: Test brew bump-formula-pr without creating a PR
         required: true
         type: boolean
         default: true
@@ -207,6 +207,6 @@ jobs:
             "--no-browse"
           )
           if [ "$HOMEBREW_DRY_RUN" = "true" ]; then
-            args+=(--dry-run --no-audit)
+            args+=(--write-only --no-audit)
           fi
           brew "${args[@]}"
