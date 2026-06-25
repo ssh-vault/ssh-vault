@@ -207,6 +207,6 @@ jobs:
             "--no-browse"
           )
           if [ "$HOMEBREW_DRY_RUN" = "true" ]; then
-            args+=(--dry-run)
+            args+=(--dry-run --no-audit)
           fi
           brew "${args[@]}"
