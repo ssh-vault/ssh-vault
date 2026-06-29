@@ -46,7 +46,7 @@ aes-gcm = "0.10.3"
 anyhow = "1"
 base58 = "0.2.0"
 base64ct = { version = "1.8.3", features = ["alloc"] }
-chacha20poly1305 = "0.10.1"
+chacha20poly1305 = "0.11.0"
 clap = { version = "4.6", features = ["env", "color"] }
 config = { version = "0.15", default-features = false, features = ["yaml"] }
 ed25519-dalek = { version = "2.2.0", features = ["pkcs8"] }
