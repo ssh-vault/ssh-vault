@@ -85,12 +85,15 @@ impl Vault for Ed25519Vault {
         salt[..32].copy_from_slice(e_public.as_bytes());
         salt[32..].copy_from_slice(self.montgomery_key.as_bytes());
 
-        let enc_key = crypto::hkdf(&salt, fingerprint.as_bytes(), shared_secret.as_bytes())?;
+        let mut enc_key = crypto::hkdf(&salt, fingerprint.as_bytes(), shared_secret.as_bytes())?;
 
         // encrypt the password with the derived key
         let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
         let encrypted_password =
             crypto.encrypt(password.expose_secret(), fingerprint.as_bytes())?;
+
+        // scrub the derived-key copy left on the stack
+        enc_key.zeroize();
 
         // create vault payload
         Ok(format!(
@@ -135,15 +138,19 @@ impl Vault for Ed25519Vault {
 
                 // generate the static secret and public key
                 let sk: StaticSecret = {
-                    let digest = Sha512::digest(private_key.as_ref());
-                    let mut sk = [0u8; 32];
-                    sk.copy_from_slice(
+                    let mut digest = Sha512::digest(private_key.as_ref());
+                    let mut sk_bytes = [0u8; 32];
+                    sk_bytes.copy_from_slice(
                         digest
                             .as_slice()
                             .get(..32)
                             .ok_or_else(|| anyhow::anyhow!("digest too short"))?,
                     );
-                    sk.into()
+                    let sk = StaticSecret::from(sk_bytes);
+                    // scrub the private-key-derived digest and scalar copy
+                    digest.as_mut_slice().zeroize();
+                    sk_bytes.zeroize();
+                    sk
                 };
                 let pk = X25519PublicKey::from(&sk);
 
@@ -154,13 +161,15 @@ impl Vault for Ed25519Vault {
                 salt[..32].copy_from_slice(epk.as_bytes());
                 salt[32..].copy_from_slice(pk.as_bytes());
 
-                let enc_key =
+                let mut enc_key =
                     crypto::hkdf(&salt, get_fingerprint.as_bytes(), shared_secret.as_bytes())?;
 
                 // use the enc_key to decrypt the password
                 let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
+                enc_key.zeroize();
 
-                let password = crypto.decrypt(encrypted_password, get_fingerprint.as_bytes())?;
+                let mut password =
+                    crypto.decrypt(encrypted_password, get_fingerprint.as_bytes())?;
 
                 // Validate decrypted password length before slicing
                 if password.len() < 32 {
@@ -176,9 +185,12 @@ impl Vault for Ed25519Vault {
                         .get(..32)
                         .ok_or_else(|| anyhow::anyhow!("password too short"))?,
                 );
+                // the decrypted inner password has been copied into `p`
+                password.zeroize();
 
                 // decrypt the data with the derived key
                 let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(p.into()));
+                p.zeroize();
 
                 let out = crypto.decrypt(data, get_fingerprint.as_bytes())?;
                 Ok(String::from_utf8(out)?)

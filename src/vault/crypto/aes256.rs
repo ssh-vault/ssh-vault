@@ -1,8 +1,9 @@
 use aes_gcm::{
     Aes256Gcm,
-    aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
+    aead::{Aead, KeyInit, Nonce, Payload},
 };
 use anyhow::{Result, anyhow};
+use rand::{TryRng, rngs::SysRng};
 use secrecy::{ExposeSecret, SecretSlice};
 
 pub struct Aes256Crypto {
@@ -16,9 +17,16 @@ impl super::Crypto for Aes256Crypto {
 
     // Encrypts data with a key and a fingerprint
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>> {
-        let key = self.key.expose_secret().into();
-        let cipher = Aes256Gcm::new(key);
-        let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+        let cipher = Aes256Gcm::new_from_slice(self.key.expose_secret())
+            .map_err(|err| anyhow!("Invalid key length: {err}"))?;
+
+        // Application-owned randomness for the 96-bit nonce (see gen_password).
+        let mut nonce_bytes = [0u8; 12];
+        SysRng
+            .try_fill_bytes(&mut nonce_bytes)
+            .map_err(|err| anyhow!("Error generating nonce: {err}"))?;
+        let nonce = Nonce::<Aes256Gcm>::from(nonce_bytes);
+
         let payload = Payload {
             msg: data,
             aad: fingerprint,
@@ -27,7 +35,7 @@ impl super::Crypto for Aes256Crypto {
         cipher.encrypt(&nonce, payload).map_or_else(
             |_| Err(anyhow!("Failed to encrypt data")),
             |ciphertext| {
-                let mut encrypted_data = nonce.to_vec();
+                let mut encrypted_data = nonce_bytes.to_vec();
                 encrypted_data.extend_from_slice(&ciphertext);
                 Ok(encrypted_data)
             },
@@ -44,16 +52,18 @@ impl super::Crypto for Aes256Crypto {
             ));
         }
 
-        let key = self.key.expose_secret().into();
-        let cipher = Aes256Gcm::new(key);
+        let cipher = Aes256Gcm::new_from_slice(self.key.expose_secret())
+            .map_err(|err| anyhow!("Invalid key length: {err}"))?;
         let (nonce, ciphertext) = data.split_at(12);
+        let nonce =
+            <&Nonce<Aes256Gcm>>::try_from(nonce).map_err(|err| anyhow!("Invalid nonce: {err}"))?;
         let payload = Payload {
             msg: ciphertext,
             aad: fingerprint,
         };
 
         cipher
-            .decrypt(nonce.into(), payload)
+            .decrypt(nonce, payload)
             .map_or_else(|_| Err(anyhow!("Failed to decrypt data")), Ok)
     }
 }

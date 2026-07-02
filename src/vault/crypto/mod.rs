@@ -6,6 +6,7 @@ use hkdf::Hkdf;
 use rand::{TryRng, rngs::SysRng};
 use secrecy::SecretSlice;
 use sha2::Sha256;
+use zeroize::Zeroize;
 
 /// Trait defining cryptographic operations for vault encryption
 ///
@@ -71,7 +72,10 @@ pub fn gen_password() -> Result<SecretSlice<u8>> {
     SysRng
         .try_fill_bytes(&mut password)
         .map_err(|err| anyhow!("Error generating random password: {err}"))?;
-    Ok(SecretSlice::new(password.into()))
+    let secret = SecretSlice::new(password.into());
+    // scrub the stack buffer; the secret owns its own zeroizing copy
+    password.zeroize();
+    Ok(secret)
 }
 
 /// HMAC-based Key Derivation Function (HKDF) using SHA-256

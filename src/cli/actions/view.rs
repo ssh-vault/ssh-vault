@@ -43,6 +43,10 @@ pub fn handle(action: Action) -> Result<()> {
 
             let mut data = vault.view(&password, &data, &fingerprint)?;
 
+            // Empty the destination first so a shorter secret can't leave stale
+            // trailing bytes from a previous, longer file (no-op for stdout).
+            output.truncate()?;
+
             output.write_all(data.as_bytes())?;
 
             // zeroize the secret

@@ -11,7 +11,7 @@ use std::{
     io::{Read, Seek, SeekFrom, Write},
     process::Command,
 };
-use tempfile::Builder;
+use tempfile::{Builder, NamedTempFile};
 
 #[derive(Debug)]
 pub enum Action {
@@ -73,15 +73,34 @@ pub fn process_input(buf: &mut Vec<u8>, data: Option<SecretString>) -> Result<us
         return Err(anyhow!("Editor exited with non-zero status code"));
     }
 
-    // Seek to start
-    tmpfile.seek(SeekFrom::Start(0))?;
+    read_and_scrub(&mut tmpfile, buf)
+}
 
-    // read the file
+/// Read the temporary file's contents into `buf`, then overwrite the file's
+/// bytes with zeros.
+///
+/// The scrub is a best-effort measure before the `NamedTempFile` is unlinked on
+/// drop: in-place overwrite is not guaranteed on CoW/journaling/SSD
+/// filesystems, so the unlink is the real guarantee. The rewind before writing
+/// is essential — `read_to_end` leaves the cursor at EOF, so writing without
+/// seeking back would *append* the zeros after the plaintext (doubling the
+/// file) and leave the secret fully intact.
+///
+/// # Errors
+///
+/// Returns an error if any seek/read/write/truncate/sync operation fails.
+fn read_and_scrub(tmpfile: &mut NamedTempFile, buf: &mut Vec<u8>) -> Result<usize> {
+    // Rewind and read the edited content.
+    tmpfile.seek(SeekFrom::Start(0))?;
     tmpfile.read_to_end(buf)?;
 
-    // Fill the file with zeros
+    // Rewind again before overwriting, then truncate to the original length and
+    // flush so the zeros reach disk.
+    tmpfile.seek(SeekFrom::Start(0))?;
     let zeros = vec![0u8; buf.len()];
     tmpfile.write_all(&zeros)?;
+    tmpfile.as_file().set_len(u64::try_from(buf.len())?)?;
+    tmpfile.as_file().sync_all()?;
 
     Ok(buf.len())
 }
@@ -258,6 +277,76 @@ mod tests {
             assert_eq!(input, output);
         }
         Ok(())
+    }
+
+    // Regression test for the temp-file scrub in `read_and_scrub`.
+    //
+    // The original bug: after `read_to_end` the cursor sits at EOF, so writing
+    // the zero buffer *appended* it (doubling the file) instead of overwriting
+    // the plaintext, leaving the secret fully intact on disk. This asserts the
+    // file is left fully zeroed and at its original length, not doubled.
+    #[test]
+    fn test_read_and_scrub_overwrites_plaintext() {
+        use super::read_and_scrub;
+        use std::io::{Seek, SeekFrom, Write};
+
+        let secret = b"top secret plaintext";
+        let mut tmpfile = tempfile::NamedTempFile::new().unwrap();
+        tmpfile.write_all(secret).unwrap();
+        tmpfile.seek(SeekFrom::Start(0)).unwrap();
+
+        let mut buf = Vec::new();
+        let n = read_and_scrub(&mut tmpfile, &mut buf).unwrap();
+
+        // The edited content is read back correctly.
+        assert_eq!(n, secret.len());
+        assert_eq!(buf.as_slice(), secret);
+
+        // The on-disk file is exactly `secret.len()` bytes (not doubled) and
+        // contains no plaintext — every byte is zero.
+        let on_disk = std::fs::read(tmpfile.path()).unwrap();
+        assert_eq!(on_disk.len(), secret.len());
+        assert!(on_disk.iter().all(|&b| b == 0));
+        assert!(!on_disk.windows(secret.len()).any(|w| w == secret));
+    }
+
+    // Regression test: `view -o <file>` must not leave stale trailing bytes when
+    // the destination file already exists and is longer than the new plaintext.
+    #[test]
+    fn test_view_output_truncates_stale_bytes() {
+        let secret = "short";
+
+        let mut input = NamedTempFile::new().unwrap();
+        input.write_all(secret.as_bytes()).unwrap();
+        let vault_file = NamedTempFile::new().unwrap();
+
+        let create = Action::Create {
+            fingerprint: None,
+            key: Some("test_data/ed25519.pub".to_string()),
+            user: None,
+            vault: Some(vault_file.path().to_str().unwrap().to_string()),
+            json: false,
+            input: Some(input.path().to_str().unwrap().to_string()),
+        };
+        assert!(create::handle(create).is_ok());
+
+        // Pre-populate the output file with content longer than the secret.
+        let mut output_file = NamedTempFile::new().unwrap();
+        output_file
+            .write_all(b"XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
+            .unwrap();
+
+        let view = Action::View {
+            key: Some("test_data/ed25519".to_string()),
+            output: Some(output_file.path().to_str().unwrap().to_string()),
+            passphrase: None,
+            vault: Some(vault_file.path().to_str().unwrap().to_string()),
+        };
+        assert!(view::handle(view).is_ok());
+
+        // The file must contain exactly the secret — no leftover 'X' bytes.
+        let contents = std::fs::read_to_string(output_file.path()).unwrap();
+        assert_eq!(contents, secret);
     }
 
     #[test]

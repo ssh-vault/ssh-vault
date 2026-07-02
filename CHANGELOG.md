@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.0
+* security: fix editor temp-file scrub that appended zeros instead of overwriting the plaintext
+* security: create `view -o` output and the key cache with owner-only permissions (0600/0700) and truncate stale bytes
+* security: zeroize derived keys and decrypted secret buffers
+* bump `aes-gcm` and `chacha20poly1305` to 0.11 (AEAD API migration; vault format unchanged)
+* cargo update
+
 ## 1.2.14
 * replace the Homebrew release action with `brew bump-formula-pr` for official Homebrew core PRs
 * cargo update to refresh dependencies and fix `RUSTSEC-2026-0185`

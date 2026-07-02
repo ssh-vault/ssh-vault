@@ -55,9 +55,18 @@ impl OutputDestination {
         if let Some(filename) = output {
             // Use a file if the filename is not "-" (stdout)
             if filename != "-" {
-                return Ok(Self::File(
-                    OpenOptions::new().write(true).create(true).open(filename)?,
-                ));
+                let mut options = OpenOptions::new();
+                options.write(true).create(true);
+                // Restrict newly-created output files to the owner (0600). This
+                // matters for `view -o`, whose output is decrypted plaintext;
+                // the default umask would otherwise create it world/group
+                // readable. mode() only affects files this call creates.
+                #[cfg(unix)]
+                {
+                    use std::os::unix::fs::OpenOptionsExt;
+                    options.mode(0o600);
+                }
+                return Ok(Self::File(options.open(filename)?));
             }
         }
 
@@ -211,6 +220,21 @@ mod tests {
         let mut buf = [0; 1024];
         let n = output_file.read(&mut buf).unwrap();
         assert_eq!(n, 0);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_output_destination_new_file_mode() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("secret.txt");
+
+        let _output = OutputDestination::new(Some(path.to_str().unwrap().to_string())).unwrap();
+
+        // Newly-created output files must be owner-only (0600).
+        let mode = std::fs::metadata(&path).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode, 0o600);
     }
 
     #[test]

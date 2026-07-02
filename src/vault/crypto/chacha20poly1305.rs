@@ -1,8 +1,9 @@
 use anyhow::{Result, anyhow};
 use chacha20poly1305::{
     ChaCha20Poly1305,
-    aead::{Aead, AeadCore, KeyInit, OsRng, Payload},
+    aead::{Aead, KeyInit, Nonce, Payload},
 };
+use rand::{TryRng, rngs::SysRng};
 use secrecy::{ExposeSecret, SecretSlice};
 
 pub struct ChaCha20Poly1305Crypto {
@@ -16,8 +17,16 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
 
     // Encrypts data with a key and a fingerprint
     fn encrypt(&self, data: &[u8], fingerprint: &[u8]) -> Result<Vec<u8>, anyhow::Error> {
-        let cipher = ChaCha20Poly1305::new(self.key.expose_secret().into());
-        let nonce = ChaCha20Poly1305::generate_nonce(&mut OsRng);
+        let cipher = ChaCha20Poly1305::new_from_slice(self.key.expose_secret())
+            .map_err(|err| anyhow!("Invalid key length: {err}"))?;
+
+        // Application-owned randomness for the 96-bit nonce (see gen_password).
+        let mut nonce_bytes = [0u8; 12];
+        SysRng
+            .try_fill_bytes(&mut nonce_bytes)
+            .map_err(|err| anyhow!("Error generating nonce: {err}"))?;
+        let nonce = Nonce::<ChaCha20Poly1305>::from(nonce_bytes);
+
         let payload = Payload {
             msg: data,
             aad: fingerprint,
@@ -26,7 +35,7 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
         cipher.encrypt(&nonce, payload).map_or_else(
             |_| Err(anyhow!("Failed to encrypt data")),
             |ciphertext| {
-                let mut encrypted_data = nonce.to_vec();
+                let mut encrypted_data = nonce_bytes.to_vec();
                 encrypted_data.extend_from_slice(&ciphertext);
                 Ok(encrypted_data)
             },
@@ -43,11 +52,14 @@ impl super::Crypto for ChaCha20Poly1305Crypto {
             ));
         }
 
-        let cipher = ChaCha20Poly1305::new(self.key.expose_secret().into());
+        let cipher = ChaCha20Poly1305::new_from_slice(self.key.expose_secret())
+            .map_err(|err| anyhow!("Invalid key length: {err}"))?;
         let (nonce, ciphertext) = data.split_at(12);
+        let nonce = <&Nonce<ChaCha20Poly1305>>::try_from(nonce)
+            .map_err(|err| anyhow!("Invalid nonce: {err}"))?;
         let decrypted_data = cipher
             .decrypt(
-                nonce.into(),
+                nonce,
                 Payload {
                     msg: ciphertext,
                     aad: fingerprint,

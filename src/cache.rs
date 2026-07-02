@@ -39,11 +39,46 @@ pub fn get(key: &str) -> Result<String> {
 /// Return an error if the cache file can't be created
 pub fn put(key: &str, response: &str) -> Result<()> {
     let cache = get_cache_path(key)?;
-    // Create parent directories if they don't exist
-    if let Some(parent_dir) = std::path::Path::new(&cache).parent() {
+
+    // Create parent directories if they don't exist. The cache path is
+    // predictable (md5 of the URL), so on a shared host a lax-permission
+    // directory would let another user read or overwrite cached keys (cache
+    // poisoning) — and `find` may even cache a fetched private key here.
+    // Restrict to the owner.
+    if let Some(parent_dir) = cache.parent() {
         fs::create_dir_all(parent_dir)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            // Enforce 0700 on ssh-vault's own cache dirs even if they already
+            // existed with looser permissions. Only these two — never ~/.ssh.
+            let vault_dir = get_ssh_vault_path()?;
+            for dir in [vault_dir.join("keys"), vault_dir] {
+                if dir.is_dir() {
+                    fs::set_permissions(&dir, fs::Permissions::from_mode(0o700))?;
+                }
+            }
+        }
     }
-    Ok(fs::write(cache, response)?)
+
+    #[cfg(unix)]
+    {
+        use std::io::Write;
+        use std::os::unix::fs::{OpenOptionsExt, PermissionsExt};
+        let mut file = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .mode(0o600)
+            .open(&cache)?;
+        file.write_all(response.as_bytes())?;
+        // Enforce 0600 even if the file already existed with looser permissions.
+        fs::set_permissions(&cache, fs::Permissions::from_mode(0o600))?;
+    }
+    #[cfg(not(unix))]
+    fs::write(&cache, response)?;
+
+    Ok(())
 }
 
 /// Get the path to the cache file ~/.ssh/vault/keys/`<key>`
@@ -121,6 +156,28 @@ mod tests {
         put("test-3", "test")?;
         let response = get("test-3")?;
         assert_eq!(response, "test");
+        fs::remove_file(cache)?;
+        Ok(())
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_put_permissions() -> Result<(), Box<dyn std::error::Error>> {
+        use std::os::unix::fs::PermissionsExt;
+
+        let cache = get_cache_path("test-perms")?;
+        put("test-perms", "test")?;
+
+        // Cache file must be owner-only (0600).
+        let file_mode = fs::metadata(&cache)?.permissions().mode() & 0o777;
+        assert_eq!(file_mode, 0o600);
+
+        // Parent directory must be owner-only (0700).
+        if let Some(parent) = cache.parent() {
+            let dir_mode = fs::metadata(parent)?.permissions().mode() & 0o777;
+            assert_eq!(dir_mode, 0o700);
+        }
+
         fs::remove_file(cache)?;
         Ok(())
     }
