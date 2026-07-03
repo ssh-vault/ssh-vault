@@ -189,7 +189,6 @@ jobs:
             exit 1
           fi
 
-          VERSION="${TAG#v}"
           TARBALL="https://github.com/ssh-vault/ssh-vault/archive/refs/tags/${TAG}.tar.gz"
           SHA256=$(curl -fsSL "$TARBALL" | shasum -a 256 | cut -d' ' -f1)
           echo "tarball=$TARBALL sha256=$SHA256"
@@ -197,10 +196,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           brew update
+          # Do not pass --version: it writes a `version` stanza into the formula
+          # that `brew audit --strict` rejects as redundant, since Homebrew
+          # already parses the version from the tag in --url. See the tag in
+          # $TARBALL (.../refs/tags/${TAG}.tar.gz).
           args=(
             "bump-formula-pr"
             "ssh-vault"
-            "--version=$VERSION"
             "--url=$TARBALL"
             "--sha256=$SHA256"
             "--message=Update ssh-vault to ${TAG}."
