@@ -68,7 +68,7 @@ ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption"] }
 temp-env = "0.3.6"
 tempfile = "3.27"
 url = "2.5"
-x25519-dalek = { version = "2.0.1", features = ["getrandom", "static_secrets"] }
+x25519-dalek = { version = "3.0.0", features = ["getrandom", "static_secrets"] }
 zeroize = "1.9.0"
 
 [package.metadata.generate-rpm]
