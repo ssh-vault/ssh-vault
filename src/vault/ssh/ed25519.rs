@@ -20,15 +20,18 @@ pub struct Ed25519Vault {
     public_key: PublicKey,
 }
 
+fn x25519_public_key(ed25519_public: &[u8; 32]) -> Result<X25519PublicKey> {
+    let verifying_key =
+        ed25519_dalek::VerifyingKey::from_bytes(ed25519_public).context("Could not load key")?;
+    Ok(verifying_key.to_montgomery().to_bytes().into())
+}
+
 impl Vault for Ed25519Vault {
     fn new(public: Option<PublicKey>, private: Option<PrivateKey>) -> Result<Self> {
         match (public, private) {
             (Some(public), None) => match public.key_data() {
                 KeyData::Ed25519(key_data) => {
-                    let public_key = ed25519_dalek::VerifyingKey::try_from(key_data)
-                        .context("Could not load key")?;
-                    let montgomery_key: X25519PublicKey =
-                        public_key.to_montgomery().to_bytes().into();
+                    let montgomery_key = x25519_public_key(&key_data.0)?;
 
                     Ok(Self {
                         montgomery_key,
@@ -40,13 +43,8 @@ impl Vault for Ed25519Vault {
             },
             (None, Some(private)) => match private.key_data() {
                 KeypairData::Ed25519(key_data) => {
-                    if private.is_encrypted() {
-                        return Err(anyhow::anyhow!("Private key is encrypted"));
-                    }
                     let public_key = private.public_key().clone();
-                    let verifying_key = ed25519_dalek::VerifyingKey::try_from(key_data.public)?;
-                    let montgomery_key: X25519PublicKey =
-                        verifying_key.to_montgomery().to_bytes().into();
+                    let montgomery_key = x25519_public_key(&key_data.public.0)?;
 
                     Ok(Self {
                         montgomery_key,
@@ -54,6 +52,7 @@ impl Vault for Ed25519Vault {
                         public_key,
                     })
                 }
+                KeypairData::Encrypted(_) => Err(anyhow::anyhow!("Private key is encrypted")),
                 _ => Err(anyhow::anyhow!("Invalid key type for Ed25519Vault")),
             },
             _ => Err(anyhow::anyhow!("Missing public and private key")),
@@ -249,6 +248,18 @@ mod tests {
         let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
         let result = Ed25519Vault::new(Some(public_key), None);
         assert!(result.is_ok());
+        Ok(())
+    }
+
+    #[test]
+    fn test_ed25519_new_with_encrypted_private_key() -> Result<()> {
+        let private_key =
+            PrivateKey::read_openssh_file(std::path::Path::new("test_data/ed25519_password"))?;
+        let result = Ed25519Vault::new(None, Some(private_key));
+        assert!(result.is_err());
+        if let Err(e) = result {
+            assert!(e.to_string().contains("Private key is encrypted"));
+        }
         Ok(())
     }
 

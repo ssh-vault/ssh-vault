@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1
+* bump `ed25519-dalek` and `x25519-dalek` to 3.0 (`curve25519-dalek` 5.0, `rand_core` 0.10; vault format unchanged)
+* build ed25519 verifying keys from raw key bytes, decoupling from `ssh-key`'s internal dalek version
+* keep the `zeroize` feature enabled for `ssh-key`'s internal `ed25519-dalek` 2.x (feature unification no longer covered it after the direct dependency moved to 3.0)
+* add wire-format regression tests: vault fixtures frozen at 1.3.0 in `test_data/regression/` guard against upgrades breaking decryption of existing vaults
+* fix misleading "Invalid key type" error when constructing an `Ed25519Vault` from an encrypted private key (now reports "Private key is encrypted")
+
 ## 1.3.0
 * security: fix editor temp-file scrub that appended zeros instead of overwriting the plaintext
 * security: create `view -o` output and the key cache with owner-only permissions (0600/0700) and truncate stale bytes

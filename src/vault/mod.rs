@@ -295,4 +295,45 @@ mod tests {
         }
         Ok(())
     }
+
+    // Wire-format regression tests: the vault files under test_data/regression/
+    // are frozen artifacts; decrypt-only so a dependency upgrade that changes the
+    // key derivation or cipher output breaks these tests instead of users' vaults.
+    const REGRESSION_SECRET: &str = "ssh-vault regression fixture: do not regenerate this file";
+
+    #[test]
+    fn test_regression_ed25519_frozen_vault() -> Result<()> {
+        let vault = std::fs::read_to_string("test_data/regression/ed25519.vault")?;
+        let (key_type, fingerprint, password, data) = parse(&vault)?;
+        assert_eq!(key_type, "CHACHA20-POLY1305");
+
+        let private_key = find::private_key_type(Some("test_data/ed25519".to_string()), key_type)?;
+        let key_type = find::key_type(&private_key.algorithm())?;
+        assert_eq!(key_type, SshKeyType::Ed25519);
+        let view = SshVault::new(&key_type, None, Some(private_key))?;
+
+        assert_eq!(
+            view.view(&password, &data, &fingerprint)?,
+            REGRESSION_SECRET
+        );
+        Ok(())
+    }
+
+    #[test]
+    fn test_regression_rsa_frozen_vault() -> Result<()> {
+        let vault = std::fs::read_to_string("test_data/regression/id_rsa.vault")?;
+        let (key_type, fingerprint, password, data) = parse(&vault)?;
+        assert_eq!(key_type, "AES256");
+
+        let private_key = find::private_key_type(Some("test_data/id_rsa".to_string()), key_type)?;
+        let key_type = find::key_type(&private_key.algorithm())?;
+        assert_eq!(key_type, SshKeyType::Rsa);
+        let view = SshVault::new(&key_type, None, Some(private_key))?;
+
+        assert_eq!(
+            view.view(&password, &data, &fingerprint)?,
+            REGRESSION_SECRET
+        );
+        Ok(())
+    }
 }

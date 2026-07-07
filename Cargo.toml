@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.3.0"
+version = "1.3.1"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
@@ -49,7 +49,11 @@ base64ct = { version = "1.8.3", features = ["alloc"] }
 chacha20poly1305 = "0.11.0"
 clap = { version = "4.6", features = ["env", "color"] }
 config = { version = "0.15", default-features = false, features = ["yaml"] }
-ed25519-dalek = { version = "2.2.0", features = ["pkcs8"] }
+ed25519-dalek = "3.0.0"
+# ssh-key 0.6 pins ed25519-dalek 2.x without its `zeroize` feature; this renamed
+# dependency re-enables it so secret keys inside ssh-key are wiped on drop
+# (remove once ssh-key moves to ed25519-dalek 3)
+ed25519-dalek-v2 = { package = "ed25519-dalek", version = "2", default-features = false, features = ["zeroize"] }
 hex-literal = "1.1.0"
 hkdf = "0.13.0"
 home = "0.5.12"
@@ -68,7 +72,7 @@ ssh-key = { version = "0.6.7", features = ["ed25519", "rsa", "encryption"] }
 temp-env = "0.3.6"
 tempfile = "3.27"
 url = "2.5"
-x25519-dalek = { version = "2.0.1", features = ["getrandom", "static_secrets"] }
+x25519-dalek = { version = "3.0.0", features = ["getrandom", "static_secrets"] }
 zeroize = "1.9.0"
 
 [package.metadata.generate-rpm]
