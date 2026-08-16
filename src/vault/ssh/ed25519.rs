@@ -80,11 +80,13 @@ impl Vault for Ed25519Vault {
 
         // the salt is the concatenation of the
         // ephemeral public key and the receiver's public key
-        let mut salt = [0; 64];
-        salt[..32].copy_from_slice(e_public.as_bytes());
-        salt[32..].copy_from_slice(self.montgomery_key.as_bytes());
+        let salt = [*e_public.as_bytes(), *self.montgomery_key.as_bytes()];
 
-        let mut enc_key = crypto::hkdf(&salt, fingerprint.as_bytes(), shared_secret.as_bytes())?;
+        let mut enc_key = crypto::hkdf(
+            salt.as_flattened(),
+            fingerprint.as_bytes(),
+            shared_secret.as_bytes(),
+        )?;
 
         // encrypt the password with the derived key
         let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));
@@ -156,12 +158,13 @@ impl Vault for Ed25519Vault {
                 // generate the shared secret
                 let shared_secret: StaticSecret = (*sk.diffie_hellman(&epk).as_bytes()).into();
 
-                let mut salt = [0; 64];
-                salt[..32].copy_from_slice(epk.as_bytes());
-                salt[32..].copy_from_slice(pk.as_bytes());
+                let salt = [*epk.as_bytes(), *pk.as_bytes()];
 
-                let mut enc_key =
-                    crypto::hkdf(&salt, get_fingerprint.as_bytes(), shared_secret.as_bytes())?;
+                let mut enc_key = crypto::hkdf(
+                    salt.as_flattened(),
+                    get_fingerprint.as_bytes(),
+                    shared_secret.as_bytes(),
+                )?;
 
                 // use the enc_key to decrypt the password
                 let crypto = ChaCha20Poly1305Crypto::new(SecretSlice::new(enc_key.into()));

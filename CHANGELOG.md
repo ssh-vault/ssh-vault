@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.3
+* cargo update for the current Rust 1.97-compatible dependency set
+* avoid CodeQL false positives for the ed25519 HKDF salt by building it directly from public key bytes (vault format unchanged)
+* add explicit read-only GitHub Actions token permissions to satisfy code-scanning workflow findings
+
 ## 1.3.1
 * bump `ed25519-dalek` and `x25519-dalek` to 3.0 (`curve25519-dalek` 5.0, `rand_core` 0.10; vault format unchanged)
 * build ed25519 verifying keys from raw key bytes, decoupling from `ssh-key`'s internal dalek version

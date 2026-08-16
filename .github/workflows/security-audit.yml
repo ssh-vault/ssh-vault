@@ -14,6 +14,9 @@ on:
       - main
       - develop
 
+permissions:
+  contents: read
+
 jobs:
   security_audit:
     name: Security Audit

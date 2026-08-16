@@ -7,6 +7,9 @@ on:
     branches:
       - '*'
 
+permissions:
+  contents: read
+
 jobs:
   format:
     name: Format
