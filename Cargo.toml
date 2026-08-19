@@ -1,6 +1,6 @@
 [package]
 name = "ssh-vault"
-version = "1.3.3"
+version = "1.3.4"
 authors = ["Nicolas Embriz <nbari@tequila.io>"]
 description = "encrypt/decrypt using ssh keys"
 documentation = "https://ssh-vault.com/"
