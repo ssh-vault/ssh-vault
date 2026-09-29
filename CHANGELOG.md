@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.6
+* refresh locked dependencies
+* strengthen Ed25519 short-password tests to exercise the length guard
+
 ## 1.3.3
 * cargo update for the current Rust 1.97-compatible dependency set
 * avoid CodeQL false positives for the ed25519 HKDF salt by building it directly from public key bytes (vault format unchanged)

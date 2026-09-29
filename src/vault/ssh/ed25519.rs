@@ -212,37 +212,45 @@ mod tests {
 
     #[test]
     fn test_ed25519_view_short_password_data() -> Result<()> {
-        // Create an Ed25519 vault with a public key
-        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
-        let vault = Ed25519Vault::new(Some(public_key), None)?;
+        let private_key = PrivateKey::read_openssh_file(std::path::Path::new("test_data/ed25519"))?;
+        let fingerprint = private_key
+            .public_key()
+            .fingerprint(HashAlg::Sha256)
+            .to_string();
+        let vault = Ed25519Vault::new(None, Some(private_key))?;
 
-        // Test with password data shorter than 32 bytes
         for len in 0..32 {
             let short_password = vec![0u8; len];
             let data = vec![0u8; 50];
-            let fingerprint = "SHA256:test";
-
-            let result = vault.view(&short_password, &data, fingerprint);
-            assert!(result.is_err(), "Should fail with {len} bytes");
-            if let Err(err) = result {
-                let err_msg = err.to_string();
-                assert!(err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"));
-            }
+            let result = vault
+                .view(&short_password, &data, &fingerprint)
+                .map_err(|err| err.to_string());
+            assert_eq!(
+                result,
+                Err(format!(
+                    "Invalid password data: too short (expected at least 32 bytes, got {len})"
+                ))
+            );
         }
         Ok(())
     }
 
     #[test]
     fn test_ed25519_view_empty_password() -> Result<()> {
-        let public_key = TEST_ED25519_PUBLIC_KEY.parse::<PublicKey>()?;
-        let vault = Ed25519Vault::new(Some(public_key), None)?;
+        let private_key = PrivateKey::read_openssh_file(std::path::Path::new("test_data/ed25519"))?;
+        let fingerprint = private_key
+            .public_key()
+            .fingerprint(HashAlg::Sha256)
+            .to_string();
+        let vault = Ed25519Vault::new(None, Some(private_key))?;
 
-        let result = vault.view(&[], &[0u8; 50], "SHA256:test");
-        assert!(result.is_err());
-        if let Err(err) = result {
-            let err_msg = err.to_string();
-            assert!(err_msg.contains("too short") || err_msg.contains("Fingerprint mismatch"));
-        }
+        let result = vault
+            .view(&[], &[0u8; 50], &fingerprint)
+            .map_err(|err| err.to_string());
+        assert_eq!(
+            result,
+            Err("Invalid password data: too short (expected at least 32 bytes, got 0)".to_string())
+        );
         Ok(())
     }
 
