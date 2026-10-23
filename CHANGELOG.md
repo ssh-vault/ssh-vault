@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.3.8
+* cargo update to refresh dependencies and fix `RUSTSEC-2026-0382` and `RUSTSEC-2026-0383`
+
 ## 1.3.7
 * cargo update to refresh dependencies and fix rustls advisories `RUSTSEC-2026-0346`, `RUSTSEC-2026-0347`, `RUSTSEC-2026-0348`, and `RUSTSEC-2026-0349`
 * replace yanked `yoke-derive` 0.8.3
