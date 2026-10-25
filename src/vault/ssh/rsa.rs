@@ -3,7 +3,7 @@ use crate::vault::{
 };
 use anyhow::{Context, Result};
 use base64ct::{Base64, Encoding};
-use rsa::{BigUint, Oaep, RsaPrivateKey, RsaPublicKey, rand_core::OsRng, sha2::Sha256};
+use rsa::{Oaep, RsaPrivateKey, RsaPublicKey, sha2::Sha256};
 use secrecy::{ExposeSecret, SecretSlice};
 use ssh_key::{PrivateKey, PublicKey, private::KeypairData, public::KeyData};
 use zeroize::Zeroize;
@@ -36,45 +36,8 @@ impl Vault for RsaVault {
                         return Err(anyhow::anyhow!("Private key is encrypted"));
                     }
 
-                    // Extract components from ssh-key's RSA representation
-                    // Use as_bytes() or a similar method to get the &[u8] from Mpint
-                    //
-                    // <https://docs.rs/ssh-key/latest/ssh_key/private/struct.RsaPrivateKey.html>
-                    //
-                    // pub struct RsaPrivateKey {
-                    //     pub d: Mpint,
-                    //     pub iqmp: Mpint,
-                    //     pub p: Mpint,
-                    //     pub q: Mpint,
-                    // }
-                    let modulus = BigUint::from_bytes_be(rsa_keypair.public.n.as_ref());
-                    let public_exponent = BigUint::from_bytes_be(rsa_keypair.public.e.as_ref());
-                    let private_exponent = BigUint::from_bytes_be(rsa_keypair.private.d.as_ref());
-                    let prime_p = BigUint::from_bytes_be(rsa_keypair.private.p.as_ref());
-                    let prime_q = BigUint::from_bytes_be(rsa_keypair.private.q.as_ref());
-
-                    // Create the RSA private key
-                    //
-                    // Constructs an RSA key pair from individual components:
-                    //
-                    // n: RSA modulus
-                    // e: public exponent (i.e. encrypting exponent)
-                    // d: private exponent (i.e. decrypting exponent)
-                    // primes: prime factors of n: typically two primes p and q. More than two
-                    // primes can be provided for multiprime RSA, however this is generally not
-                    // recommended. If no primes are provided, a prime factor recovery algorithm
-                    // will be employed to attempt to recover the factors (as described in NIST SP
-                    // 800-56B Revision 2 Appendix C.2). This algorithm only works if there are
-                    // just two prime factors p and q (as opposed to multiprime), and e is between
-                    // 2^16 and 2^256.
-                    let private_key = RsaPrivateKey::from_components(
-                        modulus,
-                        public_exponent,
-                        private_exponent,
-                        vec![prime_p, prime_q],
-                    )?;
-
-                    // let private_key = RsaPrivateKey::try_from(key_data)?;
+                    let private_key = RsaPrivateKey::try_from(rsa_keypair)
+                        .context("Could not load private key")?;
 
                     let public_key = private_key.to_public_key();
 
@@ -104,12 +67,11 @@ impl Vault for RsaVault {
         // zeroize data
         data.zeroize();
 
-        // Keep the RSA boundary on rsa::rand_core::OsRng. The rest of the crate
-        // uses rand 0.10, but current rsa/ssh-key releases still depend on the
-        // older rand_core line. Revisit this when upstream removes that split.
-        let encrypted_password =
-            self.public_key
-                .encrypt(&mut OsRng, Oaep::new::<Sha256>(), password.expose_secret())?;
+        let encrypted_password = self.public_key.encrypt(
+            &mut rand::rng(),
+            Oaep::<Sha256>::new(),
+            password.expose_secret(),
+        )?;
 
         // create vault payload
         let payload = format!(
@@ -137,7 +99,7 @@ impl Vault for RsaVault {
         match &self.private_key {
             Some(private_key) => {
                 let password: SecretSlice<u8> =
-                    SecretSlice::new(private_key.decrypt(Oaep::new::<Sha256>(), password)?.into());
+                    SecretSlice::new(private_key.decrypt(Oaep::<Sha256>::new(), password)?.into());
 
                 let crypto = Aes256Crypto::new(password);
 

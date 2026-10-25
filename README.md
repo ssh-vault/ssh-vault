@@ -75,10 +75,8 @@ $ echo "secret" | ssh-vault create -u new
 
 `ssh-vault` uses `rand 0.10` for application-owned randomness.
 
-The remaining older `rand` in the dependency graph is currently transitive via
-the released `rsa` / `ssh-key` stack. Keep new application code on `rand 0.10`
-APIs and only use the RSA-local compatibility path where `rsa` requires its own
-`rand_core` types. Revisit this when upstream releases remove that constraint.
+The `rsa` / `ssh-key` stack now shares the same `rand_core 0.10` types.
+RSA encryption uses the cryptographic generator from `rand::rng()`.
 
 ## Issues
 

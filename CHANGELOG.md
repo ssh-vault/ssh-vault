@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.9
+* upgrade `ssh-key` to 0.7.0-rc.11 and `rsa` to 0.10.0-rc.19, refreshing `crypto-bigint` to 0.7.8 to fix `RUSTSEC-2026-0387`
+* adapt RSA key conversion and OAEP calls to the new APIs; use `rand 0.10` for RSA encryption randomness
+* remove the `ed25519-dalek` 2.x compatibility dependency now that `ssh-key` uses 3.x
+* refresh locked dependencies
+
 ## 1.3.8
 * cargo update to refresh dependencies and fix `RUSTSEC-2026-0382` and `RUSTSEC-2026-0383`
 
